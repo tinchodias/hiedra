@@ -11,7 +11,7 @@ Class {
 		'parentsLinkBuilder',
 		'originLinkBuilder'
 	],
-	#category : #HiedraTests
+	#category : #Hiedra-Tests
 }
 
 { #category : #running }
