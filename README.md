@@ -15,7 +15,7 @@ Note this project is already part of Pharo 6 and 7. However, if you need to inst
 
 ## Example of use
 
-```
+```Smalltalk
 Class {
 	#name : #HiedraExampleModel,
 	#superclass : #ComposableModel,
