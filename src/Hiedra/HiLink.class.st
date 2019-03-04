@@ -1,88 +1,38 @@
 "
-I am a link used to render a Hiedra ruler.
+I am a link in a Hiedra ruler.
 "
 Class {
 	#name : #HiLink,
-	#superclass : #HiRenderingElement,
+	#superclass : #HiRulerElement,
 	#instVars : [
-		'linkBuilder',
 		'origin',
 		'target',
-		'checkpoints'
+		'rulerPoints'
 	],
-	#category : #'Hiedra-Rendering'
+	#category : #'Hiedra-Model'
 }
 
 { #category : #'instance creation' }
-HiLink class >> linkBuilder: aLinkBuilder origin: aNode target: anotherNode [
+HiLink class >> origin: aNode target: anotherNode rulerPoints: aCollectionOfPoints [
 
 	^ self basicNew
-		initializeLinkBuilder: aLinkBuilder origin: aNode target: anotherNode;
+		initializeWithOrigin: aNode target: anotherNode rulerPoints: aCollectionOfPoints;
 		yourself
 ]
 
-{ #category : #comparing }
-HiLink >> = other [
-
-	^ self class = other class and: [
-		origin = other origin and: [ 
-		target = other target and: [ 
-		linkBuilder = other linkBuilder ] ] ]
-]
-
-{ #category : #accessing }
-HiLink >> checkpoints [
-	^ checkpoints
-]
-
-{ #category : #accessing }
-HiLink >> checkpoints: anObject [
-	checkpoints := anObject
-]
-
-{ #category : #comparing }
-HiLink >> hash [
-
-	^ origin hash bitXor: (target hash bitXor: linkBuilder hash)
-]
-
-{ #category : #controlling }
-HiLink >> ifNode: nodeBlock ifLink: linkBlock [
-
-	^ linkBlock cull: self
+{ #category : #testing }
+HiLink >> doesContinue: anotherLink [
+	^ anotherLink target = origin
 ]
 
 { #category : #initialization }
-HiLink >> initializeLinkBuilder: aLinkBuilder origin: aNode target: anotherNode [
+HiLink >> initializeWithOrigin: aNode target: anotherNode rulerPoints: aCollectionOfPoints [
 
 	self initialize.
 	
-	linkBuilder := aLinkBuilder.
 	origin := aNode.
 	target := anotherNode.
-]
-
-{ #category : #accessing }
-HiLink >> intermediateIndices [
-
-	| originRowIndex targetRowIndex |
-	originRowIndex := origin rowIndex.
-	targetRowIndex := target rowIndex.
-
-	^ originRowIndex >= targetRowIndex
-		ifTrue: [ originRowIndex - 1 to: targetRowIndex + 1 by: -1 ]
-		ifFalse: [ originRowIndex + 1 to: targetRowIndex - 1 ]
-]
-
-{ #category : #testing }
-HiLink >> isLink [
-
-	^ true
-]
-
-{ #category : #accessing }
-HiLink >> linkBuilder [
-	^ linkBuilder
+	rulerPoints := aCollectionOfPoints.
 ]
 
 { #category : #accessing }
@@ -97,10 +47,15 @@ HiLink >> printOn: aStream [
 	
 	aStream
 		nextPut: $(;
-		print: origin;
+		print: origin theValue;
 		nextPutAll: '->';
-		print: target;
+		print: target theValue;
 		nextPut: $).
+]
+
+{ #category : #accessing }
+HiLink >> rulerPoints [
+	^ rulerPoints
 ]
 
 { #category : #accessing }

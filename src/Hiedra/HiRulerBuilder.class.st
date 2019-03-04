@@ -1,144 +1,113 @@
 "
-I know how to build rulers.
+I create HiNode and HiLink instances from a collection of values and a block closure of targets (that  answers what values are connected from a given value). It is important that the nodes and links are ""iterated"" in a breadth-first way as it is expected to build a HiRuler, i.e. a Hiedra visualization.
 "
 Class {
 	#name : #HiRulerBuilder,
-	#superclass : #HiBuilder,
+	#superclass : #Object,
 	#instVars : [
-		'rowSize',
-		'columnSize',
-		'nodeBuilder',
-		'linkBuilders',
-		'values'
+		'values',
+		'linksBlock',
+		'ruler',
+		'valueIndices'
 	],
-	#category : #'Hiedra-Builders'
+	#category : #'Hiedra-Model'
 }
 
-{ #category : #'accessing - building API' }
-HiRulerBuilder >> addLinkBuilder: aBlockClosure [ 
-	
-	| newLink |
-	newLink := HiLinkBuilder new.
-	aBlockClosure value: newLink.
-	linkBuilders add: newLink.
-]
-
-{ #category : #building }
-HiRulerBuilder >> athensSurface [
-	| athensSurface ruler |
-	ruler := HiRuler new
-		values: values;
-		linkBuilders: linkBuilders;
+{ #category : #convenience }
+HiRulerBuilder class >> newRulerValues: aCollection linksBlock: aBlockClosure [
+	^ self new
+		values: aCollection;
+		linksBlock: aBlockClosure;
 		build;
-		yourself.
-
-	"FIX: it's (ruler numberOfColumns + 1) because of the left margin"
-	athensSurface := AthensCairoSurface extent: 
-		((ruler numberOfColumns + 1) * self columnSize) @ (self numberOfRows * self rowSize).
-		
-	athensSurface drawDuring: [ :athensCanvas | 
-
-		"apply left margin"
-		athensCanvas pathTransform
-			translateX: self columnSize
-			Y: 0.
-					
-		(HiRulerRenderer 
-			model: self 
-			athensCanvas: athensCanvas
-			ruler: ruler) 
-			render ].
-
-	^ athensSurface
-]
-
-{ #category : #'accessing - rendering' }
-HiRulerBuilder >> bottomOfRowIndex: rowIndex [
-	^ rowIndex * self rowSize
-]
-
-{ #category : #'accessing - rendering' }
-HiRulerBuilder >> centerOfColumnIndex: columnIndex [
-	^ (self leftOfColumnIndex: columnIndex) + (self columnSize // 2)
-]
-
-{ #category : #'accessing - rendering' }
-HiRulerBuilder >> centerOfRowIndex: rowIndex [
-	^ (self topOfRowIndex: rowIndex) + (self rowSize // 2)
-]
-
-{ #category : #'accessing - building API' }
-HiRulerBuilder >> columnSize [
-	^ columnSize
-]
-
-{ #category : #'accessing - building API' }
-HiRulerBuilder >> columnSize: anInteger [
-	columnSize := anInteger
+		ruler
 ]
 
 { #category : #building }
-HiRulerBuilder >> form [
-	| surface form |
-	surface := self athensSurface.
+HiRulerBuilder >> build [
+	
+	self prepareToProcess.
+	
+	values do: [ :each | self processNodesAndLinksFrom: each ].
 
-	form := Form 
-		extent: (surface width @ surface height) 
-		depth: 32.
 
-	form getCanvas 
-		drawImage: surface asForm 
-		at: 0@0.
+]
 
-	^ form
+{ #category : #private }
+HiRulerBuilder >> ensureCreateNodeAtProperRowFor: aValue [
+	^ ruler
+		nodeAt: aValue
+		ifAbsent: [ | rowIndex |
+			rowIndex := valueIndices at: aValue.
+			ruler
+				addNodeWithValue: aValue
+				atRowIndex: rowIndex
+			]
 ]
 
 { #category : #initialization }
 HiRulerBuilder >> initialize [
+
 	super initialize.
-	
-	rowSize := 25.
-	columnSize := rowSize // 2.
-	nodeBuilder := HiNodeBuilder new.
-	linkBuilders := OrderedCollection new.
+	linksBlock := [ :value | #() ].
+	values := #().
 ]
 
-{ #category : #'accessing - rendering' }
-HiRulerBuilder >> leftOfColumnIndex: columnIndex [
-	^ (columnIndex - 1) * self columnSize
+{ #category : #accessing }
+HiRulerBuilder >> linksBlock [
+	^ linksBlock
 ]
 
-{ #category : #'accessing - rendering' }
-HiRulerBuilder >> linkBuilders [
-	^ linkBuilders
+{ #category : #accessing }
+HiRulerBuilder >> linksBlock: aBlockClosure [
+
+	linksBlock := aBlockClosure
 ]
 
-{ #category : #'accessing - building API' }
-HiRulerBuilder >> nodeBuilder [
-	^ nodeBuilder
+{ #category : #private }
+HiRulerBuilder >> prepareToProcess [
+
+	valueIndices := Dictionary new.	
+	values withIndexDo: [ :aValue :index |
+		valueIndices at: aValue put: index ].
+
+	ruler := HiRuler withNumberOfRows: values size.
 ]
 
-{ #category : #'accessing - rendering' }
-HiRulerBuilder >> numberOfRows [
-	^ values size
+{ #category : #private }
+HiRulerBuilder >> processLinkFrom: aNode to: anotherNode [
+
+	ruler addLinkFrom: aNode to: anotherNode
 ]
 
-{ #category : #'accessing - building API' }
-HiRulerBuilder >> rowSize [
-	^ rowSize
+{ #category : #private }
+HiRulerBuilder >> processNodesAndLinksFrom: aValue [
+	"This method traverses the values using the linkBlock. It is a depth-first traversal."
+
+	| aNode |
+	aNode := self ensureCreateNodeAtProperRowFor: aValue.
+
+	(linksBlock cull: aValue) do: [ :anotherValue |
+		| anotherNode |
+		anotherNode := self ensureCreateNodeAtProperRowFor: anotherValue.
+
+		(aNode hasLinkTo: anotherNode) ifFalse: [
+			self processLinkFrom: aNode to: anotherNode.
+			self processNodesAndLinksFrom: anotherValue ].
+	].
+
 ]
 
-{ #category : #'accessing - building API' }
-HiRulerBuilder >> rowSize: anInteger [
-	rowSize := anInteger
+{ #category : #building }
+HiRulerBuilder >> ruler [
+	^ ruler
 ]
 
-{ #category : #'accessing - rendering' }
-HiRulerBuilder >> topOfRowIndex: rowIndex [
-	^ (rowIndex - 1) * self rowSize
+{ #category : #accessing }
+HiRulerBuilder >> values [
+	^ values
 ]
 
-{ #category : #'accessing - building API' }
+{ #category : #accessing }
 HiRulerBuilder >> values: aCollection [ 
 	values := aCollection
 ]

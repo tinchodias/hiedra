@@ -1,57 +1,114 @@
 "
-I represent a ruler of nodes with links.
+I represent a Hiedra visualization (a ruler), which is composed of nodes and links between nodes.
+
 "
 Class {
 	#name : #HiRuler,
 	#superclass : #Object,
 	#instVars : [
-		'freeColumnIndexByRow',
-		'linkBuilders',
-		'values',
 		'nodes',
-		'links'
+		'links',
+		'elementsByRow',
+		'nodeByValue',
+		'values'
 	],
-	#category : #'Hiedra-Rendering'
+	#category : #'Hiedra-Model'
 }
 
-{ #category : #building }
-HiRuler >> build [
-	freeColumnIndexByRow := Array new: values size withAll: 1. 
-	nodes := OrderedCollection new.
-	links := OrderedCollection new.
+{ #category : #'instance creation' }
+HiRuler class >> new [
+	"use #withNumberOfRows: instead"
+	self shouldNotImplement
+]
+
+{ #category : #'instance creation' }
+HiRuler class >> withNumberOfRows: anInteger [
 	
-	HiNodesAndLinksIterator new 
-		linkBuilders: linkBuilders;
-		values: values;
-		doWithNodes: [ :node | self processNode: node ]
-		doWithLinks: [ :link | self processLink: link ]
+	^ self basicNew
+		initializeWithNumberOfRows: anInteger;
+		yourself.
 ]
 
 { #category : #accessing }
-HiRuler >> freeColumnIndexAt: rowIndex [
-	^ freeColumnIndexByRow at: rowIndex
+HiRuler >> addLinkFrom: aNode to: anotherNode [
+
+	| rulerPoints newLink |
+	rulerPoints := (self
+		intermediateRowIndicesFrom: aNode
+		to: anotherNode)
+		collect: [ :rowIndex | 
+			((elementsByRow at: rowIndex) size + 1) @ rowIndex ].
+
+	newLink := HiLink
+		origin: aNode
+		target: anotherNode
+		rulerPoints: rulerPoints.
+
+	rulerPoints do: [ :aPoint |
+		(elementsByRow at: aPoint y) addLast: newLink ].
+		
+	aNode addOutgoingLink: newLink.
+	anotherNode addIncomingLink: newLink.
+	links add: newLink.
+	
+	^ newLink
 ]
 
 { #category : #accessing }
-HiRuler >> indentAt: rowIndex [
-	freeColumnIndexByRow 
-		at: rowIndex 
-		put: (freeColumnIndexByRow at: rowIndex) + 1
+HiRuler >> addNodeWithValue: aValue atRowIndex: rowIndex [
+
+	| newNode rowElements columnIndex |
+	rowElements := elementsByRow at: rowIndex.
+	columnIndex := rowElements size + 1.
+	newNode := HiNode value: aValue rulerPoint: columnIndex@rowIndex.
+
+	rowElements addLast: newNode.
+	nodes add: newNode.
+	nodeByValue at: aValue put: newNode.
+	values at: rowIndex put: aValue. "TODO: Remove... too much redundancy"
+	
+	^ newNode
 ]
 
 { #category : #accessing }
-HiRuler >> linkBuilders [
-	^ linkBuilders
+HiRuler >> elementsByRow [
+	^ elementsByRow
 ]
 
-{ #category : #accessing }
-HiRuler >> linkBuilders: aCollection [
-	linkBuilders := aCollection
+{ #category : #initialization }
+HiRuler >> initializeWithNumberOfRows: anInteger [ 
+
+	self initialize.
+	
+	nodeByValue := Dictionary new: anInteger.
+	nodes := OrderedCollection new: anInteger.
+	values := Array new: anInteger.
+	elementsByRow := Array streamContents: [ :stream | anInteger timesRepeat: [ stream nextPut: OrderedCollection new]]. 
+	links := OrderedCollection new.
+
+]
+
+{ #category : #private }
+HiRuler >> intermediateRowIndicesFrom: origin to: target [
+
+	| originRowIndex targetRowIndex |
+	originRowIndex := origin rulerPoint y.
+	targetRowIndex := target rulerPoint y.
+
+	^ originRowIndex <= targetRowIndex
+		ifTrue: [ originRowIndex + 1 to: targetRowIndex - 1 ]
+		ifFalse: [ originRowIndex - 1 to: targetRowIndex + 1 by: -1 ]
 ]
 
 { #category : #accessing }
 HiRuler >> links [
 	^ links
+]
+
+{ #category : #accessing }
+HiRuler >> nodeAt: aValue ifAbsent: aBlock [
+
+	^ nodeByValue at: aValue ifAbsent: aBlock
 ]
 
 { #category : #accessing }
@@ -61,44 +118,18 @@ HiRuler >> nodes [
 
 { #category : #accessing }
 HiRuler >> numberOfColumns [
-	^ freeColumnIndexByRow 
+
+	^ elementsByRow 
 		ifEmpty: [ 0 ]
-		ifNotEmpty: [ freeColumnIndexByRow max ]
-]
-
-{ #category : #private }
-HiRuler >> processLink: aLink [
-	| checkpoints |
-	links add: aLink.
-	
-	checkpoints := OrderedCollection new.
-
-	"add origin checkpoint"
-	checkpoints add: aLink origin rulerPoint.
-	
-	"add checkpoints in the middle"
-	aLink intermediateIndices do: [ :rowIndex |
-		checkpoints add: (freeColumnIndexByRow at: rowIndex) @ rowIndex.
-
-		self indentAt: rowIndex ].
-		
-	"add target checkpoint"
-	checkpoints add: aLink target rulerPoint.
-
-	"register checkpoints"
-	 aLink checkpoints: checkpoints
-]
-
-{ #category : #private }
-HiRuler >> processNode: node [
-	
-	nodes add: node.
-	node columnIndex: (freeColumnIndexByRow at: node rowIndex).
-	self indentAt: node rowIndex.
-
+		ifNotEmpty: [ elementsByRow max: #size ]
 ]
 
 { #category : #accessing }
-HiRuler >> values: aCollection [ 
-	values := aCollection
+HiRuler >> numberOfRows [
+	^ elementsByRow size
+]
+
+{ #category : #accessing }
+HiRuler >> values [
+	^ values
 ]
