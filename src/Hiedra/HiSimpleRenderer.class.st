@@ -18,31 +18,45 @@ Class {
 }
 
 { #category : #rendering }
-HiSimpleRenderer >> addLinkFragmentFrom: originCanvasPoint to: targetCanvasPoint into: athensPathBuilder intermediateY: intermediateY [
+HiSimpleRenderer >> addLinkFragmentFrom: startPoint to: endPoint into: athensPathBuilder intermediateY: intermediateY [
 
-	| curveAngle halfColumn |
-	originCanvasPoint y < targetCanvasPoint y
+	| halfColumn |
+	startPoint y < endPoint y
 		ifFalse: [ ^ self shouldBeImplemented ].
 		"reversed direction --> athensPathBuilder ccwArcTo: targetCanvasPoint angle: 60 degreesToRadians"
 
-	(originCanvasPoint x = targetCanvasPoint x)
-		ifTrue: [ ^ athensPathBuilder lineTo: targetCanvasPoint ].
+	(startPoint x = endPoint x)
+		ifTrue: [ ^ athensPathBuilder lineTo: endPoint ].
 
-	curveAngle := 45 degreesToRadians.
 	halfColumn := columnWidth/2.
 
-	"Is it direction from top to right (true) of from top to left (false)?"
-	(originCanvasPoint x < targetCanvasPoint x)
+	(startPoint x < endPoint x)
 		ifTrue: [
+			"
+			From top-left to bottom-right:
+			
+				 o
+				 \___
+				     \
+				     o
+			"
 			athensPathBuilder
-				ccwArcTo: (originCanvasPoint x + halfColumn) @ intermediateY angle: curveAngle;
-				lineTo:   (targetCanvasPoint x - halfColumn) @ intermediateY;
-				cwArcTo:  targetCanvasPoint angle: curveAngle ]
+				ccwArcTo: (startPoint x + halfColumn) @ intermediateY angle: self fragmentCurveAngle;
+				lineTo:   (endPoint x   - halfColumn) @ intermediateY;
+				cwArcTo:  endPoint angle: self fragmentCurveAngle ]
 		ifFalse: [
+			"
+			From top-right to bottom-left:
+			
+				     o
+				  ___/
+				 /
+				 o
+			"
 			athensPathBuilder 
-				cwArcTo:  (originCanvasPoint x - halfColumn) @ intermediateY angle: curveAngle;
-				lineTo:   (targetCanvasPoint x + halfColumn) @ intermediateY;
-				ccwArcTo: targetCanvasPoint angle: curveAngle ]
+				cwArcTo:  (startPoint x - halfColumn) @ intermediateY angle: self fragmentCurveAngle;
+				lineTo:   (endPoint x   + halfColumn) @ intermediateY;
+				ccwArcTo: endPoint angle: self fragmentCurveAngle ]
 
 ]
 
@@ -119,6 +133,11 @@ HiSimpleRenderer >> columnWidth [
 { #category : #accessing }
 HiSimpleRenderer >> columnWidth: aNumber [
 	columnWidth := aNumber
+]
+
+{ #category : #rendering }
+HiSimpleRenderer >> fragmentCurveAngle [
+	^ 45 degreesToRadians
 ]
 
 { #category : #initialization }
