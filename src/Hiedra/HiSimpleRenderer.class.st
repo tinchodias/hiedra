@@ -12,7 +12,8 @@ Class {
 		'nodeBorderWidth',
 		'columnWidth',
 		'rowHeight',
-		'linkColor'
+		'linkColor',
+		'linkCurveAngle'
 	],
 	#category : #'Hiedra-UI'
 }
@@ -41,9 +42,9 @@ HiSimpleRenderer >> addLinkFragmentFrom: startPoint to: endPoint into: athensPat
 				     o
 			"
 			athensPathBuilder
-				ccwArcTo: (startPoint x + halfColumn) @ intermediateY angle: self fragmentCurveAngle;
+				ccwArcTo: (startPoint x + halfColumn) @ intermediateY angle: self linkCurveAngle;
 				lineTo:   (endPoint x   - halfColumn) @ intermediateY;
-				cwArcTo:  endPoint angle: self fragmentCurveAngle ]
+				cwArcTo:  endPoint angle: self linkCurveAngle ]
 		ifFalse: [
 			"
 			From top-right to bottom-left:
@@ -54,9 +55,9 @@ HiSimpleRenderer >> addLinkFragmentFrom: startPoint to: endPoint into: athensPat
 				 o
 			"
 			athensPathBuilder 
-				cwArcTo:  (startPoint x - halfColumn) @ intermediateY angle: self fragmentCurveAngle;
+				cwArcTo:  (startPoint x - halfColumn) @ intermediateY angle: self linkCurveAngle;
 				lineTo:   (endPoint x   + halfColumn) @ intermediateY;
-				ccwArcTo: endPoint angle: self fragmentCurveAngle ]
+				ccwArcTo: endPoint angle: self linkCurveAngle ]
 
 ]
 
@@ -135,24 +136,20 @@ HiSimpleRenderer >> columnWidth: aNumber [
 	columnWidth := aNumber
 ]
 
-{ #category : #rendering }
-HiSimpleRenderer >> fragmentCurveAngle [
-	^ 45 degreesToRadians
-]
-
 { #category : #initialization }
 HiSimpleRenderer >> initialize [
 	super initialize.
-	
-	nodeDiameter := 4.0.
-	nodeBorderWidth := 1.5.
+
+	nodeDiameter := 2.5.
+	nodeBorderWidth := 2.
 	nodeColor := Smalltalk ui theme textColor.
 
-	linkWidth := 2.0.
+	linkWidth := nodeBorderWidth.
 	linkDashes := #().
+	linkCurveAngle := 45 degreesToRadians.
 	linkColor := nodeColor.
 
-	columnWidth := linkWidth * 4.
+	columnWidth := linkWidth * 3.
 	rowHeight := nil.	"Important: the user must set the exact height of rows"
 
 ]
@@ -165,6 +162,18 @@ HiSimpleRenderer >> linkColor [
 { #category : #accessing }
 HiSimpleRenderer >> linkColor: aColor [
 	linkColor := aColor
+]
+
+{ #category : #rendering }
+HiSimpleRenderer >> linkCurveAngle [
+	^ linkCurveAngle
+]
+
+{ #category : #rendering }
+HiSimpleRenderer >> linkCurveAngle: anAngleAsRadians [
+	"Example argument: 45 degreesToRadians"
+
+	linkCurveAngle := anAngleAsRadians
 ]
 
 { #category : #accessing }
@@ -230,7 +239,7 @@ HiSimpleRenderer >> nodeRatio [
 HiSimpleRenderer >> renderLinks: links on: athensCanvas [
 
 	"Set the paint for links"
-	(athensCanvas setStrokePaint: linkColor value)
+	(athensCanvas setStrokePaint: linkColor)
 		width: linkWidth.
 	athensCanvas paint
 		joinRound;

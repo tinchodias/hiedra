@@ -45,7 +45,7 @@ HiAbstractRenderer >> newForm [
 	
 	| athensSurface |
 	athensSurface := AthensCairoSurface extent: self formWidth @ self formHeight.
-		
+	
 	athensSurface drawDuring: [ :athensCanvas |
 		athensCanvas pathTransform translateBy: self initialTranslationInAthensCanvas.
 
@@ -70,9 +70,10 @@ HiAbstractRenderer >> nodesAndLinks [
 
 	"Also add links between contiguous nodes 
 	(they are not added in previous step as they don't occupy a space in the ruler)."
-	nodes do: [:aNode | 
-		(aNode incomingLinks, aNode outgoingLinks)
-			do: [:aLink | links add: aLink ] ].
+	nodes do: [:aNode |
+		links 
+			addAll: aNode incomingLinks;
+			addAll: aNode outgoingLinks ].
 
 	^ { nodes. links }
 ]

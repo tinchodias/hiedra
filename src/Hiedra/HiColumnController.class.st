@@ -48,10 +48,11 @@ HiColumnController >> newCellMorphFor: aValue [
 	cellBoundsInPage := self cellBoundsInPage: pageIndex for: aValue.
 
 	aForm := Form extent: cellBoundsInPage extent depth: 32.
+	
 	aForm getCanvas
 		translucentImage: pageForm
-		at: 0@0
-		sourceRect: cellBoundsInPage.
+			at: 0@0
+			sourceRect: cellBoundsInPage truncated.
 	^ aForm asMorph
 ]
 

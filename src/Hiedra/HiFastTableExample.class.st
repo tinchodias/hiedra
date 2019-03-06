@@ -86,10 +86,6 @@ HiFastTableExample >> initialize [
 
 	hiedraColumnController := HiColumnController new.
 	hiedraColumnController renderer
-		nodeDiameter: 2.5;
-		nodeBorderWidth: 1.0;
-		linkWidth: 0.75;
-		columnWidth: 5.5;
 		nodeColor: aColor;
 		linkColor: aColor;
 		rowHeight: self rowHeight.	"It is important to set the right height of rows"
