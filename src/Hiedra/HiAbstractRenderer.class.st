@@ -12,7 +12,7 @@ Class {
 	#category : #'Hiedra-UI'
 }
 
-{ #category : #rendering }
+{ #category : #accessing }
 HiAbstractRenderer >> columnWidth [
 	^ self subclassResponsibility
 ]
@@ -100,7 +100,7 @@ HiAbstractRenderer >> renderOn: athensCanvas [
 	self renderNodes: nodesAndLinks first on: athensCanvas.
 ]
 
-{ #category : #rendering }
+{ #category : #accessing }
 HiAbstractRenderer >> rowHeight [
 	^ self subclassResponsibility
 ]

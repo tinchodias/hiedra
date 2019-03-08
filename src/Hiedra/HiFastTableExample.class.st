@@ -76,7 +76,7 @@ HiFastTableExample >> elements: anObject [
 
 ]
 
-{ #category : #accessing }
+{ #category : #initialization }
 HiFastTableExample >> initialize [
 
 	super initialize.
@@ -87,7 +87,7 @@ HiFastTableExample >> initialize [
 	hiedraColumnController renderer rowHeight: self rowHeight.
 ]
 
-{ #category : #accessing }
+{ #category : #private }
 HiFastTableExample >> readyToBeDisplayed [
 	"In this example we know the controller is already initialized."
 	
