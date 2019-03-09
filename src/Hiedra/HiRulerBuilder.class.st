@@ -86,7 +86,7 @@ HiRulerBuilder >> processNodesAndLinksFrom: aValue [
 	| aNode |
 	aNode := self ensureCreateNodeAtProperRowFor: aValue.
 
-	(linksBlock cull: aValue) do: [ :anotherValue |
+	(linksBlock value: aValue) do: [ :anotherValue |
 		| anotherNode |
 		anotherNode := self ensureCreateNodeAtProperRowFor: anotherValue.
 
