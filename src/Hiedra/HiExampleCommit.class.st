@@ -53,7 +53,7 @@ HiExampleCommit class >> randomlyGenerated [
 	linksDictionary := Dictionary new.
 	random := Random new.
 	^ values collect: [ :value | 
-		HiExampleCommit new
+		self new
 			id: value;
 			comment: 'Value ', value asString;
 			parentIds: (values intersection: { random nextInt: (value - 1) });

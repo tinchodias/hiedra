@@ -141,8 +141,8 @@ HiSimpleRenderer >> initialize [
 	super initialize.
 
 	nodeDiameter := 2.5.
-	nodeBorderWidth := 2.
-	nodeColor := Smalltalk ui theme textColor.
+	nodeBorderWidth := 1.75.
+	nodeColor := Smalltalk ui theme caretColor.
 
 	linkWidth := nodeBorderWidth.
 	linkDashes := #().

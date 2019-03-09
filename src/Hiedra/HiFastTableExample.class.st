@@ -78,24 +78,20 @@ HiFastTableExample >> elements: commits [
 
 ]
 
-{ #category : #accessing }
+{ #category : #initialization }
 HiFastTableExample >> initialize [
 
-	| aColor |
 	super initialize.
 
-	aColor := Smalltalk ui theme caretColor.
-
 	hiedraColumnController := HiColumnController new.
-	hiedraColumnController renderer
-		nodeColor: aColor;
-		linkColor: aColor;
-		rowHeight: self rowHeight.	"It is important to set the right height of rows"
 
+	"We must set the right height of rows"
+	hiedraColumnController renderer rowHeight: self rowHeight.
 ]
 
-{ #category : #accessing }
+{ #category : #private }
 HiFastTableExample >> readyToBeDisplayed [
+	"In this example we know the controller is already initialized."
 	
 	self table columns first width: hiedraColumnController rulerWidth.
 ]
