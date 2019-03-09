@@ -53,7 +53,7 @@ HiFastTableExample >> cellColumn: column row: rowIndex [
 
 	column id = 'Hiedra' ifTrue: [ 
 		^ FTCellMorph new
-			addMorphBack: (hiedraColumnController cellMorphFor: commit id);
+			addMorphBack: (hiedraColumnController cellMorphFor: commit);
 			yourself
 		].
 
@@ -64,13 +64,15 @@ HiFastTableExample >> cellColumn: column row: rowIndex [
 ]
 
 { #category : #accessing }
-HiFastTableExample >> elements: anObject [
+HiFastTableExample >> elements: commits [
 
-	super elements: anObject.
+	super elements: commits.
 
 	hiedraColumnController ruler: (HiRulerBuilder 
-		newRulerValues: (elements collect: #id)
-		linksBlock: [:id | (elements detect: [:each | each id = id ]) parentIds ]).
+		newRulerValues: commits
+		linksBlock: [:aCommit |
+			aCommit parentIds collect: [:id | 
+				commits detect: [:each | each id = id ] ] ]).
 
 	hiedraColumnController refresh.
 

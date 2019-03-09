@@ -53,12 +53,15 @@ HiSpecExample >> commits: commits [
 	tree roots: commits.
 
 	hiedraColumnController ruler: (HiRulerBuilder 
-		newRulerValues: (commits collect: #id)
-		linksBlock: [:id | (commits detect: [:each | each id = id ]) parentIds ]).
+		newRulerValues: commits
+		linksBlock: [:aCommit |
+			aCommit parentIds collect: [:id | 
+				commits detect: [:each | each id = id ] ] ]).
 
 	hiedraColumnController refresh.
 	
-	tree columns first initialWidth: hiedraColumnController rulerWidth 
+	"After #refresh, we can know the width of the column."
+	tree columns first initialWidth: hiedraColumnController rulerWidth.
 ]
 
 { #category : #initialization }
@@ -86,7 +89,7 @@ HiSpecExample >> initializeWidgets [
 	tree columns:	{
 		TreeColumnPresenter new	
 			displayBlock: [ :item |
-				(hiedraColumnController cellMorphFor: item content id)
+				(hiedraColumnController cellMorphFor: item content)
 					height: rowHeight;
 					yourself ];
 			yourself.
