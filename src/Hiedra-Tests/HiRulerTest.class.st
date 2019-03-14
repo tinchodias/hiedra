@@ -27,7 +27,7 @@ HiRulerTest >> rulerWithTwoMergedForks [
 HiRulerTest >> testEmpty [
 	
 	| ruler |
-	ruler := HiRuler withNumberOfRows: 0.
+	ruler := HiRuler withValues: #().
 	
 	self assert: ruler nodes isEmpty.
 	self assert: ruler links isEmpty.
@@ -49,13 +49,13 @@ HiRulerTest >> testTwoMergedForks [
 	"
 
 	| ruler c b a |
-	ruler := HiRuler withNumberOfRows: 3.
+	ruler := HiRuler withValues: #(c b a).
 
-	c := ruler addNodeWithValue: #c atRowIndex: 1.
-	a := ruler addNodeWithValue: #a atRowIndex: 3.
+	c := ruler addNodeFor: #c.
+	a := ruler addNodeFor: #a.
 	ruler addLinkFrom: c to: a.
 
-	b := ruler addNodeWithValue: #b atRowIndex: 2.
+	b := ruler addNodeFor: #b.
 	ruler
 		addLinkFrom: c to: b;
 		addLinkFrom: b to: a.

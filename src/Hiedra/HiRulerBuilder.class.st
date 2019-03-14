@@ -7,8 +7,7 @@ Class {
 	#instVars : [
 		'values',
 		'linksBlock',
-		'ruler',
-		'valueIndices'
+		'ruler'
 	],
 	#category : #'Hiedra-Model'
 }
@@ -25,23 +24,45 @@ HiRulerBuilder class >> newRulerValues: aCollection linksBlock: aBlockClosure [
 { #category : #building }
 HiRulerBuilder >> build [
 	
-	self prepareToProcess.
-	
-	values do: [ :each | self processNodesAndLinksFrom: each ].
+	self prepareToBuild.	
 
+	values do: [ :each | 
+		ruler
+			nodeAt: each
+			ifAbsent: [
+				ruler addNodeFor: each.
+				self buildLinksStartingAt: each ].
+		].
 
 ]
 
 { #category : #private }
-HiRulerBuilder >> ensureCreateNodeAtProperRowFor: aValue [
-	^ ruler
-		nodeAt: aValue
-		ifAbsent: [ | rowIndex |
-			rowIndex := valueIndices at: aValue.
-			ruler
-				addNodeWithValue: aValue
-				atRowIndex: rowIndex
-			]
+HiRulerBuilder >> buildLinksStartingAt: aValue [
+	"This method traverses the values using the linkBlock. It is a depth-first traversal."
+
+	| pending |
+	pending := Stack new.
+	self stackLinksFrom: aValue in: pending.
+
+	[ pending isEmpty ] whileFalse: [
+		| next aNode anotherNode |
+		next := pending pop.
+
+		aNode := ruler
+			nodeAt: next key
+			ifAbsent: [ self error "cannot happen" ].
+		anotherNode := ruler
+			nodeAt: next value
+			ifAbsent: [ 
+				self stackLinksFrom: next value in: pending.
+				ruler addNodeFor: next value ].
+
+		(aNode hasLinkTo: anotherNode) ifFalse: [ 
+			ruler addLinkFrom: aNode to: anotherNode.
+		].
+
+	].
+
 ]
 
 { #category : #initialization }
@@ -64,42 +85,23 @@ HiRulerBuilder >> linksBlock: aBlockClosure [
 ]
 
 { #category : #private }
-HiRulerBuilder >> prepareToProcess [
+HiRulerBuilder >> prepareToBuild [
 
-	valueIndices := Dictionary new.	
-	values withIndexDo: [ :aValue :index |
-		valueIndices at: aValue put: index ].
-
-	ruler := HiRuler withNumberOfRows: values size.
-]
-
-{ #category : #private }
-HiRulerBuilder >> processLinkFrom: aNode to: anotherNode [
-
-	ruler addLinkFrom: aNode to: anotherNode
-]
-
-{ #category : #private }
-HiRulerBuilder >> processNodesAndLinksFrom: aValue [
-	"This method traverses the values using the linkBlock. It is a depth-first traversal."
-
-	| aNode |
-	aNode := self ensureCreateNodeAtProperRowFor: aValue.
-
-	(linksBlock value: aValue) do: [ :anotherValue |
-		| anotherNode |
-		anotherNode := self ensureCreateNodeAtProperRowFor: anotherValue.
-
-		(aNode hasLinkTo: anotherNode) ifFalse: [
-			self processLinkFrom: aNode to: anotherNode.
-			self processNodesAndLinksFrom: anotherValue ].
-	].
-
+	ruler := HiRuler withValues: values.
 ]
 
 { #category : #building }
 HiRulerBuilder >> ruler [
 	^ ruler
+]
+
+{ #category : #private }
+HiRulerBuilder >> stackLinksFrom: aValue in: pending [
+
+	| linkedValues |
+	linkedValues := linksBlock value: aValue.
+	linkedValues reverseDo: [:each | pending push: (aValue -> each) ].
+
 ]
 
 { #category : #accessing }

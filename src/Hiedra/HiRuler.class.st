@@ -1,6 +1,7 @@
 "
-I represent a Hiedra visualization (a ruler), which is composed of nodes and links between nodes.
+I represent a Hiedra visualization (a ruler), which is composed of nodes and links between such nodes.
 
+A ruler is created with a list of values, and each of these values will have its corresponding node in the corresponding row. In other words, a ruler always has a 1-to-1 relation between values, nodes and rows.
 "
 Class {
 	#name : #HiRuler,
@@ -10,7 +11,8 @@ Class {
 		'links',
 		'elementsByRow',
 		'nodeByValue',
-		'values'
+		'values',
+		'valueIndices'
 	],
 	#category : #'Hiedra-Model'
 }
@@ -22,16 +24,17 @@ HiRuler class >> new [
 ]
 
 { #category : #'instance creation' }
-HiRuler class >> withNumberOfRows: anInteger [
+HiRuler class >> withValues: aSequenceableCollection [
 	
 	^ self basicNew
-		initializeWithNumberOfRows: anInteger;
+		initializeWithValues: aSequenceableCollection;
 		yourself.
 ]
 
 { #category : #accessing }
 HiRuler >> addLinkFrom: aNode to: anotherNode [
-
+	"Add a HiLink to the ruler from aNode to anotherNode. The link will occupy a free point in the ruler for each intermediate row from the origin to the target node."
+	
 	| rulerPoints newLink |
 	rulerPoints := (self
 		intermediateRowIndicesFrom: aNode
@@ -55,15 +58,22 @@ HiRuler >> addLinkFrom: aNode to: anotherNode [
 ]
 
 { #category : #accessing }
-HiRuler >> addNodeWithValue: aValue atRowIndex: rowIndex [
+HiRuler >> addNodeFor: aValue [
+	"Add the node for aValue. The node will occupy a free point in the ruler in the corresponding row.
+	
+	Constraints:
+	- aValue must belong to the initial list of values used when creating the ruler instance.
+	- aValue must be added exactly once as node.
+	"
 
-	| newNode rowElements columnIndex |
+	| newNode rowElements columnIndex rowIndex |
+	rowIndex := valueIndices at: aValue.
 	rowElements := elementsByRow at: rowIndex.
 	columnIndex := rowElements size + 1.
 	newNode := HiNode value: aValue rulerPoint: columnIndex@rowIndex.
 
 	rowElements addLast: newNode.
-	nodes add: newNode.
+	nodes at: rowIndex put: newNode.
 	nodeByValue at: aValue put: newNode.
 	values at: rowIndex put: aValue. "TODO: Remove... too much redundancy"
 	
@@ -76,14 +86,18 @@ HiRuler >> elementsByRow [
 ]
 
 { #category : #initialization }
-HiRuler >> initializeWithNumberOfRows: anInteger [ 
+HiRuler >> initializeWithValues: aSequenceableCollection [ 
 
 	self initialize.
-	
-	nodeByValue := Dictionary new: anInteger.
-	nodes := OrderedCollection new: anInteger.
-	values := Array new: anInteger.
-	elementsByRow := Array streamContents: [ :stream | anInteger timesRepeat: [ stream nextPut: OrderedCollection new]]. 
+
+	values := aSequenceableCollection.
+	valueIndices := Dictionary new: values size.
+	values withIndexDo: [ :aValue :index |
+		valueIndices at: aValue put: index ].	
+	nodeByValue := Dictionary new: values size.
+	nodes := Array new: values size.
+	elementsByRow := Array streamContents: [ :stream |
+		values size timesRepeat: [ stream nextPut: OrderedCollection new ]]. 
 	links := OrderedCollection new.
 
 ]
@@ -112,6 +126,12 @@ HiRuler >> nodeAt: aValue ifAbsent: aBlock [
 ]
 
 { #category : #accessing }
+HiRuler >> nodeAt: aValue ifPresent: presentBlock ifAbsent: absentBlock [
+
+	^ nodeByValue at: aValue ifPresent: presentBlock ifAbsent: absentBlock
+]
+
+{ #category : #accessing }
 HiRuler >> nodes [
 	^ nodes
 ]
@@ -126,6 +146,7 @@ HiRuler >> numberOfColumns [
 
 { #category : #accessing }
 HiRuler >> numberOfRows [
+
 	^ elementsByRow size
 ]
 
