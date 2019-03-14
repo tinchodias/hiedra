@@ -24,7 +24,7 @@ HiRulerBuilder class >> newRulerValues: aCollection linksBlock: aBlockClosure [
 { #category : #building }
 HiRulerBuilder >> build [
 	
-	self prepareToBuild.	
+	ruler := HiRuler withValues: values.
 
 	values do: [ :each | 
 		ruler
@@ -82,12 +82,6 @@ HiRulerBuilder >> linksBlock [
 HiRulerBuilder >> linksBlock: aBlockClosure [
 
 	linksBlock := aBlockClosure
-]
-
-{ #category : #private }
-HiRulerBuilder >> prepareToBuild [
-
-	ruler := HiRuler withValues: values.
 ]
 
 { #category : #building }
