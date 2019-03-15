@@ -30,16 +30,17 @@ HiFastTableExample class >> openExample: selector [
 
 	| commits dataSource table |
 	commits := HiExampleCommit perform: selector.
-	dataSource := self new elements: commits; yourself.
+	dataSource := self new.
 
 	table := FTTableMorph new
 		extent: 500 @ 700;
-		addColumn: (FTColumn id: 'Hiedra');
+		addColumn: (FTColumn id: ' ');
 		addColumn: (FTColumn id: 'Comment');
 		dataSource: dataSource;
-		rowHeight: dataSource rowHeight;
 		beResizable;
 		yourself.
+	
+	dataSource elements: commits.
 	
 	table openInWindowLabeled: ('Hiedra in FastTable - {1} - {2} elements' format: {selector. commits size})
 ]
@@ -51,7 +52,7 @@ HiFastTableExample >> cellColumn: column row: rowIndex [
 	| commit |
 	commit := self elementAt: rowIndex.
 
-	column id = 'Hiedra' ifTrue: [ 
+	column id = ' ' ifTrue: [ 
 		^ FTCellMorph new
 			addMorphBack: (hiedraColumnController cellMorphFor: commit);
 			yourself
@@ -60,43 +61,33 @@ HiFastTableExample >> cellColumn: column row: rowIndex [
 	column id = 'Comment' ifTrue: [ 
 		^ commit comment asMorph ].
 
-	^ super cellColumn: column row: rowIndex
+	^ self error
 ]
 
 { #category : #accessing }
 HiFastTableExample >> elements: commits [
-
 	super elements: commits.
 
+	"Adjust the ruler rendering settings with table's row height."
+	hiedraColumnController renderer rowHeight: self table rowHeight floor.
+
+	"Create a new ruler model with the new elements"
 	hiedraColumnController ruler: (HiRulerBuilder 
 		newRulerValues: commits
 		linksBlock: [:aCommit |
 			aCommit parentIds collect: [:id | 
 				commits detect: [:each | each id = id ] ] ]).
 
+	"Render the ruler"
 	hiedraColumnController refresh.
+
+	"Adjust the column width in the table"
+	self table columns first width: hiedraColumnController rulerWidth.
 
 ]
 
 { #category : #initialization }
 HiFastTableExample >> initialize [
-
 	super initialize.
-
-	hiedraColumnController := HiColumnController new.
-
-	"We must set the right height of rows"
-	hiedraColumnController renderer rowHeight: self rowHeight.
-]
-
-{ #category : #private }
-HiFastTableExample >> readyToBeDisplayed [
-	"In this example we know the controller is already initialized."
-	
-	self table columns first width: hiedraColumnController rulerWidth.
-]
-
-{ #category : #accessing }
-HiFastTableExample >> rowHeight [
-	^ 22
+	hiedraColumnController := HiColumnController new
 ]
