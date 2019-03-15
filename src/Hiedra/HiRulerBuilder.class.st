@@ -48,9 +48,7 @@ HiRulerBuilder >> buildLinksStartingAt: aValue [
 		| next aNode anotherNode |
 		next := pending pop.
 
-		aNode := ruler
-			nodeAt: next key
-			ifAbsent: [ self error "cannot happen" ].
+		aNode := ruler nodeAt: next key.
 		anotherNode := ruler
 			nodeAt: next value
 			ifAbsent: [ 

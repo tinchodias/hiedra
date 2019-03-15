@@ -120,15 +120,15 @@ HiRuler >> links [
 ]
 
 { #category : #accessing }
-HiRuler >> nodeAt: aValue ifAbsent: aBlock [
+HiRuler >> nodeAt: aValue [
 
-	^ nodeByValue at: aValue ifAbsent: aBlock
+	^ nodeByValue at: aValue
 ]
 
 { #category : #accessing }
-HiRuler >> nodeAt: aValue ifPresent: presentBlock ifAbsent: absentBlock [
+HiRuler >> nodeAt: aValue ifAbsent: aBlock [
 
-	^ nodeByValue at: aValue ifPresent: presentBlock ifAbsent: absentBlock
+	^ nodeByValue at: aValue ifAbsent: aBlock
 ]
 
 { #category : #accessing }

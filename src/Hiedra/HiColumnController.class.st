@@ -16,7 +16,7 @@ Class {
 HiColumnController >> cellBoundsInPage: pageIndex for: aValue [
 	
 	| aNode valueRelativeIndex pageFirstRowIndex |
-	aNode := self ruler nodeAt: aValue ifAbsent: [ self error ].
+	aNode := self ruler nodeAt: aValue.
 	pageFirstRowIndex := (self rowsIntervalForPageIndex: pageIndex) first.
 	valueRelativeIndex := aNode rulerPoint y - pageFirstRowIndex.
 
