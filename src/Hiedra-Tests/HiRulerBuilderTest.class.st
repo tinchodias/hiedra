@@ -27,7 +27,7 @@ HiRulerBuilderTest >> assertRulerHasLinks: expectedLinksAndRulerPointsAsAssociat
 			equals: expectedLinkAsAssociation.
 		self
 			assert: actualRulerPoints = rulerPoints asArray
-			description: [ '{1}: Found {2} instead of {3}.' format: { actualLink. actualLink rulerPoints. rulerPoints } ].
+			description: [ '{1}: Found {2} instead of {3}.' format: { actualLink. actualRulerPoints. rulerPoints } ].
 	]
 
 ]
