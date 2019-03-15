@@ -90,7 +90,7 @@ HiSimpleRenderer >> athensPathForAscendingLink: aHiLink on: athensCanvas [
 			moveTo: fragmentStart.
 
 		"Add all fragments except last (in reversed order)"
-		aHiLink rulerPoints reverseDo: [ :rulerPoint | 
+		aHiLink intermediatePoints reverseDo: [ :rulerPoint | 
 			| fragmentEnd |
 			fragmentEnd := self cellCenterFor: rulerPoint.
 			self
@@ -125,7 +125,7 @@ HiSimpleRenderer >> athensPathForDescendingLink: aHiLink on: athensCanvas [
 			moveTo: fragmentStart.
 
 		"Add all fragments except last"
-		aHiLink rulerPoints do: [ :rulerPoint |
+		aHiLink intermediatePoints do: [ :rulerPoint |
 			| fragmentEnd |
 			fragmentEnd := self cellCenterFor: rulerPoint.
 			self

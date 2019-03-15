@@ -53,6 +53,18 @@ HiNode >> initializeWithValue: aValue rulerPoint: aPoint [
 ]
 
 { #category : #accessing }
+HiNode >> intermediateRowIndicesTo: anotherNode [
+
+	| originRowIndex targetRowIndex |
+	originRowIndex := self rulerPoint y.
+	targetRowIndex := anotherNode rulerPoint y.
+
+	^ originRowIndex <= targetRowIndex
+		ifTrue: [ originRowIndex + 1 to: targetRowIndex - 1 ]
+		ifFalse: [ originRowIndex - 1 to: targetRowIndex + 1 by: -1 ]
+]
+
+{ #category : #accessing }
 HiNode >> outgoingLinks [
 	^ outgoingLinks
 ]

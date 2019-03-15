@@ -7,16 +7,16 @@ Class {
 	#instVars : [
 		'origin',
 		'target',
-		'rulerPoints'
+		'intermediatePoints'
 	],
 	#category : #'Hiedra-Model'
 }
 
 { #category : #'instance creation' }
-HiLink class >> origin: aNode target: anotherNode rulerPoints: aCollectionOfPoints [
+HiLink class >> origin: aNode target: anotherNode intermediatePoints: aListOfPoints [
 
 	^ self basicNew
-		initializeWithOrigin: aNode target: anotherNode rulerPoints: aCollectionOfPoints;
+		initializeWithOrigin: aNode target: anotherNode intermediatePoints: aListOfPoints;
 		yourself
 ]
 
@@ -26,13 +26,18 @@ HiLink >> doesContinue: anotherLink [
 ]
 
 { #category : #initialization }
-HiLink >> initializeWithOrigin: aNode target: anotherNode rulerPoints: aCollectionOfPoints [
+HiLink >> initializeWithOrigin: aNode target: anotherNode intermediatePoints: aCollectionOfPoints [
 
 	self initialize.
 	
 	origin := aNode.
 	target := anotherNode.
-	rulerPoints := aCollectionOfPoints.
+	intermediatePoints := aCollectionOfPoints.
+]
+
+{ #category : #accessing }
+HiLink >> intermediatePoints [
+	^ intermediatePoints
 ]
 
 { #category : #testing }
@@ -56,11 +61,6 @@ HiLink >> printOn: aStream [
 		nextPutAll: '->';
 		print: target theValue;
 		nextPut: $).
-]
-
-{ #category : #accessing }
-HiLink >> rulerPoints [
-	^ rulerPoints
 ]
 
 { #category : #accessing }

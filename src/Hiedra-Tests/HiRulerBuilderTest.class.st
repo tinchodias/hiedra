@@ -21,7 +21,7 @@ HiRulerBuilderTest >> assertRulerHasLinks: expectedLinksAndRulerPointsAsAssociat
 		actualLink := ruler links at: index.
 		expectedLinkAsAssociation := each key.
 		rulerPoints := each value.
-		actualRulerPoints := {actualLink origin rulerPoint}, actualLink rulerPoints asArray, {actualLink target rulerPoint}.
+		actualRulerPoints := {actualLink origin rulerPoint}, actualLink intermediatePoints asArray, {actualLink target rulerPoint}.
 		self
 			assert: actualLink origin theValue -> actualLink target theValue
 			equals: expectedLinkAsAssociation.

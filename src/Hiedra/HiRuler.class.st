@@ -35,19 +35,16 @@ HiRuler class >> withValues: aSequenceableCollection [
 HiRuler >> addLinkFrom: aNode to: anotherNode [
 	"Add a HiLink to the ruler from aNode to anotherNode. The link will occupy a free point in the ruler for each intermediate row from the origin to the target node."
 	
-	| rulerPoints newLink |
-	rulerPoints := (self
-		intermediateRowIndicesFrom: aNode
-		to: anotherNode)
-		collect: [ :rowIndex | 
-			((elementsByRow at: rowIndex) size + 1) @ rowIndex ].
+	| intermediatePoints newLink |
+	intermediatePoints := (aNode intermediateRowIndicesTo: anotherNode)
+		collect: [ :row | ((elementsByRow at: row) size + 1) @ row ].
 
 	newLink := HiLink
 		origin: aNode
 		target: anotherNode
-		rulerPoints: rulerPoints.
+		intermediatePoints: intermediatePoints.
 
-	rulerPoints do: [ :aPoint |
+	intermediatePoints do: [ :aPoint |
 		(elementsByRow at: aPoint y) addLast: newLink ].
 		
 	aNode addOutgoingLink: newLink.
@@ -102,18 +99,6 @@ HiRuler >> initializeWithValues: aSequenceableCollection [
 
 ]
 
-{ #category : #private }
-HiRuler >> intermediateRowIndicesFrom: origin to: target [
-
-	| originRowIndex targetRowIndex |
-	originRowIndex := origin rulerPoint y.
-	targetRowIndex := target rulerPoint y.
-
-	^ originRowIndex <= targetRowIndex
-		ifTrue: [ originRowIndex + 1 to: targetRowIndex - 1 ]
-		ifFalse: [ originRowIndex - 1 to: targetRowIndex + 1 by: -1 ]
-]
-
 { #category : #accessing }
 HiRuler >> links [
 	^ links
@@ -148,6 +133,11 @@ HiRuler >> numberOfColumns [
 HiRuler >> numberOfRows [
 
 	^ elementsByRow size
+]
+
+{ #category : #accessing }
+HiRuler >> valueIndices [
+	^ valueIndices
 ]
 
 { #category : #accessing }
