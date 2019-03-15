@@ -7,12 +7,13 @@ Class {
 	#name : #HiRuler,
 	#superclass : #Object,
 	#instVars : [
-		'nodes',
 		'links',
 		'elementsByRow',
 		'nodeByValue',
-		'values',
-		'valueIndices'
+		'nodeByRow',
+		'valueByRow',
+		'rowByValue',
+		'linksByRow'
 	],
 	#category : #'Hiedra-Model'
 }
@@ -44,9 +45,12 @@ HiRuler >> addLinkFrom: aNode to: anotherNode [
 		target: anotherNode
 		intermediatePoints: intermediatePoints.
 
+	(linksByRow at: aNode rulerPoint y) add: newLink.
 	intermediatePoints do: [ :aPoint |
-		(elementsByRow at: aPoint y) addLast: newLink ].
-		
+		(elementsByRow at: aPoint y) addLast: newLink.
+		(linksByRow at: aPoint y) add: newLink ].
+	(linksByRow at: anotherNode rulerPoint y) add: newLink.
+	
 	aNode addOutgoingLink: newLink.
 	anotherNode addIncomingLink: newLink.
 	links add: newLink.
@@ -64,15 +68,15 @@ HiRuler >> addNodeFor: aValue [
 	"
 
 	| newNode rowElements columnIndex rowIndex |
-	rowIndex := valueIndices at: aValue.
+	rowIndex := rowByValue at: aValue.
 	rowElements := elementsByRow at: rowIndex.
 	columnIndex := rowElements size + 1.
 	newNode := HiNode value: aValue rulerPoint: columnIndex@rowIndex.
 
 	rowElements addLast: newNode.
-	nodes at: rowIndex put: newNode.
+	nodeByRow at: rowIndex put: newNode.
 	nodeByValue at: aValue put: newNode.
-	values at: rowIndex put: aValue. "TODO: Remove... too much redundancy"
+	valueByRow at: rowIndex put: aValue. "TODO: Remove... too much redundancy"
 	
 	^ newNode
 ]
@@ -86,16 +90,19 @@ HiRuler >> elementsByRow [
 HiRuler >> initializeWithValues: aSequenceableCollection [ 
 
 	self initialize.
+	valueByRow := aSequenceableCollection.
 
-	values := aSequenceableCollection.
-	valueIndices := Dictionary new: values size.
-	values withIndexDo: [ :aValue :index |
-		valueIndices at: aValue put: index ].	
-	nodeByValue := Dictionary new: values size.
-	nodes := Array new: values size.
-	elementsByRow := Array streamContents: [ :stream |
-		values size timesRepeat: [ stream nextPut: OrderedCollection new ]]. 
+	rowByValue := Dictionary new: valueByRow size.
+	valueByRow withIndexDo: [ :each :index | rowByValue at: each put: index ].
+	nodeByValue := Dictionary new: valueByRow size.
+	nodeByRow := Array new: valueByRow size.
 	links := OrderedCollection new.
+
+	elementsByRow := Array new: valueByRow size.
+	linksByRow := Array new: valueByRow size.
+	1 to: valueByRow size do: [ :index | 
+		elementsByRow at: index put: LinkedList new.
+		linksByRow at: index put: LinkedList new ]. 
 
 ]
 
@@ -105,20 +112,32 @@ HiRuler >> links [
 ]
 
 { #category : #accessing }
-HiRuler >> nodeAt: aValue [
+HiRuler >> linksAtRow: rowIndex [
+
+	^ linksByRow at: rowIndex
+]
+
+{ #category : #accessing }
+HiRuler >> nodeAtRow: rowIndex [
+
+	^ nodeByRow at: rowIndex
+]
+
+{ #category : #accessing }
+HiRuler >> nodeAtValue: aValue [
 
 	^ nodeByValue at: aValue
 ]
 
 { #category : #accessing }
-HiRuler >> nodeAt: aValue ifAbsent: aBlock [
+HiRuler >> nodeAtValue: aValue ifAbsent: aBlock [
 
 	^ nodeByValue at: aValue ifAbsent: aBlock
 ]
 
 { #category : #accessing }
 HiRuler >> nodes [
-	^ nodes
+	^ nodeByRow
 ]
 
 { #category : #accessing }
@@ -137,10 +156,10 @@ HiRuler >> numberOfRows [
 
 { #category : #accessing }
 HiRuler >> valueIndices [
-	^ valueIndices
+	^ rowByValue
 ]
 
 { #category : #accessing }
 HiRuler >> values [
-	^ values
+	^ valueByRow
 ]

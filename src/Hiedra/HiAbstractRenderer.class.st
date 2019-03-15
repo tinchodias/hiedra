@@ -55,30 +55,6 @@ HiAbstractRenderer >> newForm [
 ]
 
 { #category : #rendering }
-HiAbstractRenderer >> nodesAndLinks [
-	
-	| links nodes |
-	nodes := Set new.
-	links := Set new.
-
-	"Add all nodes and links that occupy space in the ruler."
-	rowsInterval do: [:row | 
-		(ruler elementsByRow at: row) do: [:element |
-			(element isKindOf: HiNode) 
-				ifTrue: [ nodes add: element ]
-				ifFalse: [ links add: element ] ]].
-
-	"Also add links between contiguous nodes 
-	(they are not added in previous step as they don't occupy a space in the ruler)."
-	nodes do: [:aNode |
-		links 
-			addAll: aNode incomingLinks;
-			addAll: aNode outgoingLinks ].
-
-	^ { nodes. links }
-]
-
-{ #category : #rendering }
 HiAbstractRenderer >> renderLinks: links on: athensCanvas [ 
 
 	self subclassResponsibility
@@ -94,10 +70,12 @@ HiAbstractRenderer >> renderNodes: nodes on: athensCanvas [
 HiAbstractRenderer >> renderOn: athensCanvas [
 	"Render all relevant Hiedra ruler elements in the athensCanvas"
 	
-	| nodesAndLinks |
-	nodesAndLinks := self nodesAndLinks.
-	self renderLinks: nodesAndLinks second on: athensCanvas.
-	self renderNodes: nodesAndLinks first on: athensCanvas.
+	| links nodes |
+	nodes := rowsInterval collect: [:row | ruler nodeAtRow: row ].
+	links := rowsInterval flatCollect: [:row | ruler linksAtRow: row ] as: Set.
+
+	self renderLinks: links on: athensCanvas.
+	self renderNodes: nodes on: athensCanvas.
 ]
 
 { #category : #accessing }

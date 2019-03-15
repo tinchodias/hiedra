@@ -28,7 +28,7 @@ HiRulerBuilder >> build [
 
 	values do: [ :each | 
 		ruler
-			nodeAt: each
+			nodeAtValue: each
 			ifAbsent: [
 				ruler addNodeFor: each.
 				self buildLinksStartingAt: each ].
@@ -48,9 +48,9 @@ HiRulerBuilder >> buildLinksStartingAt: aValue [
 		| next aNode anotherNode |
 		next := pending pop.
 
-		aNode := ruler nodeAt: next key.
+		aNode := ruler nodeAtValue: next key.
 		anotherNode := ruler
-			nodeAt: next value
+			nodeAtValue: next value
 			ifAbsent: [ 
 				self stackLinksFrom: next value in: pending.
 				ruler addNodeFor: next value ].
