@@ -24119,9 +24119,8 @@ HiExampleCommit class >> pharo_v60507 [
 { #category : #examples }
 HiExampleCommit class >> randomlyGenerated [
 
-	| values linksDictionary random |
+	| values random |
 	values := 62 to: 3 by: -1.
-	linksDictionary := Dictionary new.
 	random := Random new.
 	^ values collect: [ :value | 
 		self new
