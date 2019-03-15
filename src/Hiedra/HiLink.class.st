@@ -35,6 +35,11 @@ HiLink >> initializeWithOrigin: aNode target: anotherNode rulerPoints: aCollecti
 	rulerPoints := aCollectionOfPoints.
 ]
 
+{ #category : #testing }
+HiLink >> isDescending [
+	^ origin rulerPoint y < target rulerPoint y
+]
+
 { #category : #accessing }
 HiLink >> origin [
 	^ origin

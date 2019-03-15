@@ -19,81 +19,145 @@ Class {
 }
 
 { #category : #rendering }
-HiSimpleRenderer >> addLinkFragmentFrom: startPoint to: endPoint into: athensPathBuilder intermediateY: intermediateY [
+HiSimpleRenderer >> addLinkFragmentFrom: topPoint to: bottomPoint intermediateY: intermediateY into: athensPathBuilder [
+	"Add a curve between two points in a canvas, that pass via an intermediate Y."
+
+	topPoint x = bottomPoint x
+		ifTrue: [ ^ athensPathBuilder lineTo: bottomPoint ].
+
+	topPoint x < bottomPoint x
+		ifTrue: [
+			self
+				addLinkFragmentFromTopLeft: topPoint
+				toBottomRight: bottomPoint
+				intermediateY: intermediateY
+				into: athensPathBuilder ]
+		ifFalse: [
+			self
+				addLinkFragmentFromTopRight: topPoint
+				toBottomLeft: bottomPoint
+				intermediateY: intermediateY
+				into: athensPathBuilder ]
+]
+
+{ #category : #rendering }
+HiSimpleRenderer >> addLinkFragmentFromTopLeft: topPoint toBottomRight: bottomPoint intermediateY: intermediateY into: athensPathBuilder [
+	"	
+		 s
+		 \___
+		     \
+		     e
+	"
 
 	| halfColumn |
-	startPoint y < endPoint y
-		ifFalse: [ ^ self shouldBeImplemented ].
-		"reversed direction --> athensPathBuilder ccwArcTo: targetCanvasPoint angle: 60 degreesToRadians"
-
-	(startPoint x = endPoint x)
-		ifTrue: [ ^ athensPathBuilder lineTo: endPoint ].
-
 	halfColumn := columnWidth/2.
-
-	(startPoint x < endPoint x)
-		ifTrue: [
-			"
-			From top-left to bottom-right:
-			
-				 o
-				 \___
-				     \
-				     o
-			"
-			athensPathBuilder
-				ccwArcTo: (startPoint x + halfColumn) @ intermediateY angle: self linkCurveAngle;
-				lineTo:   (endPoint x   - halfColumn) @ intermediateY;
-				cwArcTo:  endPoint angle: self linkCurveAngle ]
-		ifFalse: [
-			"
-			From top-right to bottom-left:
-			
-				     o
-				  ___/
-				 /
-				 o
-			"
-			athensPathBuilder 
-				cwArcTo:  (startPoint x - halfColumn) @ intermediateY angle: self linkCurveAngle;
-				lineTo:   (endPoint x   + halfColumn) @ intermediateY;
-				ccwArcTo: endPoint angle: self linkCurveAngle ]
+	athensPathBuilder
+		ccwArcTo: (topPoint x    + halfColumn) @ intermediateY angle: self linkCurveAngle;
+		lineTo:   (bottomPoint x - halfColumn) @ intermediateY;
+		cwArcTo:  bottomPoint angle: self linkCurveAngle
 
 ]
 
 { #category : #rendering }
-HiSimpleRenderer >> athensPathForLink: aHiLink on: athensCanvas [
-	"Answer the Athens path for a link."
+HiSimpleRenderer >> addLinkFragmentFromTopRight: topPoint toBottomLeft: bottomPoint intermediateY: intermediateY into: athensPathBuilder [
+	"	
+		     s
+		  ___/
+		 /
+		 e
+	"
 
-	| nodeRatioOffset fragmentStart |
-	nodeRatioOffset := 0 @ self nodeRatio.
+	| halfColumn |
+	halfColumn := columnWidth/2.
+	athensPathBuilder 
+		cwArcTo:  (topPoint x    - halfColumn) @ intermediateY angle: self linkCurveAngle;
+		lineTo:   (bottomPoint x + halfColumn) @ intermediateY;
+		ccwArcTo: bottomPoint angle: self linkCurveAngle
+]
 
-	^ athensCanvas createPath: [:athensPathBuilder |		
-		"Start of first fragment (that connects BELOW of the origin node)"
-		fragmentStart := (self cellCenterFor: aHiLink origin rulerPoint) + nodeRatioOffset.
+{ #category : #rendering }
+HiSimpleRenderer >> athensPathForAscendingLink: aHiLink on: athensCanvas [
+	"Answer the Athens path for a link that goes from bottom to top."
+
+	^ athensCanvas createPath: [ :athensPathBuilder | 
+		| nodeRatioYOffset fragmentStart |
+		nodeRatioYOffset := 0 @ self nodeRatio.
+
+		"Start of first fragment (that connects at BOTTOM of the target node)"
+		fragmentStart := (self cellCenterFor: aHiLink target rulerPoint) + nodeRatioYOffset.
 		athensPathBuilder
 			absolute;
 			moveTo: fragmentStart.
 
-		"All but last fragments"
+		"Add all fragments except last (in reversed order)"
+		aHiLink rulerPoints reverseDo: [ :rulerPoint | 
+			| fragmentEnd |
+			fragmentEnd := self cellCenterFor: rulerPoint.
+			self
+				addLinkFragmentFrom: fragmentStart
+				to: fragmentEnd
+				intermediateY: (self cellOriginFor: rulerPoint) y + (linkWidth / 2) + 2
+				into: athensPathBuilder.
+			fragmentStart := fragmentEnd
+			].
+
+		"Add last fragment (that connects at TOP of the origin node)"
+		self
+			addLinkFragmentFrom: fragmentStart
+			to: (self cellCenterFor: aHiLink origin rulerPoint) - nodeRatioYOffset
+			intermediateY: (self cellOriginFor: aHiLink origin rulerPoint) y - (linkWidth / 2)
+			into: athensPathBuilder
+		]
+]
+
+{ #category : #rendering }
+HiSimpleRenderer >> athensPathForDescendingLink: aHiLink on: athensCanvas [
+	"Answer the Athens path for a link that goes from top to bottom."
+
+	^ athensCanvas createPath: [ :athensPathBuilder | 
+		| nodeRatioYOffset fragmentStart |
+		nodeRatioYOffset := 0 @ self nodeRatio.
+
+		"Start of first fragment (that connects BELOW of the origin node)"
+		fragmentStart := (self cellCenterFor: aHiLink origin rulerPoint) + nodeRatioYOffset.
+		athensPathBuilder
+			absolute;
+			moveTo: fragmentStart.
+
+		"Add all fragments except last"
 		aHiLink rulerPoints do: [ :rulerPoint |
 			| fragmentEnd |
 			fragmentEnd := self cellCenterFor: rulerPoint.
 			self
 				addLinkFragmentFrom: fragmentStart
 				to: fragmentEnd
-				into: athensPathBuilder
-				intermediateY: (self cellOriginFor: rulerPoint) y + (linkWidth/2) + 2.
-			fragmentStart := fragmentEnd ].
+				intermediateY: (self cellOriginFor: rulerPoint) y + (linkWidth / 2) + 2
+				into: athensPathBuilder.
+			fragmentStart := fragmentEnd
+			].
 
-		"End of last fragment (that connects ABOVE of the target node)"
+		"Add last fragment (that connects ABOVE of the target node)"
 		self
 			addLinkFragmentFrom: fragmentStart
-			to: (self cellCenterFor: aHiLink target rulerPoint) - nodeRatioOffset
+			to: (self cellCenterFor: aHiLink target rulerPoint) - nodeRatioYOffset
+			intermediateY: (self cellOriginFor: aHiLink target rulerPoint) y - (linkWidth / 2)
 			into: athensPathBuilder
-			intermediateY: (self cellOriginFor: aHiLink target rulerPoint) y - (linkWidth/2).
-		].
+		]
+]
 
+{ #category : #rendering }
+HiSimpleRenderer >> athensPathForLink: aHiLink on: athensCanvas [
+	"Answer the Athens path for a link."
+
+	^ aHiLink isDescending
+		ifTrue: [ 
+			self
+				athensPathForDescendingLink: aHiLink
+				on: athensCanvas ]
+		ifFalse: [
+			self
+				athensPathForAscendingLink: aHiLink
+				on: athensCanvas ]
 ]
 
 { #category : #rendering }
