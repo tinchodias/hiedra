@@ -82,8 +82,8 @@ HiSpecExample >> initializeWidgets [
 			nodeDiameter: 1.5;
 			nodeBorderWidth: 2.0;
 			linkWidth: 3.0;
-			rowHeight: rowHeight; 
-			linkColor: (Color red alpha: 0.75).
+			rowHeight: rowHeight;
+			nodeColor: Smalltalk ui theme textColor.
 	
 	"Configure columns"
 	tree columns:	{
