@@ -70,8 +70,10 @@ HiColumnController >> pageFormAt: pageIndex [
 { #category : #private }
 HiColumnController >> pageIndexFor: aValue [
 	| rowIndex |
-	rowIndex := self ruler values indexOf: aValue.
-	self assert: rowIndex > 0. "Else, aValue is not a ruler value."
+	rowIndex := self ruler valueIndices
+		at: aValue
+		ifAbsent: [ self error: 'Value not found. Should the table refresh the ruler?' ].
+
 	^ (rowIndex - 1) // self pageSize
 ]
 
