@@ -80,7 +80,7 @@ HiSpecExample >> initializeWidgets [
 	hiedraColumnController := HiColumnController new.	
 		hiedraColumnController renderer
 			nodeDiameter: 1.5;
-			nodeBorderWidth: 2.0;
+			nodeBorderWidth: 3.0;
 			linkWidth: 3.0;
 			rowHeight: rowHeight;
 			nodeColor: Smalltalk ui theme textColor.
