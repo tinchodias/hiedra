@@ -71,7 +71,7 @@ HiSpecExample >> initializeWidgets [
 	tree := self newTree.
 
 	"Important: Ensure the height of rows for Hiedra is the same as the widget's cell height."
-	rowHeight := 23. 
+	rowHeight := 30.
 
 	"Important: Set zero inset, else there will be an empty gap cutting Hiedra ruler."
 	tree rowInset: 0.
@@ -80,9 +80,9 @@ HiSpecExample >> initializeWidgets [
 	hiedraColumnController := HiColumnController new.	
 		hiedraColumnController renderer
 			nodeDiameter: 1.5;
-			nodeBorderWidth: 3.0;
-			linkWidth: 3.0;
+			nodeBorderWidth: 4.0;
 			rowHeight: rowHeight;
+			columnWidth: 10;
 			nodeColor: Smalltalk ui theme textColor.
 	
 	"Configure columns"

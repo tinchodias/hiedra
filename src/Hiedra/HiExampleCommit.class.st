@@ -24120,13 +24120,13 @@ HiExampleCommit class >> pharo_v60507 [
 HiExampleCommit class >> randomlyGenerated [
 
 	| values random |
-	values := 62 to: 3 by: -1.
+	values := 60 to: 1 by: -1.
 	random := Random new.
 	^ values collect: [ :value | 
 		self new
 			id: value;
 			comment: 'Value ', value asString;
-			parentIds: (values intersection: { random nextInt: (value - 1) });
+			parentIds: ((values copyWithout: value) intersection: { random nextInt: values max });
 			yourself
 		]
 ]
