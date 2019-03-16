@@ -13,10 +13,26 @@ Class {
 		'columnWidth',
 		'rowHeight',
 		'linkColor',
-		'linkCurveAngle'
+		'linkCurveAngle',
+		'arrowSize'
 	],
 	#category : #'Hiedra-UI'
 }
+
+{ #category : #rendering }
+HiSimpleRenderer >> addArrowInto: athensPathBuilder descending: aBoolean [
+
+	| c |
+	arrowSize isZero ifTrue: [ ^ self ].
+
+	c := aBoolean ifTrue: [ 1 ] ifFalse: [ -1 ].
+	athensPathBuilder
+		relative;
+		lineTo: (-1 * arrowSize) @ (-1 * c * arrowSize);
+		lineTo: ( 2 * arrowSize) @ 0;
+		lineTo: (-1 * arrowSize) @ (c * arrowSize);
+		absolute.
+]
 
 { #category : #rendering }
 HiSimpleRenderer >> addLinkFragmentFrom: topPoint to: bottomPoint intermediateY: intermediateY into: athensPathBuilder [
@@ -75,6 +91,16 @@ HiSimpleRenderer >> addLinkFragmentFromTopRight: topPoint toBottomLeft: bottomPo
 		ccwArcTo: bottomPoint angle: self linkCurveAngle
 ]
 
+{ #category : #accessing }
+HiSimpleRenderer >> arrowSize [
+	^ arrowSize
+]
+
+{ #category : #accessing }
+HiSimpleRenderer >> arrowSize: aNumber [
+	arrowSize := aNumber
+]
+
 { #category : #rendering }
 HiSimpleRenderer >> athensPathForAscendingLink: aHiLink on: athensCanvas [
 	"Answer the Athens path for a link that goes from bottom to top."
@@ -83,11 +109,12 @@ HiSimpleRenderer >> athensPathForAscendingLink: aHiLink on: athensCanvas [
 		| nodeRatioYOffset fragmentStart |
 		nodeRatioYOffset := 0 @ self nodeRatio.
 
+
 		"Start of first fragment (that connects at BOTTOM of the target node)"
 		fragmentStart := (self cellCenterFor: aHiLink target rulerPoint) + nodeRatioYOffset.
-		athensPathBuilder
-			absolute;
-			moveTo: fragmentStart.
+		athensPathBuilder absolute; moveTo: fragmentStart.
+
+		self addArrowInto: athensPathBuilder descending: false.
 
 		"Add all fragments except last (in reversed order)"
 		aHiLink intermediatePoints reverseDo: [ :rulerPoint | 
@@ -106,7 +133,7 @@ HiSimpleRenderer >> athensPathForAscendingLink: aHiLink on: athensCanvas [
 			addLinkFragmentFrom: fragmentStart
 			to: (self cellCenterFor: aHiLink origin rulerPoint) - nodeRatioYOffset
 			intermediateY: (self cellOriginFor: aHiLink origin rulerPoint) y - (linkWidth / 2)
-			into: athensPathBuilder
+			into: athensPathBuilder.
 		]
 ]
 
@@ -120,9 +147,7 @@ HiSimpleRenderer >> athensPathForDescendingLink: aHiLink on: athensCanvas [
 
 		"Start of first fragment (that connects BELOW of the origin node)"
 		fragmentStart := (self cellCenterFor: aHiLink origin rulerPoint) + nodeRatioYOffset.
-		athensPathBuilder
-			absolute;
-			moveTo: fragmentStart.
+		athensPathBuilder absolute; moveTo: fragmentStart.
 
 		"Add all fragments except last"
 		aHiLink intermediatePoints do: [ :rulerPoint |
@@ -141,7 +166,9 @@ HiSimpleRenderer >> athensPathForDescendingLink: aHiLink on: athensCanvas [
 			addLinkFragmentFrom: fragmentStart
 			to: (self cellCenterFor: aHiLink target rulerPoint) - nodeRatioYOffset
 			intermediateY: (self cellOriginFor: aHiLink target rulerPoint) y - (linkWidth / 2)
-			into: athensPathBuilder
+			into: athensPathBuilder.
+
+		self addArrowInto: athensPathBuilder descending: true.
 		]
 ]
 
@@ -212,9 +239,11 @@ HiSimpleRenderer >> initialize [
 	linkDashes := #().
 	linkCurveAngle := 45 degreesToRadians.
 	linkColor := nodeColor.
+	arrowSize := linkWidth.
 
+	"Important: the user must set the height of rows (integers worked better than a floats)"
+	rowHeight := nil.
 	columnWidth := linkWidth * 3.
-	rowHeight := nil.	"Important: the user must set the exact height of rows"
 
 ]
 
