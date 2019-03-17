@@ -97,8 +97,8 @@ HiRulerBuilderTest >> debugShowingRulerInPresenter: valuesAndParentsAsDictionary
 		linksBlock: [ :key | valuesAndParentsAsDictionary at: key ]).
 	hiedraColumnController renderer
 		rowHeight: 30;
-		columnWidth: 10.
-	hiedraColumnController refresh.
+		cellWidth: 10.
+	hiedraColumnController reset.
 
 	"Show the ruler in a Spec tree."
 	TreePresenter new

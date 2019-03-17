@@ -78,8 +78,8 @@ HiFastTableExample >> elements: commits [
 			aCommit parentIds collect: [:id | 
 				commits detect: [:each | each id = id ] ] ]).
 
-	"Render the ruler"
-	hiedraColumnController refresh.
+	"Reset the visualization"
+	hiedraColumnController reset.
 
 	"Adjust the column width in the table"
 	self table columns first width: hiedraColumnController rulerWidth.

@@ -10,11 +10,11 @@ Class {
 		'linkWidth',
 		'nodeDiameter',
 		'nodeBorderWidth',
-		'columnWidth',
 		'rowHeight',
 		'linkColor',
 		'linkCurveAngle',
-		'arrowSize'
+		'arrowSize',
+		'cellWidth'
 	],
 	#category : #'Hiedra-UI'
 }
@@ -66,7 +66,7 @@ HiSimpleRenderer >> addLinkFragmentFromTopLeft: topPoint toBottomRight: bottomPo
 	"
 
 	| halfColumn |
-	halfColumn := columnWidth/2.
+	halfColumn := cellWidth/2.
 	athensPathBuilder
 		ccwArcTo: (topPoint x    + halfColumn) @ intermediateY angle: self linkCurveAngle;
 		lineTo:   (bottomPoint x - halfColumn) @ intermediateY;
@@ -84,7 +84,7 @@ HiSimpleRenderer >> addLinkFragmentFromTopRight: topPoint toBottomLeft: bottomPo
 	"
 
 	| halfColumn |
-	halfColumn := columnWidth/2.
+	halfColumn := cellWidth/2.
 	athensPathBuilder 
 		cwArcTo:  (topPoint x    - halfColumn) @ intermediateY angle: self linkCurveAngle;
 		lineTo:   (bottomPoint x + halfColumn) @ intermediateY;
@@ -106,12 +106,11 @@ HiSimpleRenderer >> athensPathForAscendingLink: aHiLink on: athensCanvas [
 	"Answer the Athens path for a link that goes from bottom to top."
 
 	^ athensCanvas createPath: [ :athensPathBuilder | 
-		| nodeRatioYOffset fragmentStart |
-		nodeRatioYOffset := 0 @ self nodeRatio.
-
+		| nodeConnectionYOffset fragmentStart |
+		nodeConnectionYOffset := self nodeBottomRelativeConnectionPoint.
 
 		"Start of first fragment (that connects at BOTTOM of the target node)"
-		fragmentStart := (self cellCenterFor: aHiLink target rulerPoint) + nodeRatioYOffset.
+		fragmentStart := (self cellCenterFor: aHiLink target rulerPoint) + nodeConnectionYOffset.
 		athensPathBuilder absolute; moveTo: fragmentStart.
 
 		self addArrowInto: athensPathBuilder descending: false.
@@ -123,7 +122,7 @@ HiSimpleRenderer >> athensPathForAscendingLink: aHiLink on: athensCanvas [
 			self
 				addLinkFragmentFrom: fragmentStart
 				to: fragmentEnd
-				intermediateY: (self cellOriginFor: rulerPoint) y + (linkWidth / 2) + 2
+				intermediateY: (self cellOriginFor: rulerPoint) y
 				into: athensPathBuilder.
 			fragmentStart := fragmentEnd
 			].
@@ -131,8 +130,8 @@ HiSimpleRenderer >> athensPathForAscendingLink: aHiLink on: athensCanvas [
 		"Add last fragment (that connects at TOP of the origin node)"
 		self
 			addLinkFragmentFrom: fragmentStart
-			to: (self cellCenterFor: aHiLink origin rulerPoint) - nodeRatioYOffset
-			intermediateY: (self cellOriginFor: aHiLink origin rulerPoint) y - (linkWidth / 2)
+			to: (self cellCenterFor: aHiLink origin rulerPoint) - nodeConnectionYOffset
+			intermediateY: (self cellOriginFor: aHiLink origin rulerPoint) y
 			into: athensPathBuilder.
 		]
 ]
@@ -142,11 +141,11 @@ HiSimpleRenderer >> athensPathForDescendingLink: aHiLink on: athensCanvas [
 	"Answer the Athens path for a link that goes from top to bottom."
 
 	^ athensCanvas createPath: [ :athensPathBuilder | 
-		| nodeRatioYOffset fragmentStart |
-		nodeRatioYOffset := 0 @ self nodeRatio.
+		| nodeConnectionYOffset fragmentStart |
+		nodeConnectionYOffset := self nodeBottomRelativeConnectionPoint.
 
 		"Start of first fragment (that connects BELOW of the origin node)"
-		fragmentStart := (self cellCenterFor: aHiLink origin rulerPoint) + nodeRatioYOffset.
+		fragmentStart := (self cellCenterFor: aHiLink origin rulerPoint) + nodeConnectionYOffset.
 		athensPathBuilder absolute; moveTo: fragmentStart.
 
 		"Add all fragments except last"
@@ -156,7 +155,7 @@ HiSimpleRenderer >> athensPathForDescendingLink: aHiLink on: athensCanvas [
 			self
 				addLinkFragmentFrom: fragmentStart
 				to: fragmentEnd
-				intermediateY: (self cellOriginFor: rulerPoint) y + (linkWidth / 2) + 2
+				intermediateY: (self cellOriginFor: rulerPoint) y
 				into: athensPathBuilder.
 			fragmentStart := fragmentEnd
 			].
@@ -164,8 +163,8 @@ HiSimpleRenderer >> athensPathForDescendingLink: aHiLink on: athensCanvas [
 		"Add last fragment (that connects ABOVE of the target node)"
 		self
 			addLinkFragmentFrom: fragmentStart
-			to: (self cellCenterFor: aHiLink target rulerPoint) - nodeRatioYOffset
-			intermediateY: (self cellOriginFor: aHiLink target rulerPoint) y - (linkWidth / 2)
+			to: (self cellCenterFor: aHiLink target rulerPoint) - nodeConnectionYOffset
+			intermediateY: (self cellOriginFor: aHiLink target rulerPoint) y
 			into: athensPathBuilder.
 
 		self addArrowInto: athensPathBuilder descending: true.
@@ -207,24 +206,24 @@ HiSimpleRenderer >> athensPathForNodeOn: athensCanvas [
 { #category : #rendering }
 HiSimpleRenderer >> cellCenterFor: aRulerPoint [
 
-	^ (self cellOriginFor: aRulerPoint) + ((columnWidth // 2) @ (rowHeight // 2))
+	^ (self cellOriginFor: aRulerPoint) + ((cellWidth // 2) @ (rowHeight // 2))
 ]
 
 { #category : #rendering }
 HiSimpleRenderer >> cellOriginFor: aRulerPoint [
 
-	^ ((aRulerPoint x - 1) * columnWidth) @ 
+	^ ((aRulerPoint x - 1) * cellWidth) @ 
 	  ((aRulerPoint y - 1) * rowHeight)
 ]
 
 { #category : #accessing }
-HiSimpleRenderer >> columnWidth [
-	^ columnWidth
+HiSimpleRenderer >> cellWidth [
+	^ cellWidth
 ]
 
 { #category : #accessing }
-HiSimpleRenderer >> columnWidth: aNumber [
-	columnWidth := aNumber
+HiSimpleRenderer >> cellWidth: aNumber [
+	cellWidth := aNumber
 ]
 
 { #category : #initialization }
@@ -239,11 +238,11 @@ HiSimpleRenderer >> initialize [
 	linkDashes := #().
 	linkCurveAngle := 45 degreesToRadians.
 	linkColor := nodeColor.
-	arrowSize := linkWidth.
+	arrowSize := linkWidth * 0.75.
 
 	"Important: the user must set the height of rows (integers worked better than a floats)"
 	rowHeight := nil.
-	columnWidth := linkWidth * 3.
+	cellWidth := linkWidth * 3.
 
 ]
 
@@ -302,6 +301,12 @@ HiSimpleRenderer >> nodeBorderWidth: aNumber [
 	nodeBorderWidth := aNumber
 ]
 
+{ #category : #rendering }
+HiSimpleRenderer >> nodeBottomRelativeConnectionPoint [
+
+	^ 0 @ ((nodeDiameter / 2) + nodeBorderWidth + 1)
+]
+
 { #category : #accessing }
 HiSimpleRenderer >> nodeColor [
 	^ nodeColor
@@ -320,12 +325,6 @@ HiSimpleRenderer >> nodeDiameter [
 { #category : #accessing }
 HiSimpleRenderer >> nodeDiameter: aNumber [
 	nodeDiameter := aNumber
-]
-
-{ #category : #rendering }
-HiSimpleRenderer >> nodeRatio [
-
-	^ (nodeDiameter / 2) + nodeBorderWidth
 ]
 
 { #category : #rendering }

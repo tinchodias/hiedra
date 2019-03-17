@@ -13,7 +13,7 @@ Class {
 }
 
 { #category : #accessing }
-HiAbstractRenderer >> columnWidth [
+HiAbstractRenderer >> cellWidth [
 	^ self subclassResponsibility
 ]
 
@@ -29,14 +29,14 @@ HiAbstractRenderer >> formWidth [
 	"Answer the width in pixels for the form to be rendered."
 
 	"Note: The reason of numberOfColumns + 2 is the left and right margin."
-	^ (ruler numberOfColumns + 2) * self columnWidth
+	^ (ruler numberOfColumns + 2) * self cellWidth
 ]
 
 { #category : #rendering }
 HiAbstractRenderer >> initialTranslationInAthensCanvas [
 	"Apply left margin + rowsInterval offset."
 
-	^ self columnWidth @ (-1 * (rowsInterval first - 1) * self rowHeight)
+	^ self cellWidth @ (-1 * (rowsInterval first - 1) * self rowHeight)
 ]
 
 { #category : #API }

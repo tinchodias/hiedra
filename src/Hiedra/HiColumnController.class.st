@@ -7,7 +7,8 @@ Class {
 	#instVars : [
 		'cellMorphByValue',
 		'renderer',
-		'formByPageIndex'
+		'formByPageIndex',
+		'pageSize'
 	],
 	#category : #'Hiedra-UI'
 }
@@ -26,6 +27,8 @@ HiColumnController >> cellBoundsInPage: pageIndex for: aValue [
 
 { #category : #API }
 HiColumnController >> cellMorphFor: aValue [
+	"Answer a Morph that corresponds to aValue. The height of such Morph is given by renderer's rowHeight and the width is given by the ruler's numberOfColumns and the renderer's cellWidth.
+	This is an important method of this class, that the table widget will use to fill each Hiedra column's cell."
 
 	^ cellMorphByValue at: aValue ifAbsent: [ self newCellMorphFor: aValue ]
 ]
@@ -35,7 +38,8 @@ HiColumnController >> initialize [
 
 	super initialize.
 	renderer := HiSimpleRenderer new.
-	self refresh.
+	pageSize := 30.
+	self reset.
 ]
 
 { #category : #private }
@@ -77,22 +81,32 @@ HiColumnController >> pageIndexFor: aValue [
 	^ (rowIndex - 1) // self pageSize
 ]
 
-{ #category : #private }
+{ #category : #accessing }
 HiColumnController >> pageSize [
-	^ 30
+	^ pageSize
+]
+
+{ #category : #accessing }
+HiColumnController >> pageSize: anInteger [
+	pageSize := anInteger
+]
+
+{ #category : #accessing }
+HiColumnController >> renderer [
+	^ renderer
+]
+
+{ #category : #accessing }
+HiColumnController >> renderer: aHiRulerRenderer [
+	renderer := aHiRulerRenderer
 ]
 
 { #category : #API }
-HiColumnController >> refresh [
-	"Generate the Hiedra model and visualization for the settings previously configured."
+HiColumnController >> reset [
+	"Reset the internal state with the purpose to regenerate the visualization the next time #cellMorphFor: is executed."
 
 	cellMorphByValue := Dictionary new.
 	formByPageIndex := Dictionary new.
-]
-
-{ #category : #API }
-HiColumnController >> renderer [
-	^ renderer
 ]
 
 { #category : #private }
