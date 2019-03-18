@@ -60,7 +60,7 @@ HiSpecExample >> commits: commits [
 
 	hiedraColumnController reset.
 	
-	"After #refresh, we can know the width of the column."
+	"After #reset, we can know the width of the column."
 	tree columns first initialWidth: hiedraColumnController rulerWidth.
 ]
 
@@ -79,10 +79,10 @@ HiSpecExample >> initializeWidgets [
 	"Configure hiedra controller"
 	hiedraColumnController := HiColumnController new.	
 		hiedraColumnController renderer
-			nodeDiameter: 1.5;
-			nodeBorderWidth: 4.0;
+			nodeDiameter: 1.0;
+			nodeBorderWidth: 5.0;
 			rowHeight: rowHeight;
-			cellWidth: 10;
+			cellWidth: 8;
 			nodeColor: Smalltalk ui theme textColor.
 	
 	"Configure columns"

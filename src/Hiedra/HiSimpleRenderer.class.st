@@ -14,7 +14,8 @@ Class {
 		'linkColor',
 		'linkCurveAngle',
 		'arrowSize',
-		'cellWidth'
+		'cellWidth',
+		'nodeConnectionOffset'
 	],
 	#category : #'Hiedra-UI'
 }
@@ -230,8 +231,9 @@ HiSimpleRenderer >> cellWidth: aNumber [
 HiSimpleRenderer >> initialize [
 	super initialize.
 
-	nodeDiameter := 2.5.
+	nodeDiameter := 2.2.
 	nodeBorderWidth := 1.75.
+	nodeConnectionOffset := 1.0.
 	nodeColor := Smalltalk ui theme caretColor.
 
 	linkWidth := nodeBorderWidth.
@@ -304,7 +306,7 @@ HiSimpleRenderer >> nodeBorderWidth: aNumber [
 { #category : #rendering }
 HiSimpleRenderer >> nodeBottomRelativeConnectionPoint [
 
-	^ 0 @ ((nodeDiameter / 2) + nodeBorderWidth + 1)
+	^ 0 @ ((nodeDiameter / 2) + nodeBorderWidth + nodeConnectionOffset)
 ]
 
 { #category : #accessing }
@@ -315,6 +317,18 @@ HiSimpleRenderer >> nodeColor [
 { #category : #accessing }
 HiSimpleRenderer >> nodeColor: anObject [
 	nodeColor := anObject
+]
+
+{ #category : #accessing }
+HiSimpleRenderer >> nodeConnectionOffset [
+	^ nodeConnectionOffset
+]
+
+{ #category : #accessing }
+HiSimpleRenderer >> nodeConnectionOffset: aNumber [
+	"Set the visual offset between a node and its incoming and outcoming links."
+
+	nodeConnectionOffset := aNumber
 ]
 
 { #category : #accessing }

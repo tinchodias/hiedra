@@ -38,7 +38,7 @@ HiRulerBuilder >> build [
 
 { #category : #private }
 HiRulerBuilder >> buildLinksStartingAt: aValue [
-	"This method traverses the values using the linkBlock. It is a depth-first traversal."
+	"This method traverses the values using the linkBlock."
 
 	| pending |
 	pending := Stack new.
