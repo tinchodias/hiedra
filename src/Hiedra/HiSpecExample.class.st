@@ -79,7 +79,7 @@ HiSpecExample >> initializeWidgets [
 	"Configure hiedra controller"
 	hiedraColumnController := HiColumnController new.	
 		hiedraColumnController renderer
-			nodeDiameter: 1.0;
+			nodeRadius: 1.0;
 			nodeBorderWidth: 5.0;
 			rowHeight: rowHeight;
 			cellWidth: 8;

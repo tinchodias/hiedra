@@ -331,6 +331,16 @@ HiSimpleRenderer >> nodeConnectionOffset: aNumber [
 	nodeConnectionOffset := aNumber
 ]
 
+{ #category : #accessing }
+HiSimpleRenderer >> nodeRadius [
+	^ nodeRadio
+]
+
+{ #category : #accessing }
+HiSimpleRenderer >> nodeRadius: aNumber [
+	nodeRadio := aNumber
+]
+
 { #category : #rendering }
 HiSimpleRenderer >> renderLinks: links on: athensCanvas [
 
