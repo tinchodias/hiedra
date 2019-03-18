@@ -8,14 +8,14 @@ Class {
 		'nodeColor',
 		'linkDashes',
 		'linkWidth',
-		'nodeDiameter',
 		'nodeBorderWidth',
 		'rowHeight',
 		'linkColor',
 		'linkCurveAngle',
 		'arrowSize',
 		'cellWidth',
-		'nodeConnectionOffset'
+		'nodeConnectionOffset',
+		'nodeRadio'
 	],
 	#category : #'Hiedra-UI'
 }
@@ -192,8 +192,8 @@ HiSimpleRenderer >> athensPathForNodeOn: athensCanvas [
 	"Answer the Athens path for a node."
 
 	| nd pd |
-	pd := nodeDiameter.
-	nd := -1 * nodeDiameter.
+	pd := nodeRadio.
+	nd := -1 * nodeRadio.
 	^ athensCanvas createPath: [ :pathBuilder | 
 		pathBuilder
 			absolute;
@@ -231,9 +231,9 @@ HiSimpleRenderer >> cellWidth: aNumber [
 HiSimpleRenderer >> initialize [
 	super initialize.
 
-	nodeDiameter := 2.2.
+	nodeRadio := 2.2.
 	nodeBorderWidth := 1.75.
-	nodeConnectionOffset := 1.0.
+	nodeConnectionOffset := 0.
 	nodeColor := Smalltalk ui theme caretColor.
 
 	linkWidth := nodeBorderWidth.
@@ -306,7 +306,7 @@ HiSimpleRenderer >> nodeBorderWidth: aNumber [
 { #category : #rendering }
 HiSimpleRenderer >> nodeBottomRelativeConnectionPoint [
 
-	^ 0 @ ((nodeDiameter / 2) + nodeBorderWidth + nodeConnectionOffset)
+	^ 0 @ (nodeRadio + nodeConnectionOffset)
 ]
 
 { #category : #accessing }
@@ -329,16 +329,6 @@ HiSimpleRenderer >> nodeConnectionOffset: aNumber [
 	"Set the visual offset between a node and its incoming and outcoming links."
 
 	nodeConnectionOffset := aNumber
-]
-
-{ #category : #accessing }
-HiSimpleRenderer >> nodeDiameter [
-	^ nodeDiameter
-]
-
-{ #category : #accessing }
-HiSimpleRenderer >> nodeDiameter: aNumber [
-	nodeDiameter := aNumber
 ]
 
 { #category : #rendering }
