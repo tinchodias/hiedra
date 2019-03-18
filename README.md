@@ -22,4 +22,4 @@ The [Pharo repository](https://github.com/pharo-project/pharo) might have a more
 
 ## Use it
 
-You can see and run the examples via the classes named HiFastTableExample and HiSpecExample.
+You can find the classes named `HiFastTableExample` and `HiSpecExample` with executable examples (class-side).
