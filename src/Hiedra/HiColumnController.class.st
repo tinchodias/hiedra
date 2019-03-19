@@ -5,10 +5,10 @@ Class {
 	#name : #HiColumnController,
 	#superclass : #Object,
 	#instVars : [
-		'cellMorphByValue',
 		'renderer',
 		'formByPageIndex',
-		'pageSize'
+		'pageSize',
+		'cellMorphByRowIndex'
 	],
 	#category : #'Hiedra-UI'
 }
@@ -27,23 +27,41 @@ HiColumnController class >> startUp: isImageStarting [
 ]
 
 { #category : #private }
-HiColumnController >> cellBoundsInPage: pageIndex for: aValue [
+HiColumnController >> cellBoundsForRow: rowIndex inPage: pageIndex [
 	
-	| aNode valueRelativeIndex pageFirstRowIndex |
-	aNode := self ruler nodeAtValue: aValue.
-	pageFirstRowIndex := (self rowsIntervalForPageIndex: pageIndex) first.
-	valueRelativeIndex := aNode rulerPoint y - pageFirstRowIndex.
+	| rowIndexRelativeToRuler rowIndexRelativeToPage rowIndexOfFirstNodeInPage |
+	rowIndexRelativeToRuler := (self ruler nodeAtRow: rowIndex) rulerPoint y.
+	rowIndexOfFirstNodeInPage := self rowIndexOfFirstItemAtPage: pageIndex.
+	rowIndexRelativeToPage := rowIndexRelativeToRuler - rowIndexOfFirstNodeInPage.
 
-	^ 0 @ (valueRelativeIndex * renderer rowHeight)
-		corner: self rulerWidth @ ((valueRelativeIndex + 1) * renderer rowHeight)
+	^ 0 @ (rowIndexRelativeToPage * renderer rowHeight)
+		corner: self rulerWidth @ ((rowIndexRelativeToPage + 1) * renderer rowHeight)
 ]
 
 { #category : #API }
-HiColumnController >> cellMorphFor: aValue [
-	"Answer a Morph that corresponds to aValue. The height of such Morph is given by renderer's rowHeight and the width is given by the ruler's numberOfColumns and the renderer's cellWidth.
+HiColumnController >> cellMorphAtRow: rowIndex [
+	"Answer a Morph that corresponds to a row index. The height of such Morph is given by renderer's rowHeight and the width is given by the ruler's numberOfColumns and the renderer's cellWidth.
 	This is an important method of this class, that the table widget will use to fill each Hiedra column's cell."
 
-	^ cellMorphByValue at: aValue ifAbsent: [ self newCellMorphFor: aValue ]
+	^ cellMorphByRowIndex at: rowIndex ifAbsent: [ self newCellMorphForRow: rowIndex ]
+]
+
+{ #category : #API }
+HiColumnController >> cellMorphAtValue: aValue [
+	"Answer a Morph that corresponds to aValue. See #cellMorphAtRowIndex: for more information."
+
+	^ self cellMorphAtRow: (self rowIndexAtValue: aValue)
+]
+
+{ #category : #private }
+HiColumnController >> formAtPage: pageIndex [
+
+	^ formByPageIndex
+		at: pageIndex
+		ifAbsentPut: [
+			renderer
+				rowsInterval: (self rowIntervalAtPage: pageIndex);
+				newForm ]
 ]
 
 { #category : #initialization }
@@ -56,60 +74,49 @@ HiColumnController >> initialize [
 ]
 
 { #category : #private }
-HiColumnController >> newCellMorphFor: aValue [
+HiColumnController >> newCellMorphForRow: rowIndex [
 	"Answer a Morph that corresponds to aValue in the rendered ruler."
 
-	| pageIndex pageForm aForm cellBoundsInPage |
-	pageIndex := self pageIndexFor: aValue.
-	pageForm := self pageFormAt: pageIndex.
-	cellBoundsInPage := self cellBoundsInPage: pageIndex for: aValue.
+	| pageIndex aForm cellBoundsInPage |
+	pageIndex := self pageIndexAtRow: rowIndex.
+	cellBoundsInPage := self
+		cellBoundsForRow: rowIndex
+		inPage: pageIndex.
 
-	aForm := Form extent: cellBoundsInPage extent depth: 32.
-	
+	aForm := Form
+		extent: cellBoundsInPage extent
+		depth: 32.
 	aForm getCanvas
-		translucentImage: pageForm
-			at: 0@0
-			sourceRect: cellBoundsInPage truncated.
+		translucentImage: (self formAtPage: pageIndex)
+		at: 0 @ 0
+		sourceRect: cellBoundsInPage truncated.
 	^ aForm asMorph
 ]
 
 { #category : #private }
-HiColumnController >> pageFormAt: pageIndex [
-
-	^ formByPageIndex
-		at: pageIndex
-		ifAbsentPut: [
-			renderer
-				rowsInterval: (self rowsIntervalForPageIndex: pageIndex);
-				newForm ]
-]
-
-{ #category : #private }
-HiColumnController >> pageIndexFor: aValue [
-	| rowIndex |
-	rowIndex := self ruler valueIndices
-		at: aValue
-		ifAbsent: [ self error: 'Value not found. Should the table refresh the ruler?' ].
+HiColumnController >> pageIndexAtRow: rowIndex [
 
 	^ (rowIndex - 1) // self pageSize
 ]
 
-{ #category : #accessing }
+{ #category : #API }
 HiColumnController >> pageSize [
 	^ pageSize
 ]
 
-{ #category : #accessing }
+{ #category : #API }
 HiColumnController >> pageSize: anInteger [
+	"Set the number of rows that will be rendered together (when I'm asked for a missing cell Morph)."
+
 	pageSize := anInteger
 ]
 
-{ #category : #accessing }
+{ #category : #API }
 HiColumnController >> renderer [
 	^ renderer
 ]
 
-{ #category : #accessing }
+{ #category : #API }
 HiColumnController >> renderer: aHiRulerRenderer [
 	renderer := aHiRulerRenderer
 ]
@@ -118,13 +125,28 @@ HiColumnController >> renderer: aHiRulerRenderer [
 HiColumnController >> reset [
 	"Reset the internal state with the purpose to regenerate the visualization the next time #cellMorphFor: is executed."
 
-	cellMorphByValue := Dictionary new.
+	cellMorphByRowIndex := Dictionary new.
 	formByPageIndex := Dictionary new.
 ]
 
 { #category : #private }
-HiColumnController >> rowsIntervalForPageIndex: anInteger [
-	^ (anInteger * self pageSize) + 1 to: (((anInteger + 1) * self pageSize) min: self ruler numberOfRows)
+HiColumnController >> rowIndexAtValue: aValue [
+	^ self ruler valueIndices
+		at: aValue
+		ifAbsent: [ self error: 'Value not found. Should the table refresh the ruler?' ]
+]
+
+{ #category : #private }
+HiColumnController >> rowIndexOfFirstItemAtPage: pageIndex [
+	^ pageIndex * self pageSize + 1
+]
+
+{ #category : #private }
+HiColumnController >> rowIntervalAtPage: pageIndex [
+	"Answer the interval of row indices that correspond to the specified page index."
+
+	^ 	(self rowIndexOfFirstItemAtPage: pageIndex) to: 
+		(((pageIndex + 1) * self pageSize) min: self ruler numberOfRows)
 ]
 
 { #category : #API }

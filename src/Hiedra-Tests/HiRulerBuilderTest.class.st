@@ -104,7 +104,7 @@ HiRulerBuilderTest >> debugShowingRulerInPresenter: valuesAndParentsAsDictionary
 	TreePresenter new
 		rowInset: 0;
 		displayBlock: [ :value | 
-			(hiedraColumnController cellMorphFor: value)
+			(hiedraColumnController cellMorphAtValue: value)
 				addMorphFront: value asStringMorph
 			];
 		roots: values;

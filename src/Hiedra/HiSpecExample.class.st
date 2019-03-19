@@ -89,7 +89,7 @@ HiSpecExample >> initializeWidgets [
 	tree columns:	{
 		TreeColumnPresenter new	
 			displayBlock: [ :item |
-				(hiedraColumnController cellMorphFor: item content)
+				(hiedraColumnController cellMorphAtValue: item content)
 					height: rowHeight;
 					yourself ];
 			yourself.

@@ -49,16 +49,16 @@ HiFastTableExample class >> openExample: selector [
 HiFastTableExample >> cellColumn: column row: rowIndex [
 	"Answer a morph with the cell view."
 	
-	| commit |
-	commit := self elementAt: rowIndex.
 
 	column id = ' ' ifTrue: [ 
 		^ FTCellMorph new
-			addMorphBack: (hiedraColumnController cellMorphFor: commit);
+			addMorphBack: (hiedraColumnController cellMorphAtRow: rowIndex);
 			yourself
 		].
 
 	column id = 'Comment' ifTrue: [ 
+		| commit |
+		commit := self elementAt: rowIndex.
 		^ commit comment asMorph ].
 
 	^ self error
