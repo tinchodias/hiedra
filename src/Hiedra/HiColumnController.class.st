@@ -13,6 +13,19 @@ Class {
 	#category : #'Hiedra-UI'
 }
 
+{ #category : #'system startup' }
+HiColumnController class >> initialize [
+	SessionManager default registerGuiClassNamed: self name
+]
+
+{ #category : #'system startup' }
+HiColumnController class >> startUp: isImageStarting [
+	"Reset all instances on startup since the cached pages (athens forms) don't work in a new session."
+
+	isImageStarting
+		ifTrue: [ self allInstancesDo: #reset ]
+]
+
 { #category : #private }
 HiColumnController >> cellBoundsInPage: pageIndex for: aValue [
 	
