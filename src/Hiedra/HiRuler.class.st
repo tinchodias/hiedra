@@ -1,7 +1,35 @@
 "
-I represent a Hiedra visualization (a ruler), which is composed of nodes and links between such nodes.
+I represent a model for a Hiedra visualization (a ruler), which is composed of nodes and links between such nodes.
 
-A ruler is created with a list of values, and each of these values will have its corresponding node in the corresponding row. In other words, a ruler always has a 1-to-1 relation between values, nodes and rows.
+The user must create a ruler with a list of values. Then, my API provides #addNodeFor: and #addLinkFrom:to: to fill the ruler. Example:
+
+```
+	| ruler c b a |
+	ruler := HiRuler withValues: #(c b a).
+
+	c := ruler addNodeFor: #c.
+	a := ruler addNodeFor: #a.
+	ruler addLinkFrom: c to: a.
+
+	b := ruler addNodeFor: #b.
+	ruler
+		addLinkFrom: c to: b;
+		addLinkFrom: b to: a.
+```
+
+Which generates a ruler like:
+
+	c
+	|\ 
+	| | 
+	| b 
+	| | 
+	|/ 
+	a 
+
+
+Note 1: A ruler always has a 1-to-1 relation between values, rows and nodes.
+Note 2: See HiAbstractRenderer to render my instances into Forms.
 "
 Class {
 	#name : #HiRuler,

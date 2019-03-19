@@ -1,5 +1,5 @@
 "
-I know how to render a Hiedra visualization (ruler) on an Athens canvas.
+My subclasses know how to render a Hiedra visualization (HiRuler) using Athens.
 
 "
 Class {
@@ -68,7 +68,7 @@ HiAbstractRenderer >> renderNodes: nodes on: athensCanvas [
 
 { #category : #rendering }
 HiAbstractRenderer >> renderOn: athensCanvas [
-	"Render all relevant Hiedra ruler elements in the athensCanvas"
+	"Render all nodes and links that correspond to the previously selected rowsInterval in the athensCanvas."
 	
 	| links nodes |
 	nodes := rowsInterval collect: [:row | ruler nodeAtRow: row ].

@@ -1,5 +1,9 @@
 "
-I am a column controller. I provide a simple API to users of the Hiedra library either in Spec or Morph (FastTable).
+I am a column controller. My responsability is to provide a convenient API to Hiedra users, either in Spec (TreePresenter) or Morph (FastTable). Basically, a table widget that shows a Hiedra visualization in a column will obtain the ""cell morphs"" that correspond to each row of the table. 
+
+I implement a pagination mechanism to split the rendering of a HiRuler in pages of a fixed size on demand.
+
+My most important collaborator is a Hiedra renderer (subclass of HiAbstractRenderer) that the user can personalize with appearance settings, and that my instances use to render the pages forms on demand.
 "
 Class {
 	#name : #HiColumnController,

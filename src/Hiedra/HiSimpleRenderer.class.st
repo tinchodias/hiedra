@@ -1,5 +1,12 @@
 "
-I have the aesthetic settings to render the Hiedra visualization using Athens.
+I render a Hiedra visualization (HiRuler) in a Form using Athens. The nodes and links of the ruler will occupy the cells of a grid in the Athens canvas. 
+
+Decisions to render the ruler:
+
+* All nodes have the same appearance (radius, color, etc.).
+* All links have the same appearance (width, color, etc.).
+* All cells have same dimensions (width and height).
+
 "
 Class {
 	#name : #HiSimpleRenderer,
@@ -344,14 +351,11 @@ HiSimpleRenderer >> nodeRadius: aNumber [
 { #category : #rendering }
 HiSimpleRenderer >> renderLinks: links on: athensCanvas [
 
-	"Set the paint for links"
-	(athensCanvas setStrokePaint: linkColor)
-		width: linkWidth.
-	athensCanvas paint
-		joinRound;
-		dashes: linkDashes offset: 0.
+	"Set the paint that is common to all the links."
+	(athensCanvas setStrokePaint: linkColor) width: linkWidth.
+	athensCanvas paint joinMiter.
 	
-	"Draw the links"
+	"Draw each link on the canvas."
 	links do: [ :each | 
 		athensCanvas drawShape: (self athensPathForLink: each on: athensCanvas) ]
 

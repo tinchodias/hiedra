@@ -1,5 +1,7 @@
 "
-I create HiNode and HiLink instances from a collection of values and a block closure of targets (that  answers what values are connected from a given value). It is important that the nodes and links are ""iterated"" in a breadth-first way as it is expected to build a HiRuler, i.e. a Hiedra visualization.
+I provide a convenient API to create instances of HiRuler. The user sets a list of values (will be wrapped as nodes) and a linksBlock (that answers what values are connected from a value). 
+
+A class side method eases the creation in ony one message send.
 "
 Class {
 	#name : #HiRulerBuilder,

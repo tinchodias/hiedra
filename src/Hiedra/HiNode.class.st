@@ -1,9 +1,11 @@
 "
-I am a node in a Hiedra ruler.
+I am a node that represents a value in a Hiedra ruler. I know links that connect myself with other nodes of the same ruler (incoming and outgoing).
+
+
 "
 Class {
 	#name : #HiNode,
-	#superclass : #HiRulerElement,
+	#superclass : #Object,
 	#instVars : [
 		'value',
 		'incomingLinks',
@@ -48,8 +50,8 @@ HiNode >> initializeWithValue: aValue rulerPoint: aPoint [
 	self initialize.
 	rulerPoint := aPoint.
 	value := aValue.
-	outgoingLinks := OrderedCollection new.
-	incomingLinks := OrderedCollection new.
+	outgoingLinks := LinkedList new.
+	incomingLinks := LinkedList new.
 ]
 
 { #category : #accessing }

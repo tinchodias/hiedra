@@ -49,7 +49,6 @@ HiFastTableExample class >> openExample: selector [
 HiFastTableExample >> cellColumn: column row: rowIndex [
 	"Answer a morph with the cell view."
 	
-
 	column id = ' ' ifTrue: [ 
 		^ FTCellMorph new
 			addMorphBack: (hiedraColumnController cellMorphAtRow: rowIndex);

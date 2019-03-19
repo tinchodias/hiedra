@@ -1,9 +1,9 @@
 "
-I am a link in a Hiedra ruler.
+I am a directed link that connects an origin node with a target node in a Hiedra ruler.
 "
 Class {
 	#name : #HiLink,
-	#superclass : #HiRulerElement,
+	#superclass : #Object,
 	#instVars : [
 		'origin',
 		'target',
@@ -42,6 +42,8 @@ HiLink >> intermediatePoints [
 
 { #category : #testing }
 HiLink >> isDescending [
+	"Answer whether the origin of this link is over the target."
+
 	^ origin rulerPoint y < target rulerPoint y
 ]
 
