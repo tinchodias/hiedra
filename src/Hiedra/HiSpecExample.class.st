@@ -78,12 +78,16 @@ HiSpecExample >> initializeWidgets [
 	
 	"Configure hiedra controller"
 	hiedraColumnController := HiColumnController new.	
-		hiedraColumnController renderer
-			nodeRadius: 1.0;
-			nodeBorderWidth: 5.0;
-			rowHeight: rowHeight;
-			cellWidth: 8;
-			nodeColor: Smalltalk ui theme textColor.
+	"Increase the default value since Spec wants all Morphs initially."
+	hiedraColumnController pageSize: 1000.
+	hiedraColumnController renderer
+		rowHeight: rowHeight;
+		nodeRadius: 1.5;
+		nodeBorderWidth: 3.0;
+		arrowSize: 2.5;
+		nodeConnectionOffset: 3.5;
+		cellWidth: 8;
+		nodeColor: Smalltalk ui theme textColor.
 	
 	"Configure columns"
 	tree columns:	{

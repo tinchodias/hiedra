@@ -370,8 +370,7 @@ HiSimpleRenderer >> renderNodes: nodes on: athensCanvas [
 
 	athensCanvas paintMode restoreAfter: [
 		"Set the stroke for all the nodes."
-		(athensCanvas setStrokePaint: nodeColor)
-			width: nodeBorderWidth.
+		(athensCanvas setStrokePaint: nodeColor) width: nodeBorderWidth.
 
 		nodes do: [ :each |
 			athensCanvas pathTransform restoreAfter: [
