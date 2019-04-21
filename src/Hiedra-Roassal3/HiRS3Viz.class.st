@@ -33,11 +33,11 @@ HiRS3Viz class >> openOn: aRuler [
 		color: [ :node | |link|
 			link := node outgoingLinks 
 				ifEmpty: [ node incomingLinks 
-					ifEmpty: [ Smalltalk ui theme textColor ]
+					ifEmpty: [ nil ]
 					ifNotEmpty: [:links | links first ] ]
 				ifNotEmpty: [:links | links first ].
-			color scale: (branchByLink at: link) ];
-		interactionDo: [ :i | i popupText: [ :node | node theValue id ]; draggable ];
+			color scale: (branchByLink at: link ifAbsent: [ Smalltalk ui theme textColor ]) ];
+		interactionDo: [ :i | i draggable ];
 		position: [ :node| node rulerPoint * rowSize ];
 		onElement;
 		when: TSMouseClick do: [ :e | [ e inspect ] ].
