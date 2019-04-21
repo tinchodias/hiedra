@@ -41,7 +41,8 @@ Class {
 		'nodeByRow',
 		'valueByRow',
 		'rowByValue',
-		'linksByRow'
+		'linksByRow',
+		'branchByLink'
 	],
 	#category : #'Hiedra-Model'
 }
@@ -110,6 +111,22 @@ HiRuler >> addNodeFor: aValue [
 ]
 
 { #category : #accessing }
+HiRuler >> branchByLink [
+	"Answer a dictionary that maps each link to a branch number."
+	
+	branchByLink ifNil: [ 
+		| currentBranch |
+		currentBranch := 1.
+		branchByLink := Dictionary new.
+		self nodes reverseDo: [ :node |
+			node incomingLinks do: [ :link | 
+				self markBranch: currentBranch startingAt: link.
+				currentBranch := currentBranch + 1 ] ].
+		 ].
+	^ branchByLink
+]
+
+{ #category : #accessing }
 HiRuler >> elementsByRow [
 	^ elementsByRow
 ]
@@ -143,6 +160,21 @@ HiRuler >> links [
 HiRuler >> linksAtRow: rowIndex [
 
 	^ linksByRow at: rowIndex
+]
+
+{ #category : #accessing }
+HiRuler >> markBranch: currentBranch startingAt: link [
+	| nextLink |
+	"Stop if the link is already marked with a branch"
+	(branchByLink includesKey: link) ifTrue: [ ^self ].
+	"Iterate the first available branch until there are not more."
+	nextLink := link.
+	[ nextLink notNil ] whileTrue: [ 
+		branchByLink at: nextLink put: currentBranch.
+		nextLink origin incomingLinks ifEmpty: [ ^self ].
+		nextLink := nextLink origin incomingLinks
+			detect: [ :each | (branchByLink includesKey: each) not ]
+			ifNone: [ nil ] ]
 ]
 
 { #category : #accessing }
