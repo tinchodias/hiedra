@@ -19,24 +19,18 @@ HiRS3Viz class >> exampleIceberg156 [
 { #category : #'instance creation' }
 HiRS3Viz class >> openOn: aRuler [
 
-	| v size rowSize branchByLink shape color polylineShape |
+	| v size rowSize shape color polylineShape |
 	v := RSView new.
 
 	size := 10.
 	rowSize := 12@25.
 	color := TSScale category20.
 
-	branchByLink := aRuler branchByLink.
 	shape := RSShapeBuilder circle
 		size: size;
 		noPaint;
-		color: [ :node | |link|
-			link := node outgoingLinks 
-				ifEmpty: [ node incomingLinks 
-					ifEmpty: [ nil ]
-					ifNotEmpty: [:links | links first ] ]
-				ifNotEmpty: [:links | links first ].
-			color scale: (branchByLink at: link ifAbsent: [ Smalltalk ui theme textColor ]) ];
+		color: [ :node | 
+			color scale: (aRuler branchAtNode: node ifAbsent: [ Smalltalk ui theme textColor ]) ];
 		interactionDo: [ :i | i draggable ];
 		position: [ :node| node rulerPoint * rowSize ];
 		onElement;
@@ -46,7 +40,7 @@ HiRS3Viz class >> openOn: aRuler [
 		width: 3;
 		capRound;
 		joinRound;
-		color: [ :link |  color scale: (branchByLink at: link) ];
+		color: [ :link | color scale: (aRuler branchAtLink: link) ];
 		withVerticalAttachPoint;
 		from: [ :link | v elementFromModel: link origin ];
 		to: [ :link | v elementFromModel: link target ];
@@ -58,7 +52,8 @@ HiRS3Viz class >> openOn: aRuler [
 				yourself] ].
 	aRuler nodes do:[:node| | edges |
 		edges := polylineShape edgesOn: node incomingLinks.
-		v addAll: edges. ].
+		v addAll: edges ].
+	
 	v @ RSControlsView.
 
 	v open

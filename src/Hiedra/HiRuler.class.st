@@ -111,6 +111,27 @@ HiRuler >> addNodeFor: aValue [
 ]
 
 { #category : #accessing }
+HiRuler >> branchAtLink: aHiLink [
+	"Answer the branch number for a link."
+
+	^ self branchByLink at: aHiLink
+]
+
+{ #category : #accessing }
+HiRuler >> branchAtNode: aHiNode ifAbsent: aBlock [
+	"Answer the branch number for a node."
+
+	| aHiLink |
+	aHiLink := aHiNode outgoingLinks
+		ifEmpty: [
+			aHiNode incomingLinks
+				ifEmpty: [ ^ aBlock value ]
+				ifNotEmpty: [ :ls | ls first ] ]
+		ifNotEmpty: [ :ls | ls first ].
+	^ self branchAtLink: aHiLink
+]
+
+{ #category : #accessing }
 HiRuler >> branchByLink [
 	"Answer a dictionary that maps each link to a branch number."
 	
@@ -163,14 +184,14 @@ HiRuler >> linksAtRow: rowIndex [
 ]
 
 { #category : #accessing }
-HiRuler >> markBranch: currentBranch startingAt: link [
+HiRuler >> markBranch: aNumber startingAt: link [
 	| nextLink |
 	"Stop if the link is already marked with a branch"
 	(branchByLink includesKey: link) ifTrue: [ ^self ].
 	"Iterate the first available branch until there are not more."
 	nextLink := link.
 	[ nextLink notNil ] whileTrue: [ 
-		branchByLink at: nextLink put: currentBranch.
+		branchByLink at: nextLink put: aNumber.
 		nextLink origin incomingLinks ifEmpty: [ ^self ].
 		nextLink := nextLink origin incomingLinks
 			detect: [ :each | (branchByLink includesKey: each) not ]
