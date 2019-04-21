@@ -30,7 +30,7 @@ HiRS3Viz class >> openOn: aRuler [
 		size: size;
 		noPaint;
 		color: [ :node | 
-			color scale: (aRuler branchAtNode: node ifAbsent: [ Smalltalk ui theme textColor ]) ];
+			color scale: (aRuler branchAtNode: node ifAbsent: [ node hash ]) ];
 		interactionDo: [ :i | i draggable ];
 		position: [ :node| node rulerPoint * rowSize ];
 		onElement;
