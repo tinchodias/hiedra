@@ -43,39 +43,7 @@ HiAbstractRenderer >> initialTranslationInAthensCanvas [
 HiAbstractRenderer >> newForm [
 	"Answer a new form, rendered with the current ruler and rowInterval."
 	
-	| athensSurface |
-	athensSurface := AthensCairoSurface extent: self formWidth @ self formHeight.
-	
-	athensSurface drawDuring: [ :athensCanvas |
-		athensCanvas pathTransform translateBy: self initialTranslationInAthensCanvas.
-
-		self renderOn: athensCanvas ].
-
-	^ athensSurface asForm
-]
-
-{ #category : #rendering }
-HiAbstractRenderer >> renderLinks: links on: athensCanvas [ 
-
 	self subclassResponsibility
-]
-
-{ #category : #rendering }
-HiAbstractRenderer >> renderNodes: nodes on: athensCanvas [
-
-	self subclassResponsibility
-]
-
-{ #category : #rendering }
-HiAbstractRenderer >> renderOn: athensCanvas [
-	"Render all nodes and links that correspond to the previously selected rowsInterval in the athensCanvas."
-	
-	| links nodes |
-	nodes := rowsInterval collect: [:row | ruler nodeAtRow: row ].
-	links := rowsInterval flatCollect: [:row | ruler linksAtRow: row ] as: Set.
-
-	self renderLinks: links on: athensCanvas.
-	self renderNodes: nodes on: athensCanvas.
 ]
 
 { #category : #accessing }

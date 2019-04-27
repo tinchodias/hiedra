@@ -1,0 +1,70 @@
+"
+I render a Hiedra visualization (HiRuler) using Roassal3.
+"
+Class {
+	#name : #HiRS3Renderer,
+	#superclass : #HiAbstractRenderer,
+	#instVars : [
+		'rowHeight'
+	],
+	#category : #'Hiedra-Roassal3'
+}
+
+{ #category : #accessing }
+HiRS3Renderer >> cellWidth [
+	^ 12
+]
+
+{ #category : #API }
+HiRS3Renderer >> newForm [
+	| v size rowSize shape color polylineShape |
+	v := RSView new.
+
+	size := 10.
+	rowSize := self cellWidth @ self rowHeight.
+	color := TSScale google20.
+
+	shape := RSShapeBuilder circle
+		size: size;
+		color: [ :node | 
+			color scale: (ruler branchAtNode: node ifAbsent: [ node hash ]) ];
+		border: TSBorder new;
+		interactionDo: [ :i | i draggable ];
+		position: [ :node| node rulerPoint * rowSize ];
+		onElement;
+		when: TSMouseClick do: [ :e | [ e inspect ] ].
+	v addAll: (shape elementsOn: ruler nodes).
+	
+	polylineShape := RSSingleEdgeBuilder polyline
+		cornerRadii: 5;
+		width: 3;
+		joinRound;
+		color: [ :link | color scale: (ruler branchAtLink: link) ];
+		controlPoints: [ :link |
+			OrderedCollection new
+				add: (v elementFromModel: link origin);
+				addAll: (link intermediatePoints)*rowSize;
+				add: (v elementFromModel: link target);
+				yourself ].
+	ruler nodes do:[:node| | edges |
+		edges := polylineShape edgesOn: node incomingLinks.
+		v addAll: edges ].
+	v edges pushBack.
+	v morph ifNil: [ v createMorph ].
+	
+	v morph extent: self formWidth @ self formHeight.
+	v camera zoomToFit: self formWidth @ self formHeight.
+	"v camera translateTo: (self formWidth @ self formHeight)/2."
+	v morph drawOnMockCanvas.
+	^ v morph surface asForm
+]
+
+{ #category : #accessing }
+HiRS3Renderer >> rowHeight [
+	^ rowHeight
+]
+
+{ #category : #accessing }
+HiRS3Renderer >> rowHeight: anInteger [
+	rowHeight := anInteger
+]

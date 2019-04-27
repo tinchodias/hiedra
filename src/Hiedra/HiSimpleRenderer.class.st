@@ -300,6 +300,21 @@ HiSimpleRenderer >> linkWidth: aNumber [
 	linkWidth := aNumber
 ]
 
+{ #category : #API }
+HiSimpleRenderer >> newForm [
+	"Answer a new form, rendered with the current ruler and rowInterval."
+	
+	| athensSurface |
+	athensSurface := AthensCairoSurface extent: self formWidth @ self formHeight.
+	
+	athensSurface drawDuring: [ :athensCanvas |
+		athensCanvas pathTransform translateBy: self initialTranslationInAthensCanvas.
+
+		self renderOn: athensCanvas ].
+
+	^ athensSurface asForm
+]
+
 { #category : #accessing }
 HiSimpleRenderer >> nodeBorderWidth [
 	^ nodeBorderWidth
@@ -378,6 +393,18 @@ HiSimpleRenderer >> renderNodes: nodes on: athensCanvas [
 					translateBy: (self cellCenterFor: each rulerPoint).
 				athensCanvas drawShape: nodeAthensPath ] ] ].
 
+]
+
+{ #category : #rendering }
+HiSimpleRenderer >> renderOn: athensCanvas [
+	"Render all nodes and links that correspond to the previously selected rowsInterval in the athensCanvas."
+	
+	| links nodes |
+	nodes := rowsInterval collect: [:row | ruler nodeAtRow: row ].
+	links := rowsInterval flatCollect: [:row | ruler linksAtRow: row ] as: Set.
+
+	self renderLinks: links on: athensCanvas.
+	self renderNodes: nodes on: athensCanvas.
 ]
 
 { #category : #accessing }
