@@ -234,6 +234,13 @@ HiSimpleRenderer >> cellWidth: aNumber [
 	cellWidth := aNumber
 ]
 
+{ #category : #rendering }
+HiSimpleRenderer >> initialTranslationInAthensCanvas [
+	"Apply left margin + rowsInterval offset."
+
+	^ self cellWidth @ (-1 * (rowsInterval first - 1) * self rowHeight)
+]
+
 { #category : #initialization }
 HiSimpleRenderer >> initialize [
 	super initialize.

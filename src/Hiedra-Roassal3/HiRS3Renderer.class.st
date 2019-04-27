@@ -50,11 +50,12 @@ HiRS3Renderer >> newForm [
 		edges := polylineShape edgesOn: node incomingLinks.
 		v addAll: edges ].
 	v edges pushBack.
-	v morph ifNil: [ v createMorph ].
 	
+	v createMorph.
 	v morph extent: self formWidth @ self formHeight.
-	v camera zoomToFit: self formWidth @ self formHeight.
-	"v camera translateTo: (self formWidth @ self formHeight)/2."
+	v camera
+		zoomToFit: self formWidth @ self formHeight
+		rectangle: (0@rowHeight rectangle: (self formWidth @ self formHeight)).
 	v morph drawOnMockCanvas.
 	^ v morph surface asForm
 ]

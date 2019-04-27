@@ -17,26 +17,19 @@ HiAbstractRenderer >> cellWidth [
 	^ self subclassResponsibility
 ]
 
-{ #category : #API }
+{ #category : #accessing }
 HiAbstractRenderer >> formHeight [
 	"Answer the height in pixels for the form to be rendered."
 
 	^ rowsInterval size * self rowHeight
 ]
 
-{ #category : #API }
+{ #category : #accessing }
 HiAbstractRenderer >> formWidth [
 	"Answer the width in pixels for the form to be rendered."
 
 	"Note: The reason of numberOfColumns + 2 is the left and right margin."
 	^ (ruler numberOfColumns + 2) * self cellWidth
-]
-
-{ #category : #rendering }
-HiAbstractRenderer >> initialTranslationInAthensCanvas [
-	"Apply left margin + rowsInterval offset."
-
-	^ self cellWidth @ (-1 * (rowsInterval first - 1) * self rowHeight)
 ]
 
 { #category : #API }
