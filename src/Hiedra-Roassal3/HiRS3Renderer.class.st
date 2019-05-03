@@ -17,6 +17,20 @@ HiRS3Renderer >> cellWidth [
 
 { #category : #API }
 HiRS3Renderer >> newForm [
+	| v |
+	v := self newView.
+	
+	v createMorph.
+	v morph extent: self formWidth @ self formHeight.
+	v camera
+		zoomToFit: self formWidth @ self formHeight
+		rectangle: (0@rowHeight rectangle: (self formWidth @ self formHeight)).
+	v morph drawOnMockCanvas.
+	^ v morph surface asForm
+]
+
+{ #category : #API }
+HiRS3Renderer >> newView [
 	| v size rowSize shape color polylineShape |
 	v := RSView new.
 
@@ -26,6 +40,7 @@ HiRS3Renderer >> newForm [
 
 	shape := RSShapeBuilder circle
 		size: size;
+		popup;
 		color: [ :node | 
 			color scale: (ruler branchAtNode: node ifAbsent: [ node hash ]) ];
 		border: TSBorder new;
@@ -51,13 +66,7 @@ HiRS3Renderer >> newForm [
 		v addAll: edges ].
 	v edges pushBack.
 	
-	v createMorph.
-	v morph extent: self formWidth @ self formHeight.
-	v camera
-		zoomToFit: self formWidth @ self formHeight
-		rectangle: (0@rowHeight rectangle: (self formWidth @ self formHeight)).
-	v morph drawOnMockCanvas.
-	^ v morph surface asForm
+	^ v
 ]
 
 { #category : #accessing }

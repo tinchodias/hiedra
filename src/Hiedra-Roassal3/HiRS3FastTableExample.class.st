@@ -85,8 +85,6 @@ HiRS3FastTableExample >> elements: commits [
 { #category : #initialization }
 HiRS3FastTableExample >> initialize [
 	super initialize.
-	hiedraColumnController := HiColumnController new.
-	hiedraColumnController
-		renderer: HiRS3Renderer new;
-		pageSize: 10e16
+	hiedraColumnController := HiRS3ColumnController new.
+
 ]
