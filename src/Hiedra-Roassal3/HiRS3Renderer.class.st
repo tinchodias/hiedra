@@ -17,16 +17,17 @@ HiRS3Renderer >> cellWidth [
 
 { #category : #API }
 HiRS3Renderer >> newForm [
-	| v |
-	v := self newView.
+	| view extent |
+	view := self newView.
+	extent := self formWidth @ self formHeight.
 	
-	v createMorph.
-	v morph extent: self formWidth @ self formHeight.
-	v camera
-		zoomToFit: self formWidth @ self formHeight
-		rectangle: (0@rowHeight rectangle: (self formWidth @ self formHeight)).
-	v morph drawOnMockCanvas.
-	^ v morph surface asForm
+	view createMorph.
+	view morph extent: extent.
+	view camera
+		zoomToFit: extent
+		rectangle: (0@rowHeight rectangle: extent).
+	view morph drawOnMockCanvas.
+	^ view morph surface asForm
 ]
 
 { #category : #API }

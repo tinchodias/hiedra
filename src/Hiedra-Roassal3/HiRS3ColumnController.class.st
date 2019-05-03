@@ -17,19 +17,11 @@ HiRS3ColumnController >> cellMorphAtRow: rowIndex [
 	^ cellMorphByRowIndex at: rowIndex ifAbsent: [ self newCellMorphForRow: rowIndex ]
 ]
 
-{ #category : #API }
-HiRS3ColumnController >> cellMorphAtValue: aValue [
-	"Answer a Morph that corresponds to aValue. See #cellMorphAtRowIndex: for more information."
-
-	^ self cellMorphAtRow: (self rowIndexAtValue: aValue)
-]
-
 { #category : #initialization }
 HiRS3ColumnController >> initialize [
 
 	super initialize.
 	renderer := HiRS3Renderer new.
-	cellMorphByRowIndex := Dictionary new.
 	self reset.
 ]
 
@@ -38,13 +30,12 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 	"Answer a Morph that corresponds to aValue in the rendered ruler."
 
 	| cellY copy rectangle |
-	cellY := ((self ruler nodeAtRow: rowIndex) rulerPoint y) * renderer rowHeight.
+	cellY := ((renderer ruler nodeAtRow: rowIndex) rulerPoint y) * renderer rowHeight.
 
-	renderer rowsInterval: (1 to: self ruler numberOfRows).
+	renderer rowsInterval: (1 to: renderer ruler numberOfRows).
 	rectangle := (0@(renderer rowHeight) rectangle: (renderer formWidth @ renderer formHeight)).
 
 	view ifNil: [
-
 		view := renderer newView.
 		view color: Color transparent.
 		view createMorph.
@@ -52,10 +43,9 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 			translateTo: rectangle rsCenter;
 			scale: 1.
 		view morph extent: renderer formWidth @ renderer rowHeight.
-		
 		].
+
 	copy := view morph copyWithIndependentCamera.
-	
 	copy canvas camera translateTo: rectangle rsCenter x@cellY.
 	^copy
 	
@@ -73,28 +63,11 @@ HiRS3ColumnController >> renderer [
 ]
 
 { #category : #API }
-HiRS3ColumnController >> renderer: aHiRulerRenderer [
-	renderer := aHiRulerRenderer
-]
-
-{ #category : #API }
 HiRS3ColumnController >> reset [
 	"Reset the internal state with the purpose to regenerate the visualization the next time #cellMorphFor: is executed."
 
 	cellMorphByRowIndex := Dictionary new.
 	view := nil.
-]
-
-{ #category : #API }
-HiRS3ColumnController >> rowIndexAtValue: aValue [
-	^ self ruler valueIndices
-		at: aValue
-		ifAbsent: [ self error: 'Value not found. Should the table refresh the ruler?' ]
-]
-
-{ #category : #API }
-HiRS3ColumnController >> ruler [
-	^ renderer ruler
 ]
 
 { #category : #API }
