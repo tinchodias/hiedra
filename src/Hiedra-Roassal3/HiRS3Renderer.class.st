@@ -41,11 +41,9 @@ HiRS3Renderer >> newView [
 
 	shape := RSShapeBuilder circle
 		size: size;
-		popup;
 		color: [ :node | 
 			color scale: (ruler branchAtNode: node ifAbsent: [ node hash ]) ];
 		border: TSBorder new;
-		interactionDo: [ :i | i draggable ];
 		position: [ :node| node rulerPoint * rowSize ];
 		onElement;
 		when: TSMouseClick do: [ :e | [ e inspect ] ].
