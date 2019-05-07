@@ -51,16 +51,15 @@ HiRS3FastTableExample class >> openExample: selector [
 HiRS3FastTableExample >> cellColumn: column row: rowIndex [
 	"Answer a morph with the cell view."
 	
-	column id = ' ' ifTrue: [ 
+	column id = ' ' ifTrue: [
 		^ FTCellMorph new
 			addMorphBack: (hiedraColumnController cellMorphAtRow: rowIndex);
-			yourself
-		].
-
+			yourself ].
+		
 	column id = 'Comment' ifTrue: [ 
 		| commit |
 		commit := self elementAt: rowIndex.
-		^ commit comment asMorph ].
+		^ FTCellMorph new addMorphBack: commit comment asMorph; yourself ].
 
 	^ self error
 ]
