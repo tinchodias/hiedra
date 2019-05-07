@@ -23,6 +23,11 @@ HiRS3FastTableExample class >> example60RandomCommits [
 ]
 
 { #category : #examples }
+HiRS3FastTableExample class >> exampleTwoCommits [
+	self openExample: #twoCommits
+]
+
+{ #category : #examples }
 HiRS3FastTableExample class >> openExample: selector [
 
 	| commits dataSource table |
