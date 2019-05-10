@@ -10,12 +10,55 @@ Class {
 	#category : #'Hiedra-Roassal3'
 }
 
+{ #category : #private }
+HiRS3ColumnController >> basicHighlightNode: aRSElement [
+	aRSElement color:
+		((aRSElement attributes at: #originalColor)
+				mixed: 0.8
+				with: UITheme current textColor).
+	aRSElement border color: UITheme current textColor
+]
+
+{ #category : #private }
+HiRS3ColumnController >> basicUnhighlightElement: aRSElement [
+	aRSElement color: (aRSElement attributes at: #originalColor).
+	aRSElement border color: (aRSElement attributes at: #originalBorderColor).
+]
+
 { #category : #API }
 HiRS3ColumnController >> cellMorphAtRow: rowIndex [
 	"Answer a Morph that corresponds to a row index. The height of such Morph is given by renderer's rowHeight and the width is given by the ruler's numberOfColumns and the renderer's cellWidth.
 	This is an important method of this class, that the table widget will use to fill each Hiedra column's cell."
 
 	^ cellMorphByRowIndex at: rowIndex ifAbsent: [ self newCellMorphForRow: rowIndex ]
+]
+
+{ #category : #private }
+HiRS3ColumnController >> highlightBranchAtLink: aRSEdge [
+
+	| branch linksToHighlight |
+	branch := renderer ruler branchAtLink: aRSEdge model.
+	linksToHighlight := Array streamContents: [:stream |
+		renderer ruler branchByLink keysAndValuesDo: [:key :value | 
+		value = branch ifTrue: [ stream nextPut: key ] ] ].
+
+	view edges
+		select: [:edge | linksToHighlight includes: edge model ]
+		thenDo: [:edge | 
+			edge color: ((edge attributes at: #originalColor) mixed: 0.4 with: UITheme current textColor).
+			self basicHighlightNode: edge controlPoints first.
+			self basicHighlightNode: edge controlPoints last.
+			].
+
+	table changed.
+]
+
+{ #category : #private }
+HiRS3ColumnController >> highlightBranchesAtNode: aRSElement [
+
+	self basicHighlightNode: aRSElement.
+
+	table changed.
 ]
 
 { #category : #initialization }
@@ -44,32 +87,22 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 			scale: 1.
 		view morph extent: renderer formWidth @ renderer rowHeight.
 
-		view elements do: [:e |
+		view elements do: [ :e |
 			e attributes at: #originalColor put: e color.
 			e attributes at: #originalBorderColor put: e border color.
 			e
 				when: TSMouseClick do: [ e inspect ];
-				when: TSMouseEnter do: [ 
-					e color: (e color mixed: 0.8 with: UITheme current textColor).
-					e border color: UITheme current textColor.
-					table changed ];
-				when: TSMouseLeave do: [
-					e color: (e attributes at: #originalColor).
-					e border color: (e attributes at: #originalBorderColor).
-					table changed ].
+				when: TSMouseEnter do: [ self highlightBranchesAtNode: e ];
+				when: TSMouseLeave do: [ self unhighlightAll ].
 			].
 		
 		view edges do: [ :e |
 			e attributes at: #originalColor put: e color.
+			e attributes at: #originalBorderColor put: e border color.
 			e
 				when: TSMouseClick do: [ e inspect ];
-				when: TSMouseEnter do: [ 
-					e color: (e color mixed: 0.8 with: UITheme current textColor).
-					table changed ];
-				when: TSMouseLeave do: [
-					e color: (e attributes at: #originalColor).
-					table changed ].
-			
+				when: TSMouseEnter do: [ self highlightBranchAtLink: e ];
+				when: TSMouseLeave do: [ self unhighlightAll ].
 			 ]
 		].
 
@@ -89,8 +122,8 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 	"When the use clicks on the empty area (the canvas), we extect that the row gets the selection."
 	copy canvas when: TSMouseClick do: [ table selectIndex: rowIndex ].
 	
-	^copy
-	
+	^ copy
+
 ]
 
 { #category : #API }
@@ -125,4 +158,13 @@ HiRS3ColumnController >> table [
 { #category : #accessing }
 HiRS3ColumnController >> table: anObject [
 	table := anObject
+]
+
+{ #category : #private }
+HiRS3ColumnController >> unhighlightAll [
+
+	view edges do: [:each | self basicUnhighlightElement: each ].
+	view elements do: [:each | self basicUnhighlightElement: each ].
+	
+	table changed.
 ]
