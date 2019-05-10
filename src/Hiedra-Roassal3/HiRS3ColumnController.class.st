@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'renderer',
 		'cellMorphByRowIndex',
-		'view'
+		'view',
+		'table'
 	],
 	#category : #'Hiedra-Roassal3'
 }
@@ -29,7 +30,7 @@ HiRS3ColumnController >> initialize [
 HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 	"Answer a Morph that corresponds to aValue in the rendered ruler."
 
-	| cellY copy rectangle |
+	| cellY copy rectangle copyRectangle copyShapes |
 	cellY := ((renderer ruler nodeAtRow: rowIndex) rulerPoint y) * renderer rowHeight.
 
 	renderer rowsInterval: (1 to: renderer ruler numberOfRows).
@@ -45,16 +46,24 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 		view morph extent: renderer formWidth @ renderer rowHeight.
 		].
 
+	"Create a copy"
 	copy := view morph copyWithIndependentCamera.
-	copy canvas camera translateTo: rectangle rsCenter x@cellY.
+	copyRectangle := Rectangle 
+		rsCenter: rectangle rsCenter x@cellY 
+		extent: renderer formWidth @ renderer rowHeight.
+
+	"Time optimization for drawOn until RS3 implements it: the canvas only knows the shapes that are visible."
+	copyShapes := view canvas shapes select: [ :s | copyRectangle intersects: s encompassingRectangle ].
+	copy canvas shapes: copyShapes.
+
+	"The main goal of this code: the camera must point to the right value."
+	copy canvas camera translateTo: copyRectangle rsCenter.
+	
+	"When the use clicks on the empty area (the canvas), we extect that the row gets the selection."
+	copy canvas when: TSMouseClick do: [ table selectIndex: rowIndex ].
+	
 	^copy
 	
-	"HiRS3CellMorph new
-		view: view;
-		addMorphBack: 'hola' asMorph;
-		clipArea: cellBoundsInPage;
-		yourself.
-"
 ]
 
 { #category : #API }
@@ -79,4 +88,14 @@ HiRS3ColumnController >> ruler: aHiRuler [
 HiRS3ColumnController >> rulerWidth [
 
 	^ renderer formWidth
+]
+
+{ #category : #accessing }
+HiRS3ColumnController >> table [
+	^ table
+]
+
+{ #category : #accessing }
+HiRS3ColumnController >> table: anObject [
+	table := anObject
 ]

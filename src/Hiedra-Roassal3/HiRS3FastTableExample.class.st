@@ -78,6 +78,8 @@ HiRS3FastTableExample >> elements: commits [
 			aCommit parentIds collect: [:id | 
 				commits detect: [:each | each id = id ] ] ]).
 
+	hiedraColumnController table: self table.
+
 	"Reset the visualization"
 	hiedraColumnController reset.
 
