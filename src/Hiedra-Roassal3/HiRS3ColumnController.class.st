@@ -36,21 +36,21 @@ HiRS3ColumnController >> cellMorphAtRow: rowIndex [
 { #category : #private }
 HiRS3ColumnController >> highlightBranchAtLink: aRSEdge [
 
-	| branch linksToHighlight |
+	| branch linksToHighlight aColor |
 	branch := renderer ruler branchAtLink: aRSEdge model.
 	linksToHighlight := Array streamContents: [:stream |
 		renderer ruler branchByLink keysAndValuesDo: [:key :value | 
 		value = branch ifTrue: [ stream nextPut: key ] ] ].
+	aColor := (aRSEdge attributes at: #originalColor) mixed: 0.4 with: UITheme current textColor.
 
 	view edges
 		select: [:edge | linksToHighlight includes: edge model ]
 		thenDo: [:edge | 
-			edge color: ((edge attributes at: #originalColor) mixed: 0.4 with: UITheme current textColor).
+			edge color: aColor.
 			self basicHighlightNode: edge controlPoints first.
 			self basicHighlightNode: edge controlPoints last.
 			].
 
-	table changed.
 ]
 
 { #category : #private }
@@ -58,7 +58,9 @@ HiRS3ColumnController >> highlightBranchesAtNode: aRSElement [
 
 	self basicHighlightNode: aRSElement.
 
-	table changed.
+	aRSElement connectedEdges do: [ :each |
+		self highlightBranchAtLink: each ].
+
 ]
 
 { #category : #initialization }
@@ -92,8 +94,8 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 			e attributes at: #originalBorderColor put: e border color.
 			e
 				when: TSMouseClick do: [ e inspect ];
-				when: TSMouseEnter do: [ self highlightBranchesAtNode: e ];
-				when: TSMouseLeave do: [ self unhighlightAll ].
+				when: TSMouseEnter do: [ self highlightBranchesAtNode: e. table changed. ];
+				when: TSMouseLeave do: [ self unhighlightAll. table changed. ].
 			].
 		
 		view edges do: [ :e |
@@ -101,8 +103,8 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 			e attributes at: #originalBorderColor put: e border color.
 			e
 				when: TSMouseClick do: [ e inspect ];
-				when: TSMouseEnter do: [ self highlightBranchAtLink: e ];
-				when: TSMouseLeave do: [ self unhighlightAll ].
+				when: TSMouseEnter do: [ self highlightBranchAtLink: e. table changed. ];
+				when: TSMouseLeave do: [ self unhighlightAll. table changed. ].
 			 ]
 		].
 
@@ -165,6 +167,5 @@ HiRS3ColumnController >> unhighlightAll [
 
 	view edges do: [:each | self basicUnhighlightElement: each ].
 	view elements do: [:each | self basicUnhighlightElement: each ].
-	
-	table changed.
+
 ]
