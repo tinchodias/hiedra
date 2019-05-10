@@ -43,10 +43,8 @@ HiRS3Renderer >> newView [
 		size: size;
 		color: [ :node | 
 			color scale: (ruler branchAtNode: node ifAbsent: [ node hash ]) ];
-		border: TSBorder new;
-		position: [ :node| node rulerPoint * rowSize ];
-		onElement;
-		when: TSMouseClick do: [ :e | [ e inspect ] ].
+		border: [ TSBorder new ];
+		position: [ :node| node rulerPoint * rowSize ].
 	v addAll: (shape elementsOn: ruler nodes).
 	
 	polylineShape := RSSingleEdgeBuilder polyline
@@ -64,6 +62,8 @@ HiRS3Renderer >> newView [
 		edges := polylineShape edgesOn: node incomingLinks.
 		v addAll: edges ].
 	v edges pushBack.
+
+	v color: Color transparent.
 	
 	^ v
 ]

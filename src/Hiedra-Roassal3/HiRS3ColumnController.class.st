@@ -38,12 +38,39 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 
 	view ifNil: [
 		view := renderer newView.
-		view color: Color transparent.
 		view createMorph.
 		view camera 
 			translateTo: rectangle rsCenter;
 			scale: 1.
 		view morph extent: renderer formWidth @ renderer rowHeight.
+
+		view elements do: [:e |
+			e attributes at: #originalColor put: e color.
+			e attributes at: #originalBorderColor put: e border color.
+			e
+				when: TSMouseClick do: [ e inspect ];
+				when: TSMouseEnter do: [ 
+					e color: (e color mixed: 0.8 with: UITheme current textColor).
+					e border color: UITheme current textColor.
+					table changed ];
+				when: TSMouseLeave do: [
+					e color: (e attributes at: #originalColor).
+					e border color: (e attributes at: #originalBorderColor).
+					table changed ].
+			].
+		
+		view edges do: [ :e |
+			e attributes at: #originalColor put: e color.
+			e
+				when: TSMouseClick do: [ e inspect ];
+				when: TSMouseEnter do: [ 
+					e color: (e color mixed: 0.8 with: UITheme current textColor).
+					table changed ];
+				when: TSMouseLeave do: [
+					e color: (e attributes at: #originalColor).
+					table changed ].
+			
+			 ]
 		].
 
 	"Create a copy"
