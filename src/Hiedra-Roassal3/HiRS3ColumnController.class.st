@@ -10,12 +10,12 @@ Class {
 	#category : #'Hiedra-Roassal3'
 }
 
-{ #category : #private }
+{ #category : #'private - menu' }
 HiRS3ColumnController >> actionGoTo: aHiNode [
 	table selectIndex: aHiNode rulerPoint y
 ]
 
-{ #category : #private }
+{ #category : #'private - highlighting' }
 HiRS3ColumnController >> basicHighlightNode: aRSElement [
 	aRSElement color:
 		((aRSElement attributes at: #originalColor)
@@ -24,10 +24,12 @@ HiRS3ColumnController >> basicHighlightNode: aRSElement [
 	aRSElement border color: UITheme current textColor
 ]
 
-{ #category : #private }
+{ #category : #'private - highlighting' }
 HiRS3ColumnController >> basicUnhighlightElement: aRSElement [
 	aRSElement color: (aRSElement attributes at: #originalColor).
-	aRSElement border color: (aRSElement attributes at: #originalBorderColor).
+	aRSElement border
+		color: (aRSElement attributes at: #originalBorderColor);
+		width: (aRSElement attributes at: #originalBorderWidth).
 ]
 
 { #category : #API }
@@ -38,7 +40,7 @@ HiRS3ColumnController >> cellMorphAtRow: rowIndex [
 	^ cellMorphByRowIndex at: rowIndex ifAbsent: [ self newCellMorphForRow: rowIndex ]
 ]
 
-{ #category : #private }
+{ #category : #'private - menu' }
 HiRS3ColumnController >> edgeMenuInteraction [
 	^ RSMenuActivable new
 		menuDo: [ :menu :edge | 
@@ -59,7 +61,7 @@ HiRS3ColumnController >> edgeMenuInteraction [
 		yourself
 ]
 
-{ #category : #private }
+{ #category : #'private - highlighting' }
 HiRS3ColumnController >> highlightBranchAtLink: aRSEdge [
 
 	| branch linksToHighlight aColor |
@@ -71,7 +73,7 @@ HiRS3ColumnController >> highlightBranchAtLink: aRSEdge [
 
 	view edges
 		select: [:edge | linksToHighlight includes: edge model ]
-		thenDo: [:edge | 
+		thenDo: [:edge |
 			edge color: aColor.
 			self basicHighlightNode: edge controlPoints first.
 			self basicHighlightNode: edge controlPoints last.
@@ -118,6 +120,7 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 		view elements do: [ :e |
 			e attributes at: #originalColor put: e color.
 			e attributes at: #originalBorderColor put: e border color.
+			e attributes at: #originalBorderWidth put: e border width.
 			e
 				when: TSMouseEnter do: [ self highlightBranchesAtNode: e. table changed. ];
 				when: TSMouseLeave do: [ self unhighlightAll. table changed. ];
@@ -127,6 +130,7 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 		view edges do: [ :e |
 			e attributes at: #originalColor put: e color.
 			e attributes at: #originalBorderColor put: e border color.
+			e attributes at: #originalBorderWidth put: e border width.
 			e
 				when: TSMouseEnter do: [ self highlightBranchAtLink: e. table changed. ];
 				when: TSMouseLeave do: [ self unhighlightAll. table changed. ];
@@ -154,7 +158,7 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 
 ]
 
-{ #category : #private }
+{ #category : #'private - menu' }
 HiRS3ColumnController >> nodeMenuInteraction [
 	^ RSMenuActivable new
 		menuDo: [ :menu :node |
@@ -214,7 +218,7 @@ HiRS3ColumnController >> table: anObject [
 	table := anObject
 ]
 
-{ #category : #private }
+{ #category : #'private - highlighting' }
 HiRS3ColumnController >> unhighlightAll [
 
 	view edges do: [:each | self basicUnhighlightElement: each ].
