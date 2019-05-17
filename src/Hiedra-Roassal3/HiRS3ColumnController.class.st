@@ -81,13 +81,13 @@ HiRS3ColumnController >> highlightBranchAtLink: aRSEdge [
 
 ]
 
-{ #category : #private }
+{ #category : #'private - highlighting' }
 HiRS3ColumnController >> highlightBranchesAtNode: aRSElement [
-
-	self basicHighlightNode: aRSElement.
 
 	aRSElement connectedEdges do: [ :each |
 		self highlightBranchAtLink: each ].
+
+	aRSElement border width: 3.
 
 ]
 
