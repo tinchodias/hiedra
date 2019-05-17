@@ -11,6 +11,11 @@ Class {
 }
 
 { #category : #private }
+HiRS3ColumnController >> actionGoTo: aHiNode [
+	table selectIndex: aHiNode rulerPoint y
+]
+
+{ #category : #private }
 HiRS3ColumnController >> basicHighlightNode: aRSElement [
 	aRSElement color:
 		((aRSElement attributes at: #originalColor)
@@ -31,6 +36,27 @@ HiRS3ColumnController >> cellMorphAtRow: rowIndex [
 	This is an important method of this class, that the table widget will use to fill each Hiedra column's cell."
 
 	^ cellMorphByRowIndex at: rowIndex ifAbsent: [ self newCellMorphForRow: rowIndex ]
+]
+
+{ #category : #private }
+HiRS3ColumnController >> edgeMenuInteraction [
+	^ RSMenuActivable new
+		menuDo: [ :menu :edge | 
+			(menu
+				add: 'Go to origin'
+				target: self
+				selector: #actionGoTo:
+				argument: edge model origin)
+				icon: (self iconNamed: #up).
+			(menu
+				add: 'Go to target'
+				target: self
+				selector: #actionGoTo:
+				argument: edge model target)
+				icon: (self iconNamed: #down).
+			(menu add: 'Inspect' target: edge selector: #inspect)
+				icon: (self iconNamed: #smallInspectIt) ];
+		yourself
 ]
 
 { #category : #private }
@@ -93,18 +119,18 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 			e attributes at: #originalColor put: e color.
 			e attributes at: #originalBorderColor put: e border color.
 			e
-				when: TSMouseClick do: [ e inspect ];
 				when: TSMouseEnter do: [ self highlightBranchesAtNode: e. table changed. ];
-				when: TSMouseLeave do: [ self unhighlightAll. table changed. ].
+				when: TSMouseLeave do: [ self unhighlightAll. table changed. ];
+				addInteraction: self nodeMenuInteraction.
 			].
 		
 		view edges do: [ :e |
 			e attributes at: #originalColor put: e color.
 			e attributes at: #originalBorderColor put: e border color.
 			e
-				when: TSMouseClick do: [ e inspect ];
 				when: TSMouseEnter do: [ self highlightBranchAtLink: e. table changed. ];
-				when: TSMouseLeave do: [ self unhighlightAll. table changed. ].
+				when: TSMouseLeave do: [ self unhighlightAll. table changed. ];
+				addInteraction: self edgeMenuInteraction.
 			 ]
 		].
 
@@ -126,6 +152,32 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 	
 	^ copy
 
+]
+
+{ #category : #private }
+HiRS3ColumnController >> nodeMenuInteraction [
+	^ RSMenuActivable new
+		menuDo: [ :menu :node |
+			node model incomingLinks withIndexDo: [:each :index |
+				(menu
+					add: ('Go to incoming #{1}' format: { index })
+					target: self
+					selector: #actionGoTo:
+					argument: each origin)
+					icon: (self iconNamed: #up)
+			].
+			node model outgoingLinks withIndexDo: [:each :index |
+				(menu
+					add: ('Go to outgoing #{1}' format: { index })
+					target: self
+					selector: #actionGoTo:
+					argument: each target)
+					icon: (self iconNamed: #down)
+			].
+			(menu add: 'Inspect' target: node selector: #inspect)
+				icon: (self iconNamed: #smallInspectIt).
+			];
+		yourself
 ]
 
 { #category : #API }
