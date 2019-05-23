@@ -42,6 +42,52 @@ IceTipHiRS3DataSource >> elements: commits [
 ]
 
 { #category : #accessing }
+IceTipHiRS3DataSource >> getAllAvatars [
+
+	| github firstRemote commitsIdsToQuery graphQL response commitsByEmail avatarUrlByEmail avatarByEmail |
+	avatarUrlByEmail := Dictionary new.
+	avatarByEmail := Dictionary new.
+	elements ifEmpty: [ ^self ].
+	firstRemote := elements first repositoryModel entity remotes
+		ifEmpty: [ ^self ] ifNotEmpty: #first.
+	
+	commitsByEmail := elements groupedBy: [ :each | each entity authorEmail ].
+	commitsIdsToQuery := commitsByEmail values collect: [:each | each first id ].
+
+	github := IceGitHubAPI new credentials: (IceGitHubAPI ensureCredentials; obtainCredentials); yourself.
+
+	graphQL := String streamContents: [ :stream |
+		stream << '{ repository(owner: "' << firstRemote owner << '", name: "' << firstRemote projectName << '") {'.
+		commitsIdsToQuery doWithIndex: [ :id :index |
+			stream << 'u' << index asString << ' : object(oid: "' << id << '") { ...foo } ' ].
+		stream << '} }
+fragment foo on GitObject {
+  ... on Commit {
+    author {
+      email
+      avatarUrl
+    }
+  }
+}
+'		].
+	
+	response := github graphql: graphQL.
+
+	((response at: 'data') at: 'repository') values collect: [:each | each at: 'author' ] thenDo: [:each |
+		avatarUrlByEmail at: (each at: 'email') put: (each at: 'avatarUrl') ].
+
+	avatarUrlByEmail keysAndValuesDo: [ :key :value |
+		| paint form |
+		form := ZnEasy getJpeg: value, '&s=16'.
+		paint := (AthensCairoPatternSurfacePaint createForSurface: (AthensCairoSurface fromForm: form)).
+		paint origin: (form extent / 2) negated.
+		avatarByEmail at: key put: paint.
+	].
+
+	hiedraColumnController renderer avatarByEmail: avatarByEmail.
+]
+
+{ #category : #accessing }
 IceTipHiRS3DataSource >> initialize [
 	
 	super initialize.
@@ -52,18 +98,20 @@ IceTipHiRS3DataSource >> initialize [
 { #category : #accessing }
 IceTipHiRS3DataSource >> refreshRulerWithCurrentElements [
 
-	| ancestorIds |
-	ancestorIds := Dictionary new.
+	| entityById |
+	entityById := Dictionary new.
 	elements do: [ :aCommit |
 		"Note: Hiedra expects each ancestor id corresponds to a commit in elements."
-		ancestorIds
+		entityById
 			at: aCommit id
-			put: aCommit entity ancestorIds ].
+			put: aCommit entity ].
+	hiedraColumnController renderer entityById: entityById.
 
 	hiedraColumnController ruler: (HiRulerBuilder
-		newRulerValues: (elements collect: #id) "Note: ids should keep the original order."
-		linksBlock: [ :id | ancestorIds at: id ]).
+		newRulerValues: (elements collect: #id)
+		linksBlock: [ :id | (entityById at: id) ancestorIds ]).
 
 	hiedraColumnController table: self table.
 
+	self getAllAvatars.
 ]

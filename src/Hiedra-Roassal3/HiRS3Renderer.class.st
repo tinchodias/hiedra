@@ -5,14 +5,26 @@ Class {
 	#name : #HiRS3Renderer,
 	#superclass : #HiAbstractRenderer,
 	#instVars : [
-		'rowHeight'
+		'rowHeight',
+		'avatarByEmail',
+		'entityById'
 	],
 	#category : #'Hiedra-Roassal3'
 }
 
 { #category : #accessing }
+HiRS3Renderer >> avatarByEmail: aCollection [
+	avatarByEmail := aCollection
+]
+
+{ #category : #accessing }
 HiRS3Renderer >> cellWidth [
-	^ 12
+	^ 20
+]
+
+{ #category : #accessing }
+HiRS3Renderer >> entityById: aDictionary [
+	entityById := aDictionary
 ]
 
 { #category : #API }
@@ -35,14 +47,15 @@ HiRS3Renderer >> newView [
 	| v size rowSize shape color polylineShape |
 	v := RSView new.
 
-	size := 10.
+	size := 16.
 	rowSize := self cellWidth @ self rowHeight.
 	color := TSScale google20.
 
 	shape := RSShapeBuilder circle
 		size: size;
-		color: [ :node | 
-			color scale: (ruler branchAtNode: node ifAbsent: [ node hash ]) ];
+		paint: [ :node | avatarByEmail at: (entityById at: node theValue) authorEmail ];
+"		color: [ :node | 
+			color scale: (ruler branchAtNode: node ifAbsent: [ node hash ]) ];"
 		border: [ TSBorder new ];
 		position: [ :node| node rulerPoint * rowSize ].
 	v addAll: (shape elementsOn: ruler nodes).

@@ -18,11 +18,11 @@ HiRS3ColumnController >> actionGoTo: aHiNode [
 
 { #category : #'private - highlighting' }
 HiRS3ColumnController >> basicHighlightNode: aRSElement [
-	aRSElement color:
+"	aRSElement color:
 		((aRSElement attributes at: #originalColor)
 				mixed: 0.8
 				with: UITheme current textColor).
-	aRSElement border color: UITheme current textColor
+"	aRSElement border color: UITheme current textColor
 ]
 
 { #category : #'private - highlighting' }
