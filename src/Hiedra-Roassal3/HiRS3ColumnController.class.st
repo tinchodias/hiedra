@@ -5,7 +5,8 @@ Class {
 		'renderer',
 		'cellMorphByRowIndex',
 		'view',
-		'table'
+		'table',
+		'changeBlockClosure'
 	],
 	#category : #'Hiedra-Roassal3'
 }
@@ -38,6 +39,13 @@ HiRS3ColumnController >> cellMorphAtRow: rowIndex [
 	This is an important method of this class, that the table widget will use to fill each Hiedra column's cell."
 
 	^ cellMorphByRowIndex at: rowIndex ifAbsent: [ self newCellMorphForRow: rowIndex ]
+]
+
+{ #category : #'as yet unclassified' }
+HiRS3ColumnController >> cellMorphAtValue: aValue [
+	"Answer a Morph that corresponds to aValue. See #cellMorphAtRowIndex: for more information."
+
+	^ self cellMorphAtRow: (self rowIndexAtValue: aValue)
 ]
 
 { #category : #'private - menu' }
@@ -122,8 +130,8 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 			e attributes at: #originalBorderColor put: e border color.
 			e attributes at: #originalBorderWidth put: e border width.
 			e
-				when: TSMouseEnter do: [ self highlightBranchesAtNode: e. table changed. ];
-				when: TSMouseLeave do: [ self unhighlightAll. table changed. ];
+				when: TSMouseEnter do: [ self highlightBranchesAtNode: e. self updateTable. ];
+				when: TSMouseLeave do: [ self unhighlightAll. self updateTable. ];
 				addInteraction: self nodeMenuInteraction.
 			].
 		
@@ -132,8 +140,8 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 			e attributes at: #originalBorderColor put: e border color.
 			e attributes at: #originalBorderWidth put: e border width.
 			e
-				when: TSMouseEnter do: [ self highlightBranchAtLink: e. table changed. ];
-				when: TSMouseLeave do: [ self unhighlightAll. table changed. ];
+				when: TSMouseEnter do: [ self highlightBranchAtLink: e. self updateTable. ];
+				when: TSMouseLeave do: [ self unhighlightAll. self updateTable. ];
 				addInteraction: self edgeMenuInteraction.
 			 ]
 		].
@@ -184,6 +192,11 @@ HiRS3ColumnController >> nodeMenuInteraction [
 		yourself
 ]
 
+{ #category : #accessing }
+HiRS3ColumnController >> onChangeDo: aBlockClosure [ 
+	changeBlockClosure := aBlockClosure
+]
+
 { #category : #API }
 HiRS3ColumnController >> renderer [
 	^ renderer
@@ -195,6 +208,13 @@ HiRS3ColumnController >> reset [
 
 	cellMorphByRowIndex := Dictionary new.
 	view := nil.
+]
+
+{ #category : #'as yet unclassified' }
+HiRS3ColumnController >> rowIndexAtValue: aValue [
+	^ renderer ruler valueIndices
+		at: aValue
+		ifAbsent: [ self error: 'Value not found. Should the table refresh the ruler?' ]
 ]
 
 { #category : #API }
@@ -224,4 +244,11 @@ HiRS3ColumnController >> unhighlightAll [
 	view edges do: [:each | self basicUnhighlightElement: each ].
 	view elements do: [:each | self basicUnhighlightElement: each ].
 
+]
+
+{ #category : #private }
+HiRS3ColumnController >> updateTable [
+
+	table changed.
+	changeBlockClosure value.
 ]
