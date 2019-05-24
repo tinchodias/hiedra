@@ -52,7 +52,7 @@ IceTipHiRS3DataSource >> getAllAvatars [
 		ifEmpty: [ ^self ] ifNotEmpty: #first.
 	
 	commitsByEmail := elements groupedBy: [ :each | each entity authorEmail ].
-	commitsIdsToQuery := commitsByEmail values collect: [:each | each first id ].
+	commitsIdsToQuery := commitsByEmail values collect: [:each | each last id ].
 
 	github := IceGitHubAPI new credentials: (IceGitHubAPI ensureCredentials; obtainCredentials); yourself.
 
