@@ -53,13 +53,13 @@ HiRS3ColumnController >> edgeMenuInteraction [
 	^ RSMenuActivable new
 		menuDo: [ :menu :edge | 
 			(menu
-				add: 'Go to origin'
+				add: 'Go to child'
 				target: self
 				selector: #actionGoTo:
 				argument: edge model origin)
 				icon: (self iconNamed: #up).
 			(menu
-				add: 'Go to target'
+				add: 'Go to parent'
 				target: self
 				selector: #actionGoTo:
 				argument: edge model target)

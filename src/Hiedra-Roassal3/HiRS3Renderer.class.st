@@ -54,14 +54,13 @@ HiRS3Renderer >> newView [
 	shape := RSShapeBuilder circle
 		size: nodeSize;
 		paint: [ :node | avatarByEmail at: (entityById at: node theValue) authorEmail ];
-"		color: [ :node | 
-			color scale: (ruler branchAtNode: node ifAbsent: [ node hash ]) ];"
+
 		border: [ TSBorder new ];
 		position: [ :node| node rulerPoint * rowSize ].
 	v addAll: (shape elementsOn: ruler nodes).
 	
 	polylineShape := RSSingleEdgeBuilder polyline
-		cornerRadii: 5;
+		cornerRadii: 10;
 		width: 3;
 		joinRound;
 		color: [ :link | color scale: (ruler branchAtLink: link) ];
