@@ -95,7 +95,7 @@ HiRS3ColumnController >> highlightBranchesAtNode: aRSElement [
 	aRSElement connectedEdges do: [ :each |
 		self highlightBranchAtLink: each ].
 
-	aRSElement border width: 3.
+	aRSElement border width: 1.5.
 
 ]
 
