@@ -7,7 +7,8 @@ Class {
 	#instVars : [
 		'rowHeight',
 		'avatarByEmail',
-		'entityById'
+		'entityById',
+		'nodeSize'
 	],
 	#category : #'Hiedra-Roassal3'
 }
@@ -44,15 +45,14 @@ HiRS3Renderer >> newForm [
 
 { #category : #API }
 HiRS3Renderer >> newView [
-	| v size rowSize shape color polylineShape |
+	| v rowSize shape color polylineShape |
 	v := RSView new.
 
-	size := 16.
 	rowSize := self cellWidth @ self rowHeight.
 	color := TSScale google20.
 
 	shape := RSShapeBuilder circle
-		size: size;
+		size: nodeSize;
 		paint: [ :node | avatarByEmail at: (entityById at: node theValue) authorEmail ];
 "		color: [ :node | 
 			color scale: (ruler branchAtNode: node ifAbsent: [ node hash ]) ];"
@@ -79,6 +79,11 @@ HiRS3Renderer >> newView [
 	v color: Color transparent.
 	
 	^ v
+]
+
+{ #category : #accessing }
+HiRS3Renderer >> nodeSize: anInteger [
+	nodeSize := anInteger
 ]
 
 { #category : #accessing }

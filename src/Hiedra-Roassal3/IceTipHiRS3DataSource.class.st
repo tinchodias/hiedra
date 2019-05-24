@@ -78,7 +78,7 @@ fragment foo on GitObject {
 
 	avatarUrlByEmail keysAndValuesDo: [ :key :value |
 		| paint form |
-		form := ZnEasy getJpeg: value, '&s=16'.
+		form := [ZnEasy getImage: value, '&s=', self nodeSize asString] on: ZnHttpUnsuccessful do: [:each | self iconNamed: #github ].
 		paint := (AthensCairoPatternSurfacePaint createForSurface: (AthensCairoSurface fromForm: form)).
 		paint origin: (form extent / 2) negated.
 		avatarByEmail at: key put: paint.
@@ -96,6 +96,11 @@ IceTipHiRS3DataSource >> initialize [
 ]
 
 { #category : #accessing }
+IceTipHiRS3DataSource >> nodeSize [
+	^ 20
+]
+
+{ #category : #accessing }
 IceTipHiRS3DataSource >> refreshRulerWithCurrentElements [
 
 	| entityById |
@@ -105,7 +110,9 @@ IceTipHiRS3DataSource >> refreshRulerWithCurrentElements [
 		entityById
 			at: aCommit id
 			put: aCommit entity ].
-	hiedraColumnController renderer entityById: entityById.
+	hiedraColumnController renderer
+		entityById: entityById;
+		nodeSize: self nodeSize.
 
 	hiedraColumnController ruler: (HiRulerBuilder
 		newRulerValues: (elements collect: #id)
