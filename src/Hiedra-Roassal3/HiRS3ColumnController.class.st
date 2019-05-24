@@ -170,22 +170,35 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 HiRS3ColumnController >> nodeMenuInteraction [
 	^ RSMenuActivable new
 		menuDo: [ :menu :node |
-			node model incomingLinks withIndexDo: [:each :index |
-				(menu
-					add: ('Go to incoming #{1}' format: { index })
+			| menu2 |
+			menu2 := MenuMorph new.
+			node model incomingLinks reverseDo: [:each |
+				(menu2
+					add: ('{1} above' format: { node model rulerPoint y - each origin rulerPoint y })
 					target: self
 					selector: #actionGoTo:
 					argument: each origin)
 					icon: (self iconNamed: #up)
-			].
-			node model outgoingLinks withIndexDo: [:each :index |
-				(menu
-					add: ('Go to outgoing #{1}' format: { index })
+		 	].
+			menu
+				add: 'Go to child'
+				icon: (self iconNamed: #up)
+				subMenu: menu2.
+
+			menu2 := MenuMorph new.
+			node model outgoingLinks reverseDo: [:each |
+				(menu2
+					add: ('{1} below' format: { each target rulerPoint y - node model rulerPoint y })
 					target: self
 					selector: #actionGoTo:
 					argument: each target)
 					icon: (self iconNamed: #down)
 			].
+			menu
+				add: 'Go to parent'
+				icon: (self iconNamed: #down)
+				subMenu: menu2.
+
 			(menu add: 'Inspect' target: node selector: #inspect)
 				icon: (self iconNamed: #smallInspectIt).
 			];
