@@ -44,47 +44,24 @@ IceTipHiRS3DataSource >> elements: commits [
 { #category : #accessing }
 IceTipHiRS3DataSource >> getAllAvatars [
 
-	| github firstRemote commitsIdsToQuery graphQL response commitsByEmail avatarUrlByEmail avatarByEmail |
-	avatarUrlByEmail := Dictionary new.
-	avatarByEmail := Dictionary new.
+	| firstRemote commitsByEmail commitsIdsToQuery credentials client |
 	elements ifEmpty: [ ^self ].
 	firstRemote := elements first repositoryModel entity remotes
 		ifEmpty: [ ^self ] ifNotEmpty: #first.
 	
 	commitsByEmail := elements groupedBy: [ :each | each entity authorEmail ].
 	commitsIdsToQuery := commitsByEmail values collect: [:each | each last id ].
+	credentials := IceGitHubAPI ensureCredentials; obtainCredentials.
 
-	github := IceGitHubAPI new credentials: (IceGitHubAPI ensureCredentials; obtainCredentials); yourself.
+	client := HiGithubAvatarClient new
+		remote: firstRemote;
+		credentials: credentials;
+		avatarSize: self nodeSize;
+		commitsIds: commitsIdsToQuery;
+		get;
+		yourself.
 
-	graphQL := String streamContents: [ :stream |
-		stream << '{ repository(owner: "' << firstRemote owner << '", name: "' << firstRemote projectName << '") {'.
-		commitsIdsToQuery doWithIndex: [ :id :index |
-			stream << 'u' << index asString << ' : object(oid: "' << id << '") { ...foo } ' ].
-		stream << '} }
-fragment foo on GitObject {
-  ... on Commit {
-    author {
-      email
-      avatarUrl
-    }
-  }
-}
-'		].
-	
-	response := github graphql: graphQL.
-
-	((response at: 'data') at: 'repository') values collect: [:each | each at: 'author' ] thenDo: [:each |
-		avatarUrlByEmail at: (each at: 'email') put: (each at: 'avatarUrl') ].
-
-	avatarUrlByEmail keysAndValuesDo: [ :key :value |
-		| paint form |
-		form := [ZnEasy getImage: value, '&s=', self nodeSize asString] on: ZnHttpUnsuccessful do: [:each | self iconNamed: #github ].
-		paint := (AthensCairoPatternSurfacePaint createForSurface: (AthensCairoSurface fromForm: form)).
-		paint origin: (form extent / 2) negated.
-		avatarByEmail at: key put: paint.
-	].
-
-	hiedraColumnController renderer avatarByEmail: avatarByEmail.
+	hiedraColumnController renderer avatarByEmail: client avatarByEmail.
 ]
 
 { #category : #accessing }
