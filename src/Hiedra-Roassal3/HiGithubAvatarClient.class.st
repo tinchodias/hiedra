@@ -5,7 +5,6 @@ Class {
 		'remote',
 		'credentials',
 		'avatarSize',
-		'defaultAvatar',
 		'commitsIds',
 		'avatarUrlByEmail',
 		'avatarByEmail'
@@ -21,9 +20,8 @@ HiGithubAvatarClient >> avatarByEmail [
 { #category : #private }
 HiGithubAvatarClient >> avatarFor: urlString [
 
-	^ [ ZnEasy getImage: urlString, '&s=', self avatarSize asString ]
-			on: ZnHttpUnsuccessful
-			do: [ :each | self defaultAvatar ]
+	^ ZnEasy getImage: urlString, '&s=', self avatarSize asString
+
 ]
 
 { #category : #'accessing - request' }
@@ -61,27 +59,17 @@ HiGithubAvatarClient >> credentials: anObject [
 	credentials := anObject
 ]
 
-{ #category : #'accessing - request' }
-HiGithubAvatarClient >> defaultAvatar [
-
-	^ defaultAvatar ifNil: [ self iconNamed: #user ]
-]
-
-{ #category : #'accessing - request' }
-HiGithubAvatarClient >> defaultAvatar: aForm [
-
-	defaultAvatar := aForm
-]
-
 { #category : #action }
 HiGithubAvatarClient >> get [
 
 	| response |
 
 	"Query Github"
-	response := IceGitHubAPI new
+	
+([	response := IceGitHubAPI new
 		credentials: self credentials;
 		graphql: self graphQL.
+] timeToRun asMilliSeconds asString, ' - to query github') logCr.
 
 	"On sucess: Get avatar URLs"
 	avatarUrlByEmail := Dictionary new.
@@ -95,13 +83,36 @@ HiGithubAvatarClient >> get [
 	self flag: #todo. "On fail"
 
 	"Get avatar images"
-	avatarByEmail := Dictionary new.
-	avatarUrlByEmail keysAndValuesDo: [ :email :urlString |
-		avatarByEmail at: email put: (self avatarFor: urlString) ].
+	([self getAvatarsAsync] timeToRun asMilliSeconds asString, ' - to get ALL avatars') logCr.
 
 ]
 
-{ #category : #action }
+{ #category : #private }
+HiGithubAvatarClient >> getAvatarsAsync [
+
+	| sharedQueue semaphore |
+	sharedQueue := SharedQueue new.
+	semaphore := Semaphore new.
+
+	avatarUrlByEmail keysAndValuesDo: [ :email :urlString |
+		[
+		
+		[ | avatar |
+		avatar := self avatarFor: urlString.
+		sharedQueue	nextPut: (email -> avatar) ]
+			on: NetworkError, ZnHttpUnsuccessful
+			do: [ :each | ].
+		semaphore signal.
+		] fork ].
+	avatarUrlByEmail size timesRepeat: [ semaphore wait ].
+
+	avatarByEmail := Dictionary new.
+	sharedQueue contents do: [ :association |
+		avatarByEmail at: association key put: association value ].
+
+]
+
+{ #category : #private }
 HiGithubAvatarClient >> graphQL [
 	^ String streamContents: [ :stream |
 		stream << '{ repository(owner: "' << remote owner << '", name: "' << remote projectName << '") {'.

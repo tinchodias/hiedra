@@ -58,10 +58,15 @@ IceTipHiRS3DataSource >> getAllAvatars [
 		credentials: credentials;
 		avatarSize: self nodeSize;
 		commitsIds: commitsIdsToQuery;
-		get;
 		yourself.
 
-	hiedraColumnController renderer avatarByEmail: client avatarByEmail.
+	[ 	client get.
+		hiedraColumnController renderer avatarByEmail: client avatarByEmail ]
+			on: NetworkError, ZnHttpUnsuccessful
+			do: [ :each | hiedraColumnController renderer avatarByEmail: Dictionary new ].
+
+	
+
 ]
 
 { #category : #accessing }

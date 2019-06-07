@@ -8,7 +8,8 @@ Class {
 		'rowHeight',
 		'avatarByEmail',
 		'entityById',
-		'nodeSize'
+		'nodeSize',
+		'defaultAvatar'
 	],
 	#category : #'Hiedra-Roassal3'
 }
@@ -18,9 +19,29 @@ HiRS3Renderer >> avatarByEmail: aCollection [
 	avatarByEmail := aCollection
 ]
 
+{ #category : #API }
+HiRS3Renderer >> avatarFor: node [
+
+	^ avatarByEmail
+		at: (entityById at: node theValue) authorEmail
+		ifAbsent: [ self defaultAvatar ]
+]
+
 { #category : #accessing }
 HiRS3Renderer >> cellWidth [
 	^ 20
+]
+
+{ #category : #accessing }
+HiRS3Renderer >> defaultAvatar [
+
+	^ defaultAvatar ifNil: [ self iconNamed: #user ]
+]
+
+{ #category : #accessing }
+HiRS3Renderer >> defaultAvatar: aForm [
+
+	defaultAvatar := aForm
 ]
 
 { #category : #accessing }
@@ -53,7 +74,7 @@ HiRS3Renderer >> newView [
 
 	shape := RSShapeBuilder circle
 		size: nodeSize;
-		paint: [ :node | avatarByEmail at: (entityById at: node theValue) authorEmail ];
+		paint: [ :node | self avatarFor: node ];
 
 		border: [ TSBorder new ];
 		position: [ :node| node rulerPoint * rowSize ].
