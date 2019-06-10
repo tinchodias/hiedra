@@ -6,62 +6,36 @@ Class {
 	#superclass : #HiAbstractRenderer,
 	#instVars : [
 		'rowHeight',
-		'avatarByEmail',
-		'entityById',
 		'nodeSize',
-		'defaultAvatar'
+		'cellWidth',
+		'commitAvatarFactory'
 	],
 	#category : #'Hiedra-Roassal3'
 }
 
 { #category : #accessing }
-HiRS3Renderer >> avatarByEmail: aCollection [
-	avatarByEmail := aCollection
-]
-
-{ #category : #API }
-HiRS3Renderer >> avatarFor: node [
-
-	^ avatarByEmail
-		at: (entityById at: node theValue) authorEmail
-		ifAbsent: [ self defaultAvatar ]
-]
-
-{ #category : #accessing }
 HiRS3Renderer >> cellWidth [
-	^ 20
+	^ cellWidth
 ]
 
 { #category : #accessing }
-HiRS3Renderer >> defaultAvatar [
-
-	^ defaultAvatar ifNil: [ self iconNamed: #user ]
+HiRS3Renderer >> commitAvatarFactory [
+	^ commitAvatarFactory
 ]
 
 { #category : #accessing }
-HiRS3Renderer >> defaultAvatar: aForm [
-
-	defaultAvatar := aForm
+HiRS3Renderer >> commitAvatarFactory: anObject [
+	commitAvatarFactory := anObject
 ]
 
-{ #category : #accessing }
-HiRS3Renderer >> entityById: aDictionary [
-	entityById := aDictionary
-]
-
-{ #category : #API }
-HiRS3Renderer >> newForm [
-	| view extent |
-	view := self newView.
-	extent := self formWidth @ self formHeight.
+{ #category : #initialization }
+HiRS3Renderer >> initialize [
+	super initialize.
 	
-	view createMorph.
-	view morph extent: extent.
-	view camera
-		zoomToFit: extent
-		rectangle: (0@rowHeight rectangle: extent).
-	view morph drawOnMockCanvas.
-	^ view morph surface asForm
+	cellWidth := 20.
+	nodeSize := 20.
+	commitAvatarFactory := [ :nodeValue |
+		self iconNamed: #user ]
 ]
 
 { #category : #API }
@@ -74,8 +48,7 @@ HiRS3Renderer >> newView [
 
 	shape := RSShapeBuilder circle
 		size: nodeSize;
-		paint: [ :node | self avatarFor: node ];
-
+		paint: [ :node | commitAvatarFactory value: node theValue ];
 		border: [ TSBorder new ];
 		position: [ :node| node rulerPoint * rowSize ].
 	v addAll: (shape elementsOn: ruler nodes).

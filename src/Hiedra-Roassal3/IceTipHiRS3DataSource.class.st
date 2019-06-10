@@ -2,7 +2,8 @@ Class {
 	#name : #IceTipHiRS3DataSource,
 	#superclass : #IceTipDataSource,
 	#instVars : [
-		'hiedraColumnController'
+		'hiedraColumnController',
+		'entityById'
 	],
 	#category : #'Hiedra-Roassal3'
 }
@@ -41,8 +42,8 @@ IceTipHiRS3DataSource >> elements: commits [
 
 ]
 
-{ #category : #accessing }
-IceTipHiRS3DataSource >> getAllAvatars [
+{ #category : #private }
+IceTipHiRS3DataSource >> freshAvatarsByEmail [
 
 	| firstRemote commitsByEmail commitsIdsToQuery credentials client |
 	elements ifEmpty: [ ^self ].
@@ -60,16 +61,14 @@ IceTipHiRS3DataSource >> getAllAvatars [
 		commitsIds: commitsIdsToQuery;
 		yourself.
 
-	[ 	client get.
-		hiedraColumnController renderer avatarByEmail: client avatarByEmail ]
+	^ [ client get.
+		client avatarByEmail ]
 			on: NetworkError, ZnHttpUnsuccessful
-			do: [ :each | hiedraColumnController renderer avatarByEmail: Dictionary new ].
-
-	
+			do: [ :each | Dictionary new ].
 
 ]
 
-{ #category : #accessing }
+{ #category : #initialization }
 IceTipHiRS3DataSource >> initialize [
 	
 	super initialize.
@@ -82,10 +81,20 @@ IceTipHiRS3DataSource >> nodeSize [
 	^ 20
 ]
 
-{ #category : #accessing }
+{ #category : #private }
+IceTipHiRS3DataSource >> refreshAvatarsWithCurrentElements [
+
+	| avatarByEmail |
+	avatarByEmail := self freshAvatarsByEmail.
+	hiedraColumnController renderer commitAvatarFactory: [ :commitId |
+		avatarByEmail
+			at: (entityById at: commitId) authorEmail
+			ifAbsent: [ self iconNamed: #user ] ]
+]
+
+{ #category : #private }
 IceTipHiRS3DataSource >> refreshRulerWithCurrentElements [
 
-	| entityById |
 	entityById := Dictionary new.
 	elements do: [ :aCommit |
 		"Note: Hiedra expects each ancestor id corresponds to a commit in elements."
@@ -93,7 +102,6 @@ IceTipHiRS3DataSource >> refreshRulerWithCurrentElements [
 			at: aCommit id
 			put: aCommit entity ].
 	hiedraColumnController renderer
-		entityById: entityById;
 		nodeSize: self nodeSize.
 
 	hiedraColumnController ruler: (HiRulerBuilder
@@ -102,5 +110,5 @@ IceTipHiRS3DataSource >> refreshRulerWithCurrentElements [
 
 	hiedraColumnController table: self table.
 
-	self getAllAvatars.
+	self refreshAvatarsWithCurrentElements
 ]
