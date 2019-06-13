@@ -29,7 +29,7 @@ IceTipHiRS3DataSource >> elements: commits [
 	self table ifNil: [ ^self ].
 		
 	"Adjust the ruler rendering settings with table's row height."
-	hiedraColumnController renderer rowHeight: self table rowHeight floor.
+	hiedraColumnController rowHeight: self table rowHeight floor.
 
 	"Create a new ruler model with the new elements"
 	self refreshRulerWithCurrentElements.
@@ -86,7 +86,7 @@ IceTipHiRS3DataSource >> refreshAvatarsWithCurrentElements [
 
 	| avatarByEmail |
 	avatarByEmail := self freshAvatarsByEmail.
-	hiedraColumnController renderer commitAvatarFactory: [ :commitId |
+	hiedraColumnController viewBuilder commitAvatarFactory: [ :commitId |
 		avatarByEmail
 			at: (entityById at: commitId) authorEmail
 			ifAbsent: [ self iconNamed: #user ] ]
@@ -101,7 +101,7 @@ IceTipHiRS3DataSource >> refreshRulerWithCurrentElements [
 		entityById
 			at: aCommit id
 			put: aCommit entity ].
-	hiedraColumnController renderer
+	hiedraColumnController viewBuilder
 		nodeSize: self nodeSize.
 
 	hiedraColumnController ruler: (HiRulerBuilder
