@@ -5,7 +5,7 @@ Class {
 		'hiedraColumnController',
 		'table'
 	],
-	#category : #'Hiedra-Roassal3'
+	#category : #'Hiedra-Roassal3-Examples'
 }
 
 { #category : #specs }

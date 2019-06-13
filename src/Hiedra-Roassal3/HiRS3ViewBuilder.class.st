@@ -11,7 +11,7 @@ Class {
 		'commitAvatarFactory',
 		'ruler'
 	],
-	#category : #'Hiedra-Roassal3'
+	#category : #'Hiedra-Roassal3-UI'
 }
 
 { #category : #accessing }

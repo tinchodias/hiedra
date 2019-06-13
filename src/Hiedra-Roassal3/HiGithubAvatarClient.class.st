@@ -9,7 +9,7 @@ Class {
 		'avatarUrlByEmail',
 		'avatarByEmail'
 	],
-	#category : #'Hiedra-Roassal3'
+	#category : #'Hiedra-Roassal3-Examples-Iceberg'
 }
 
 { #category : #'accessing - response' }

@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'hiedraColumnController'
 	],
-	#category : #'Hiedra-Roassal3'
+	#category : #'Hiedra-Roassal3-Examples'
 }
 
 { #category : #examples }
