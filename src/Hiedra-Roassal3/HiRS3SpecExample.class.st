@@ -69,7 +69,7 @@ HiRS3SpecExample >> initializeWidgets [
 	hiedraColumnController := HiRS3ColumnController new.	
 
 	"Adjust the ruler rendering settings with table's row height."
-	hiedraColumnController renderer rowHeight: FTTableMorph defaultRowHeight floor.
+	hiedraColumnController rowHeight: FTTableMorph defaultRowHeight floor.
 	hiedraColumnController onChangeDo: [ table notifyPropertyChanged: #columns ].
 
 	"Configure columns"

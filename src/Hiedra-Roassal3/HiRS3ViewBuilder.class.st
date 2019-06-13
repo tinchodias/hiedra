@@ -2,34 +2,55 @@
 I render a Hiedra visualization (HiRuler) using Roassal3.
 "
 Class {
-	#name : #HiRS3Renderer,
-	#superclass : #HiAbstractRenderer,
+	#name : #HiRS3ViewBuilder,
+	#superclass : #Object,
 	#instVars : [
 		'rowHeight',
 		'nodeSize',
 		'cellWidth',
-		'commitAvatarFactory'
+		'commitAvatarFactory',
+		'ruler'
 	],
 	#category : #'Hiedra-Roassal3'
 }
 
 { #category : #accessing }
-HiRS3Renderer >> cellWidth [
+HiRS3ViewBuilder >> cellWidth [
 	^ cellWidth
 ]
 
 { #category : #accessing }
-HiRS3Renderer >> commitAvatarFactory [
+HiRS3ViewBuilder >> cellWidth: anObject [
+	cellWidth := anObject
+]
+
+{ #category : #accessing }
+HiRS3ViewBuilder >> commitAvatarFactory [
 	^ commitAvatarFactory
 ]
 
 { #category : #accessing }
-HiRS3Renderer >> commitAvatarFactory: anObject [
+HiRS3ViewBuilder >> commitAvatarFactory: anObject [
 	commitAvatarFactory := anObject
 ]
 
+{ #category : #accessing }
+HiRS3ViewBuilder >> formHeight [
+	"Answer the height in pixels for the form to be rendered."
+	
+	^ ruler numberOfRows * self rowHeight
+]
+
+{ #category : #accessing }
+HiRS3ViewBuilder >> formWidth [
+	"Answer the width in pixels for the form to be rendered."
+
+	"Note: The reason of numberOfColumns + 2 is the left and right margin."
+	^ (ruler numberOfColumns + 2) * self cellWidth
+]
+
 { #category : #initialization }
-HiRS3Renderer >> initialize [
+HiRS3ViewBuilder >> initialize [
 	super initialize.
 	
 	cellWidth := 20.
@@ -39,7 +60,7 @@ HiRS3Renderer >> initialize [
 ]
 
 { #category : #API }
-HiRS3Renderer >> newView [
+HiRS3ViewBuilder >> newView [
 	| v rowSize shape color polylineShape |
 	v := RSView new.
 
@@ -75,16 +96,31 @@ HiRS3Renderer >> newView [
 ]
 
 { #category : #accessing }
-HiRS3Renderer >> nodeSize: anInteger [
+HiRS3ViewBuilder >> nodeSize [
+	^ nodeSize
+]
+
+{ #category : #accessing }
+HiRS3ViewBuilder >> nodeSize: anInteger [
 	nodeSize := anInteger
 ]
 
 { #category : #accessing }
-HiRS3Renderer >> rowHeight [
+HiRS3ViewBuilder >> rowHeight [
 	^ rowHeight
 ]
 
 { #category : #accessing }
-HiRS3Renderer >> rowHeight: anInteger [
+HiRS3ViewBuilder >> rowHeight: anInteger [
 	rowHeight := anInteger
+]
+
+{ #category : #accessing }
+HiRS3ViewBuilder >> ruler [
+	^ ruler
+]
+
+{ #category : #accessing }
+HiRS3ViewBuilder >> ruler: anObject [
+	ruler := anObject
 ]

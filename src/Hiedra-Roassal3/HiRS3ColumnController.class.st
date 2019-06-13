@@ -2,11 +2,11 @@ Class {
 	#name : #HiRS3ColumnController,
 	#superclass : #Object,
 	#instVars : [
-		'renderer',
 		'cellMorphByRowIndex',
 		'view',
 		'table',
-		'changeBlockClosure'
+		'changeBlockClosure',
+		'viewBuilder'
 	],
 	#category : #'Hiedra-Roassal3'
 }
@@ -41,7 +41,7 @@ HiRS3ColumnController >> cellMorphAtRow: rowIndex [
 	^ cellMorphByRowIndex at: rowIndex ifAbsent: [ self newCellMorphForRow: rowIndex ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #API }
 HiRS3ColumnController >> cellMorphAtValue: aValue [
 	"Answer a Morph that corresponds to aValue. See #cellMorphAtRowIndex: for more information."
 
@@ -73,9 +73,9 @@ HiRS3ColumnController >> edgeMenuInteraction [
 HiRS3ColumnController >> highlightBranchAtLink: aRSEdge [
 
 	| branch linksToHighlight aColor |
-	branch := renderer ruler branchAtLink: aRSEdge model.
+	branch := viewBuilder ruler branchAtLink: aRSEdge model.
 	linksToHighlight := Array streamContents: [:stream |
-		renderer ruler branchByLink keysAndValuesDo: [:key :value | 
+		viewBuilder ruler branchByLink keysAndValuesDo: [:key :value | 
 		value = branch ifTrue: [ stream nextPut: key ] ] ].
 	aColor := (aRSEdge attributes at: #originalColor) mixed: 0.4 with: UITheme current textColor.
 
@@ -103,7 +103,7 @@ HiRS3ColumnController >> highlightBranchesAtNode: aRSElement [
 HiRS3ColumnController >> initialize [
 
 	super initialize.
-	renderer := HiRS3Renderer new.
+	viewBuilder := HiRS3ViewBuilder new.
 	self reset.
 ]
 
@@ -112,18 +112,17 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 	"Answer a Morph that corresponds to aValue in the rendered ruler."
 
 	| cellY copy rectangle copyRectangle copyShapes |
-	cellY := ((renderer ruler nodeAtRow: rowIndex) rulerPoint y) * renderer rowHeight.
+	cellY := ((viewBuilder ruler nodeAtRow: rowIndex) rulerPoint y) * viewBuilder rowHeight.
 
-	renderer rowsInterval: (1 to: renderer ruler numberOfRows).
-	rectangle := (0@(renderer rowHeight) rectangle: (renderer formWidth @ renderer formHeight)).
+	rectangle := (0@(viewBuilder rowHeight) rectangle: (viewBuilder formWidth @ viewBuilder formHeight)).
 
 	view ifNil: [
-		view := renderer newView.
+		view := viewBuilder newView.
 		view createMorph.
 		view camera 
 			translateTo: rectangle rsCenter;
 			scale: 1.
-		view morph extent: renderer formWidth @ renderer rowHeight.
+		view morph extent: viewBuilder formWidth @ viewBuilder rowHeight.
 
 		view elements do: [ :e |
 			e attributes at: #originalColor put: e color.
@@ -150,7 +149,7 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 	copy := view morph copyWithIndependentCamera.
 	copyRectangle := Rectangle 
 		rsCenter: rectangle rsCenter x@cellY 
-		extent: renderer formWidth @ renderer rowHeight.
+		extent: viewBuilder formWidth @ viewBuilder rowHeight.
 
 	"Time optimization for drawOn until RS3 implements it: the canvas only knows the shapes that are visible."
 	copyShapes := view canvas shapes select: [ :s | copyRectangle intersects: s encompassingRectangle ].
@@ -211,11 +210,6 @@ HiRS3ColumnController >> onChangeDo: aBlockClosure [
 ]
 
 { #category : #API }
-HiRS3ColumnController >> renderer [
-	^ renderer
-]
-
-{ #category : #API }
 HiRS3ColumnController >> reset [
 	"Reset the internal state with the purpose to regenerate the visualization the next time #cellMorphFor: is executed."
 
@@ -223,22 +217,27 @@ HiRS3ColumnController >> reset [
 	view := nil.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #API }
+HiRS3ColumnController >> rowHeight: anInteger [
+	viewBuilder rowHeight: anInteger
+]
+
+{ #category : #private }
 HiRS3ColumnController >> rowIndexAtValue: aValue [
-	^ renderer ruler valueIndices
+	^ viewBuilder ruler valueIndices
 		at: aValue
 		ifAbsent: [ self error: 'Value not found. Should the table refresh the ruler?' ]
 ]
 
 { #category : #API }
 HiRS3ColumnController >> ruler: aHiRuler [
-	renderer ruler: aHiRuler
+	viewBuilder ruler: aHiRuler
 ]
 
 { #category : #API }
 HiRS3ColumnController >> rulerWidth [
 
-	^ renderer formWidth
+	^ viewBuilder formWidth
 ]
 
 { #category : #accessing }
@@ -264,4 +263,9 @@ HiRS3ColumnController >> updateTable [
 
 	table changed.
 	changeBlockClosure value.
+]
+
+{ #category : #API }
+HiRS3ColumnController >> viewBuilder [
+	^ viewBuilder
 ]
