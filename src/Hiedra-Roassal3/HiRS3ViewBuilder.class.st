@@ -1,5 +1,5 @@
 "
-I render a Hiedra visualization (HiRuler) using Roassal3.
+I render a Hiedra visualization (HiRuler) using Roassal3. 
 "
 Class {
 	#name : #HiRS3ViewBuilder,
@@ -15,6 +15,46 @@ Class {
 	],
 	#category : #'Hiedra-Roassal3-UI'
 }
+
+{ #category : #'private - menu' }
+HiRS3ViewBuilder >> addGoToChildSubMenuIn: menu node: node [
+
+	| groupMenu |
+	groupMenu := MenuMorph new.
+	node model incomingLinks reverseDo: [:each |
+		(groupMenu
+			add: ('{1} above' format: { node model rulerPoint y - each origin rulerPoint y })
+			target: self
+			selector: #basicGoTo:
+			argument: each origin)
+			icon: (self iconNamed: #up)
+ 	].
+	menu
+		add: 'Go to child'
+		icon: (self iconNamed: #up)
+		subMenu: groupMenu.
+
+]
+
+{ #category : #'private - menu' }
+HiRS3ViewBuilder >> addGoToParentSubmenuIn: menu node: node [
+
+	| groupMenu |
+	groupMenu := MenuMorph new.
+	node model outgoingLinks reverseDo: [:each |
+		(groupMenu
+			add: ('{1} below' format: { each target rulerPoint y - node model rulerPoint y })
+			target: self
+			selector: #basicGoTo:
+			argument: each target)
+			icon: (self iconNamed: #down)
+	].
+	menu
+		add: 'Go to parent'
+		icon: (self iconNamed: #down)
+		subMenu: groupMenu.
+
+]
 
 { #category : #'private - menu' }
 HiRS3ViewBuilder >> basicGoTo: aHiNode [
@@ -60,7 +100,8 @@ HiRS3ViewBuilder >> edgeMenuInteraction [
 				argument: edge model target)
 				icon: (self iconNamed: #down).
 			(menu add: 'Inspect' target: edge selector: #inspect)
-				icon: (self iconNamed: #smallInspectIt) ];
+				icon: (self iconNamed: #smallInspectIt)
+			];
 		yourself
 ]
 
@@ -187,34 +228,8 @@ HiRS3ViewBuilder >> newView [
 HiRS3ViewBuilder >> nodeMenuInteraction [
 	^ RSMenuActivable new
 		menuDo: [ :menu :node |
-			| menu2 |
-			menu2 := MenuMorph new.
-			node model incomingLinks reverseDo: [:each |
-				(menu2
-					add: ('{1} above' format: { node model rulerPoint y - each origin rulerPoint y })
-					target: self
-					selector: #basicGoTo:
-					argument: each origin)
-					icon: (self iconNamed: #up)
-		 	].
-			menu
-				add: 'Go to child'
-				icon: (self iconNamed: #up)
-				subMenu: menu2.
-
-			menu2 := MenuMorph new.
-			node model outgoingLinks reverseDo: [:each |
-				(menu2
-					add: ('{1} below' format: { each target rulerPoint y - node model rulerPoint y })
-					target: self
-					selector: #basicGoTo:
-					argument: each target)
-					icon: (self iconNamed: #down)
-			].
-			menu
-				add: 'Go to parent'
-				icon: (self iconNamed: #down)
-				subMenu: menu2.
+			self addGoToChildSubMenuIn: menu node: node.
+			self addGoToParentSubmenuIn: menu node: node.
 
 			(menu add: 'Inspect' target: node selector: #inspect)
 				icon: (self iconNamed: #smallInspectIt).
