@@ -75,21 +75,6 @@ HiRS3ViewBuilder >> edgeMenuInteraction [
 		yourself
 ]
 
-{ #category : #accessing }
-HiRS3ViewBuilder >> formHeight [
-	"Answer the height in pixels for the form to be rendered."
-	
-	^ ruler numberOfRows * self rowHeight
-]
-
-{ #category : #accessing }
-HiRS3ViewBuilder >> formWidth [
-	"Answer the width in pixels for the form to be rendered."
-
-	"Note: The reason of numberOfColumns + 2 is the left and right margin."
-	^ (ruler numberOfColumns + 2) * cellWidth
-]
-
 { #category : #'private - highlighting' }
 HiRS3ViewBuilder >> highlightBranchAtLink: aRSEdge in: view [
 
@@ -148,65 +133,65 @@ HiRS3ViewBuilder >> linkShapeBuilder: anObject [
 
 { #category : #API }
 HiRS3ViewBuilder >> newView [
-	| v rowSize color rectangle |
-	v := RSView new.
+	| view rulerPointExtent branchScale rectangle |
+	view := RSView new.
 
-	rowSize := cellWidth @ rowHeight.
-	color := TSScale google20.
+	rulerPointExtent := cellWidth @ rowHeight.
+	branchScale := TSScale google20.
 
 	nodeShapeBuilder
-		position: [ :node | node rulerPoint * rowSize ];
+		position: [ :node | node rulerPoint * rulerPointExtent ];
 		border: [ :node |
 			TSBorder new
 				color: 
-					(color scale: (ruler branchAtNode: node ifAbsent: [ node hash ]));
+					(branchScale scale: (ruler branchAtNode: node ifAbsent: [ node hash ]));
 				yourself ].
-	v addAll: (nodeShapeBuilder elementsOn: ruler nodes).
+	view addAll: (nodeShapeBuilder elementsOn: ruler nodes).
 	
 	linkShapeBuilder
-		color: [ :link | color scale: (ruler branchAtLink: link) ];
+		color: [ :link | branchScale scale: (ruler branchAtLink: link) ];
 		controlPoints: [ :link |
 			OrderedCollection new
-				add: (v elementFromModel: link origin);
-				addAll: (link intermediatePoints) * rowSize;
-				add: (v elementFromModel: link target);
+				add: (view elementFromModel: link origin);
+				addAll: link intermediatePoints * rulerPointExtent;
+				add: (view elementFromModel: link target);
 				yourself ].
 	ruler nodes do:[:node| | edges |
 		edges := linkShapeBuilder edgesOn: node incomingLinks.
-		v addAll: edges ].
-	v edges pushBack.
+		view addAll: edges ].
+	view edges pushBack.
 
-	v color: Color transparent.
+	view color: Color transparent.
 
-	rectangle := (0 @ rowHeight rectangle: (self formWidth @ self formHeight)).
+	rectangle := 0 @ rowHeight rectangle: self rulerExtent.
 
-	v createMorph.
-	v camera 
+	view createMorph.
+	view camera 
 		translateTo: rectangle rsCenter;
 		scale: 1.
-	v morph extent: self formWidth @ self rowHeight.
+	view morph extent:  self rulerWidth @ rowHeight.
 
-	v elements do: [ :e |
+	view elements do: [ :e |
 		e attributes at: #originalColor put: e color.
 		e attributes at: #originalBorderColor put: e border color.
 		e attributes at: #originalBorderWidth put: e border width.
 		e
-			when: TSMouseEnter do: [ self highlightBranchesAtNode: e in: v. self signalChange. ];
-			when: TSMouseLeave do: [ self unhighlightAllIn: v. self signalChange. ];
+			when: TSMouseEnter do: [ self highlightBranchesAtNode: e in: view. self signalChange. ];
+			when: TSMouseLeave do: [ self unhighlightAllIn: view. self signalChange. ];
 			addInteraction: self nodeMenuInteraction.
 		].
 	
-	v edges do: [ :e |
+	view edges do: [ :e |
 		e attributes at: #originalColor put: e color.
 		e attributes at: #originalBorderColor put: e border color.
 		e attributes at: #originalBorderWidth put: e border width.
 		e
-			when: TSMouseEnter do: [ self highlightBranchAtLink: e in: v. self signalChange. ];
-			when: TSMouseLeave do: [ self unhighlightAllIn: v. self signalChange. ];
+			when: TSMouseEnter do: [ self highlightBranchAtLink: e in: view. self signalChange. ];
+			when: TSMouseLeave do: [ self unhighlightAllIn: view. self signalChange. ];
 			addInteraction: self edgeMenuInteraction.
 		 ].
 
-	^ v
+	^ view
 ]
 
 { #category : #'private - menu' }
@@ -290,6 +275,28 @@ HiRS3ViewBuilder >> ruler [
 { #category : #accessing }
 HiRS3ViewBuilder >> ruler: anObject [
 	ruler := anObject
+]
+
+{ #category : #accessing }
+HiRS3ViewBuilder >> rulerExtent [
+	"Answer the pixel extent for the view to be rendered (as a Point)."
+
+	^ self rulerWidth @ self rulerHeight
+]
+
+{ #category : #accessing }
+HiRS3ViewBuilder >> rulerHeight [
+	"Answer the height in pixels for the form to be rendered."
+	
+	^ ruler numberOfRows * self rowHeight
+]
+
+{ #category : #accessing }
+HiRS3ViewBuilder >> rulerWidth [
+	"Answer the width in pixels for the form to be rendered."
+
+	"Note: The reason of numberOfColumns + 2 is the left and right margin."
+	^ (ruler numberOfColumns + 2) * cellWidth
 ]
 
 { #category : #private }

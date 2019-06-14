@@ -40,7 +40,7 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 	| cellY copy rectangle copyRectangle copyShapes |
 	cellY := ((viewBuilder ruler nodeAtRow: rowIndex) rulerPoint y) * viewBuilder rowHeight.
 
-	rectangle := (0@(viewBuilder rowHeight) rectangle: (viewBuilder formWidth @ viewBuilder formHeight)).
+	rectangle := 0 @ viewBuilder rowHeight rectangle: viewBuilder rulerExtent.
 
 	view ifNil: [
 		viewBuilder onGoToDo: [:aHiNode | table selectIndex: aHiNode rulerPoint y ].
@@ -50,8 +50,8 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 	"Create a copy"
 	copy := view morph copyWithIndependentCamera.
 	copyRectangle := Rectangle 
-		rsCenter: rectangle rsCenter x@cellY 
-		extent: viewBuilder formWidth @ viewBuilder rowHeight.
+		rsCenter: rectangle rsCenter x @ cellY 
+		extent: viewBuilder rulerExtent.
 
 	"Time optimization for drawOn until RS3 implements it: the canvas only knows the shapes that are visible."
 	copyShapes := view canvas shapes select: [ :s | copyRectangle intersects: s encompassingRectangle ].
@@ -100,7 +100,7 @@ HiRS3ColumnController >> ruler: aHiRuler [
 { #category : #API }
 HiRS3ColumnController >> rulerWidth [
 
-	^ viewBuilder formWidth
+	^ viewBuilder rulerWidth
 ]
 
 { #category : #accessing }
