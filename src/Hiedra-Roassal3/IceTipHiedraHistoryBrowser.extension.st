@@ -9,14 +9,12 @@ IceTipHiedraHistoryBrowser >> initializeCommitList [
 			id: ' ';
 			yourself).
 
-	commitList widget rowHeight: 30.
-
 	super initializeCommitList.
 ]
 
 { #category : #'*Hiedra-Roassal3' }
 IceTipHiedraHistoryBrowser >> newCommitsDataSource [
-	^ IceTipHiRS3DataSource new 
+	^ IceTipHiRS3DataSource newCurrentDataSource
 		tool: self;
 		elements: #(); "It will be set when refreshing"
 		yourself

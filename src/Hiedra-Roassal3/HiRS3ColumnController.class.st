@@ -5,33 +5,10 @@ Class {
 		'cellMorphByRowIndex',
 		'view',
 		'table',
-		'changeBlockClosure',
 		'viewBuilder'
 	],
 	#category : #'Hiedra-Roassal3-UI'
 }
-
-{ #category : #'private - menu' }
-HiRS3ColumnController >> actionGoTo: aHiNode [
-	table selectIndex: aHiNode rulerPoint y
-]
-
-{ #category : #'private - highlighting' }
-HiRS3ColumnController >> basicHighlightNode: aRSElement [
-"	aRSElement color:
-		((aRSElement attributes at: #originalColor)
-				mixed: 0.8
-				with: UITheme current textColor).
-"	aRSElement border color: UITheme current textColor
-]
-
-{ #category : #'private - highlighting' }
-HiRS3ColumnController >> basicUnhighlightElement: aRSElement [
-	aRSElement color: (aRSElement attributes at: #originalColor).
-	aRSElement border
-		color: (aRSElement attributes at: #originalBorderColor);
-		width: (aRSElement attributes at: #originalBorderWidth).
-]
 
 { #category : #API }
 HiRS3ColumnController >> cellMorphAtRow: rowIndex [
@@ -46,57 +23,6 @@ HiRS3ColumnController >> cellMorphAtValue: aValue [
 	"Answer a Morph that corresponds to aValue. See #cellMorphAtRowIndex: for more information."
 
 	^ self cellMorphAtRow: (self rowIndexAtValue: aValue)
-]
-
-{ #category : #'private - menu' }
-HiRS3ColumnController >> edgeMenuInteraction [
-	^ RSMenuActivable new
-		menuDo: [ :menu :edge | 
-			(menu
-				add: 'Go to child'
-				target: self
-				selector: #actionGoTo:
-				argument: edge model origin)
-				icon: (self iconNamed: #up).
-			(menu
-				add: 'Go to parent'
-				target: self
-				selector: #actionGoTo:
-				argument: edge model target)
-				icon: (self iconNamed: #down).
-			(menu add: 'Inspect' target: edge selector: #inspect)
-				icon: (self iconNamed: #smallInspectIt) ];
-		yourself
-]
-
-{ #category : #'private - highlighting' }
-HiRS3ColumnController >> highlightBranchAtLink: aRSEdge [
-
-	| branch linksToHighlight aColor |
-	branch := viewBuilder ruler branchAtLink: aRSEdge model.
-	linksToHighlight := Array streamContents: [:stream |
-		viewBuilder ruler branchByLink keysAndValuesDo: [:key :value | 
-		value = branch ifTrue: [ stream nextPut: key ] ] ].
-	aColor := (aRSEdge attributes at: #originalColor) mixed: 0.4 with: UITheme current textColor.
-
-	view edges
-		select: [:edge | linksToHighlight includes: edge model ]
-		thenDo: [:edge |
-			edge color: aColor.
-			self basicHighlightNode: edge controlPoints first.
-			self basicHighlightNode: edge controlPoints last.
-			].
-
-]
-
-{ #category : #'private - highlighting' }
-HiRS3ColumnController >> highlightBranchesAtNode: aRSElement [
-
-	aRSElement connectedEdges do: [ :each |
-		self highlightBranchAtLink: each ].
-
-	aRSElement border width: 1.5.
-
 ]
 
 { #category : #initialization }
@@ -117,32 +43,8 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 	rectangle := (0@(viewBuilder rowHeight) rectangle: (viewBuilder formWidth @ viewBuilder formHeight)).
 
 	view ifNil: [
+		viewBuilder onGoToDo: [:aHiNode | table selectIndex: aHiNode rulerPoint y ].
 		view := viewBuilder newView.
-		view createMorph.
-		view camera 
-			translateTo: rectangle rsCenter;
-			scale: 1.
-		view morph extent: viewBuilder formWidth @ viewBuilder rowHeight.
-
-		view elements do: [ :e |
-			e attributes at: #originalColor put: e color.
-			e attributes at: #originalBorderColor put: e border color.
-			e attributes at: #originalBorderWidth put: e border width.
-			e
-				when: TSMouseEnter do: [ self highlightBranchesAtNode: e. self updateTable. ];
-				when: TSMouseLeave do: [ self unhighlightAll. self updateTable. ];
-				addInteraction: self nodeMenuInteraction.
-			].
-		
-		view edges do: [ :e |
-			e attributes at: #originalColor put: e color.
-			e attributes at: #originalBorderColor put: e border color.
-			e attributes at: #originalBorderWidth put: e border width.
-			e
-				when: TSMouseEnter do: [ self highlightBranchAtLink: e. self updateTable. ];
-				when: TSMouseLeave do: [ self unhighlightAll. self updateTable. ];
-				addInteraction: self edgeMenuInteraction.
-			 ]
 		].
 
 	"Create a copy"
@@ -165,48 +67,9 @@ HiRS3ColumnController >> newCellMorphForRow: rowIndex [
 
 ]
 
-{ #category : #'private - menu' }
-HiRS3ColumnController >> nodeMenuInteraction [
-	^ RSMenuActivable new
-		menuDo: [ :menu :node |
-			| menu2 |
-			menu2 := MenuMorph new.
-			node model incomingLinks reverseDo: [:each |
-				(menu2
-					add: ('{1} above' format: { node model rulerPoint y - each origin rulerPoint y })
-					target: self
-					selector: #actionGoTo:
-					argument: each origin)
-					icon: (self iconNamed: #up)
-		 	].
-			menu
-				add: 'Go to child'
-				icon: (self iconNamed: #up)
-				subMenu: menu2.
-
-			menu2 := MenuMorph new.
-			node model outgoingLinks reverseDo: [:each |
-				(menu2
-					add: ('{1} below' format: { each target rulerPoint y - node model rulerPoint y })
-					target: self
-					selector: #actionGoTo:
-					argument: each target)
-					icon: (self iconNamed: #down)
-			].
-			menu
-				add: 'Go to parent'
-				icon: (self iconNamed: #down)
-				subMenu: menu2.
-
-			(menu add: 'Inspect' target: node selector: #inspect)
-				icon: (self iconNamed: #smallInspectIt).
-			];
-		yourself
-]
-
-{ #category : #accessing }
+{ #category : #API }
 HiRS3ColumnController >> onChangeDo: aBlockClosure [ 
-	changeBlockClosure := aBlockClosure
+	viewBuilder onChangeDo: aBlockClosure
 ]
 
 { #category : #API }
@@ -248,21 +111,6 @@ HiRS3ColumnController >> table [
 { #category : #accessing }
 HiRS3ColumnController >> table: anObject [
 	table := anObject
-]
-
-{ #category : #'private - highlighting' }
-HiRS3ColumnController >> unhighlightAll [
-
-	view edges do: [:each | self basicUnhighlightElement: each ].
-	view elements do: [:each | self basicUnhighlightElement: each ].
-
-]
-
-{ #category : #private }
-HiRS3ColumnController >> updateTable [
-
-	table changed.
-	changeBlockClosure value.
 ]
 
 { #category : #API }

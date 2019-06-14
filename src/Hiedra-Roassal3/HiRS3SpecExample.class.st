@@ -38,9 +38,9 @@ HiRS3SpecExample class >> openExample: selector [
 
 	self new
 		commits: commits;
-		title: ('Hiedra in Spec - {1} - {2} elements' format: {selector. commits size});
 		extent: 500 @ 700;
-		openWithSpec
+		openWithSpec;
+		withWindowDo: [ :window | window title: ('Hiedra in Spec - {1} - {2} elements' format: {selector. commits size}) ]
 ]
 
 { #category : #accessing }
@@ -69,8 +69,9 @@ HiRS3SpecExample >> initializeWidgets [
 	hiedraColumnController := HiRS3ColumnController new.	
 
 	"Adjust the ruler rendering settings with table's row height."
-	hiedraColumnController rowHeight: FTTableMorph defaultRowHeight floor.
-	hiedraColumnController onChangeDo: [ table notifyPropertyChanged: #columns ].
+	hiedraColumnController
+		rowHeight: FTTableMorph defaultRowHeight floor;
+		onChangeDo: [ table notifyPropertyChanged: #columns ].
 
 	"Configure columns"
 	table columns:	{

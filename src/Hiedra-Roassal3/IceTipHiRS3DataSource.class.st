@@ -3,10 +3,38 @@ Class {
 	#superclass : #IceTipDataSource,
 	#instVars : [
 		'hiedraColumnController',
-		'entityById'
+		'commitById'
+	],
+	#classVars : [
+		'CurrentDataSourceClass'
 	],
 	#category : #'Hiedra-Roassal3-Examples-Iceberg'
 }
+
+{ #category : #accessing }
+IceTipHiRS3DataSource class >> beCurrentDataSourceClass [
+	CurrentDataSourceClass := self
+]
+
+{ #category : #accessing }
+IceTipHiRS3DataSource class >> currentDataSourceClass [
+	^ CurrentDataSourceClass ifNil: [ IceTipDataSource ]
+]
+
+{ #category : #accessing }
+IceTipHiRS3DataSource class >> currentDataSourceClass: aClass [
+	CurrentDataSourceClass := aClass
+]
+
+{ #category : #'instance creation' }
+IceTipHiRS3DataSource class >> newCurrentDataSource [
+	^ self currentDataSourceClass new
+]
+
+{ #category : #accessing }
+IceTipHiRS3DataSource class >> resetCurrentDataSourceClass [
+	CurrentDataSourceClass := nil
+]
 
 { #category : #accessing }
 IceTipHiRS3DataSource >> cellColumn: column row: rowIndex [
@@ -27,9 +55,11 @@ IceTipHiRS3DataSource >> elements: commits [
 	super elements: commits.
 
 	self table ifNil: [ ^self ].
-		
+	
 	"Adjust the ruler rendering settings with table's row height."
-	hiedraColumnController rowHeight: self table rowHeight floor.
+	hiedraColumnController
+		rowHeight: self table rowHeight floor;
+		onChangeDo: [ self table changed ].
 
 	"Create a new ruler model with the new elements"
 	self refreshRulerWithCurrentElements.
@@ -42,32 +72,6 @@ IceTipHiRS3DataSource >> elements: commits [
 
 ]
 
-{ #category : #private }
-IceTipHiRS3DataSource >> freshAvatarsByEmail [
-
-	| firstRemote commitsByEmail commitsIdsToQuery credentials client |
-	elements ifEmpty: [ ^self ].
-	firstRemote := elements first repositoryModel entity remotes
-		ifEmpty: [ ^self ] ifNotEmpty: #first.
-	
-	commitsByEmail := elements groupedBy: [ :each | each entity authorEmail ].
-	commitsIdsToQuery := commitsByEmail values collect: [:each | each last id ].
-	credentials := IceGitHubAPI ensureCredentials; obtainCredentials.
-
-	client := HiGithubAvatarClient new
-		remote: firstRemote;
-		credentials: credentials;
-		avatarSize: self nodeSize;
-		commitsIds: commitsIdsToQuery;
-		yourself.
-
-	^ [ client get.
-		client avatarByEmail ]
-			on: NetworkError, ZnHttpUnsuccessful
-			do: [ :each | Dictionary new ].
-
-]
-
 { #category : #initialization }
 IceTipHiRS3DataSource >> initialize [
 	
@@ -76,39 +80,20 @@ IceTipHiRS3DataSource >> initialize [
 	hiedraColumnController := HiRS3ColumnController new.
 ]
 
-{ #category : #accessing }
-IceTipHiRS3DataSource >> nodeSize [
-	^ 20
-]
-
-{ #category : #private }
-IceTipHiRS3DataSource >> refreshAvatarsWithCurrentElements [
-
-	| avatarByEmail |
-	avatarByEmail := self freshAvatarsByEmail.
-	hiedraColumnController viewBuilder commitAvatarFactory: [ :commitId |
-		avatarByEmail
-			at: (entityById at: commitId) authorEmail
-			ifAbsent: [ self iconNamed: #user ] ]
-]
-
 { #category : #private }
 IceTipHiRS3DataSource >> refreshRulerWithCurrentElements [
 
-	entityById := Dictionary new.
+	commitById := Dictionary new.
 	elements do: [ :aCommit |
 		"Note: Hiedra expects each ancestor id corresponds to a commit in elements."
-		entityById
+		commitById
 			at: aCommit id
 			put: aCommit entity ].
-	hiedraColumnController viewBuilder
-		nodeSize: self nodeSize.
 
 	hiedraColumnController ruler: (HiRulerBuilder
 		newRulerValues: (elements collect: #id)
-		linksBlock: [ :id | (entityById at: id) ancestorIds ]).
+		linksBlock: [ :id | (commitById at: id) ancestorIds ]).
 
 	hiedraColumnController table: self table.
 
-	self refreshAvatarsWithCurrentElements
 ]

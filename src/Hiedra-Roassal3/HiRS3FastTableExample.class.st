@@ -69,7 +69,9 @@ HiRS3FastTableExample >> elements: commits [
 	super elements: commits.
 
 	"Adjust the ruler rendering settings with table's row height."
-	hiedraColumnController rowHeight: self table rowHeight floor.
+	hiedraColumnController
+		rowHeight: self table rowHeight floor;
+		onChangeDo: [ self table changed ].
 
 	"Create a new ruler model with the new elements"
 	hiedraColumnController ruler: (HiRulerBuilder 

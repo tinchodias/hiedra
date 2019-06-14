@@ -6,17 +6,37 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'rowHeight',
-		'nodeSize',
 		'cellWidth',
 		'commitAvatarFactory',
-		'ruler'
+		'ruler',
+		'changeBlockClosure',
+		'actionGoToBlockClosure',
+		'linkShapeBuilder',
+		'nodeShapeBuilder'
 	],
 	#category : #'Hiedra-Roassal3-UI'
 }
 
-{ #category : #accessing }
-HiRS3ViewBuilder >> cellWidth [
-	^ cellWidth
+{ #category : #'private - menu' }
+HiRS3ViewBuilder >> basicGoTo: aHiNode [
+	actionGoToBlockClosure value: aHiNode
+]
+
+{ #category : #'private - highlighting' }
+HiRS3ViewBuilder >> basicHighlightNode: aRSElement [
+"	aRSElement color:
+		((aRSElement attributes at: #originalColor)
+				mixed: 0.8
+				with: UITheme current textColor).
+"	aRSElement border color: UITheme current textColor
+]
+
+{ #category : #'private - highlighting' }
+HiRS3ViewBuilder >> basicUnhighlightElement: aRSElement [
+	aRSElement color: (aRSElement attributes at: #originalColor).
+	aRSElement border
+		color: (aRSElement attributes at: #originalBorderColor);
+		width: (aRSElement attributes at: #originalBorderWidth).
 ]
 
 { #category : #accessing }
@@ -34,6 +54,27 @@ HiRS3ViewBuilder >> commitAvatarFactory: anObject [
 	commitAvatarFactory := anObject
 ]
 
+{ #category : #'private - menu' }
+HiRS3ViewBuilder >> edgeMenuInteraction [
+	^ RSMenuActivable new
+		menuDo: [ :menu :edge | 
+			(menu
+				add: 'Go to child'
+				target: self
+				selector: #basicGoTo:
+				argument: edge model origin)
+				icon: (self iconNamed: #up).
+			(menu
+				add: 'Go to parent'
+				target: self
+				selector: #basicGoTo:
+				argument: edge model target)
+				icon: (self iconNamed: #down).
+			(menu add: 'Inspect' target: edge selector: #inspect)
+				icon: (self iconNamed: #smallInspectIt) ];
+		yourself
+]
+
 { #category : #accessing }
 HiRS3ViewBuilder >> formHeight [
 	"Answer the height in pixels for the form to be rendered."
@@ -46,63 +87,189 @@ HiRS3ViewBuilder >> formWidth [
 	"Answer the width in pixels for the form to be rendered."
 
 	"Note: The reason of numberOfColumns + 2 is the left and right margin."
-	^ (ruler numberOfColumns + 2) * self cellWidth
+	^ (ruler numberOfColumns + 2) * cellWidth
+]
+
+{ #category : #'private - highlighting' }
+HiRS3ViewBuilder >> highlightBranchAtLink: aRSEdge in: view [
+
+	| branch linksToHighlight aColor |
+	branch := ruler branchAtLink: aRSEdge model.
+	linksToHighlight := Array streamContents: [:stream |
+		ruler branchByLink keysAndValuesDo: [:key :value | 
+		value = branch ifTrue: [ stream nextPut: key ] ] ].
+	aColor := (aRSEdge attributes at: #originalColor) mixed: 0.4 with: UITheme current textColor.
+
+	view edges
+		select: [:edge | linksToHighlight includes: edge model ]
+		thenDo: [:edge |
+			edge color: aColor.
+			self basicHighlightNode: edge controlPoints first.
+			self basicHighlightNode: edge controlPoints last.
+			].
+
+]
+
+{ #category : #'private - highlighting' }
+HiRS3ViewBuilder >> highlightBranchesAtNode: aRSElement in: view [
+
+	aRSElement connectedEdges do: [ :each |
+		self highlightBranchAtLink: each in: view ].
+
+	aRSElement border width: 1.5.
+
 ]
 
 { #category : #initialization }
 HiRS3ViewBuilder >> initialize [
 	super initialize.
 	
-	cellWidth := 20.
-	nodeSize := 20.
-	commitAvatarFactory := [ :nodeValue |
-		self iconNamed: #user ]
+	cellWidth := 9.
+	nodeShapeBuilder := RSShapeBuilder circle
+		color: Smalltalk ui theme backgroundColor;
+		size: 7;
+		yourself.
+	linkShapeBuilder := RSSingleEdgeBuilder polyline
+		cornerRadii: 7;
+		width: 2.5;
+		joinRound.
+
+]
+
+{ #category : #accessing }
+HiRS3ViewBuilder >> linkShapeBuilder [
+	^ linkShapeBuilder
+]
+
+{ #category : #accessing }
+HiRS3ViewBuilder >> linkShapeBuilder: anObject [
+	linkShapeBuilder := anObject
 ]
 
 { #category : #API }
 HiRS3ViewBuilder >> newView [
-	| v rowSize shape color polylineShape |
+	| v rowSize color rectangle |
 	v := RSView new.
 
-	rowSize := self cellWidth @ self rowHeight.
+	rowSize := cellWidth @ rowHeight.
 	color := TSScale google20.
 
-	shape := RSShapeBuilder circle
-		size: nodeSize;
-		paint: [ :node | commitAvatarFactory value: node theValue ];
-		border: [ TSBorder new ];
-		position: [ :node| node rulerPoint * rowSize ].
-	v addAll: (shape elementsOn: ruler nodes).
+	nodeShapeBuilder
+		position: [ :node | node rulerPoint * rowSize ];
+		border: [ :node |
+			TSBorder new
+				color: 
+					(color scale: (ruler branchAtNode: node ifAbsent: [ node hash ]));
+				yourself ].
+	v addAll: (nodeShapeBuilder elementsOn: ruler nodes).
 	
-	polylineShape := RSSingleEdgeBuilder polyline
-		cornerRadii: 10;
-		width: 3;
-		joinRound;
+	linkShapeBuilder
 		color: [ :link | color scale: (ruler branchAtLink: link) ];
 		controlPoints: [ :link |
 			OrderedCollection new
 				add: (v elementFromModel: link origin);
-				addAll: (link intermediatePoints)*rowSize;
+				addAll: (link intermediatePoints) * rowSize;
 				add: (v elementFromModel: link target);
 				yourself ].
 	ruler nodes do:[:node| | edges |
-		edges := polylineShape edgesOn: node incomingLinks.
+		edges := linkShapeBuilder edgesOn: node incomingLinks.
 		v addAll: edges ].
 	v edges pushBack.
 
 	v color: Color transparent.
+
+	rectangle := (0 @ rowHeight rectangle: (self formWidth @ self formHeight)).
+
+	v createMorph.
+	v camera 
+		translateTo: rectangle rsCenter;
+		scale: 1.
+	v morph extent: self formWidth @ self rowHeight.
+
+	v elements do: [ :e |
+		e attributes at: #originalColor put: e color.
+		e attributes at: #originalBorderColor put: e border color.
+		e attributes at: #originalBorderWidth put: e border width.
+		e
+			when: TSMouseEnter do: [ self highlightBranchesAtNode: e in: v. self signalChange. ];
+			when: TSMouseLeave do: [ self unhighlightAllIn: v. self signalChange. ];
+			addInteraction: self nodeMenuInteraction.
+		].
 	
+	v edges do: [ :e |
+		e attributes at: #originalColor put: e color.
+		e attributes at: #originalBorderColor put: e border color.
+		e attributes at: #originalBorderWidth put: e border width.
+		e
+			when: TSMouseEnter do: [ self highlightBranchAtLink: e in: v. self signalChange. ];
+			when: TSMouseLeave do: [ self unhighlightAllIn: v. self signalChange. ];
+			addInteraction: self edgeMenuInteraction.
+		 ].
+
 	^ v
 ]
 
-{ #category : #accessing }
-HiRS3ViewBuilder >> nodeSize [
-	^ nodeSize
+{ #category : #'private - menu' }
+HiRS3ViewBuilder >> nodeMenuInteraction [
+	^ RSMenuActivable new
+		menuDo: [ :menu :node |
+			| menu2 |
+			menu2 := MenuMorph new.
+			node model incomingLinks reverseDo: [:each |
+				(menu2
+					add: ('{1} above' format: { node model rulerPoint y - each origin rulerPoint y })
+					target: self
+					selector: #basicGoTo:
+					argument: each origin)
+					icon: (self iconNamed: #up)
+		 	].
+			menu
+				add: 'Go to child'
+				icon: (self iconNamed: #up)
+				subMenu: menu2.
+
+			menu2 := MenuMorph new.
+			node model outgoingLinks reverseDo: [:each |
+				(menu2
+					add: ('{1} below' format: { each target rulerPoint y - node model rulerPoint y })
+					target: self
+					selector: #basicGoTo:
+					argument: each target)
+					icon: (self iconNamed: #down)
+			].
+			menu
+				add: 'Go to parent'
+				icon: (self iconNamed: #down)
+				subMenu: menu2.
+
+			(menu add: 'Inspect' target: node selector: #inspect)
+				icon: (self iconNamed: #smallInspectIt).
+			];
+		yourself
 ]
 
 { #category : #accessing }
-HiRS3ViewBuilder >> nodeSize: anInteger [
-	nodeSize := anInteger
+HiRS3ViewBuilder >> nodeShapeBuilder [
+	^ nodeShapeBuilder
+]
+
+{ #category : #accessing }
+HiRS3ViewBuilder >> nodeShapeBuilder: anObject [
+	nodeShapeBuilder := anObject
+]
+
+{ #category : #accessing }
+HiRS3ViewBuilder >> onChangeDo: aBlockClosure [
+	"Establishes what to do when there is something new in the view."
+
+	changeBlockClosure := aBlockClosure
+]
+
+{ #category : #accessing }
+HiRS3ViewBuilder >> onGoToDo: aBlockClosure [
+	"Establishes what to do when user selects go to in the contextual menu. The block will receive an HiNode as argument."
+
+	actionGoToBlockClosure := aBlockClosure
 ]
 
 { #category : #accessing }
@@ -123,4 +290,17 @@ HiRS3ViewBuilder >> ruler [
 { #category : #accessing }
 HiRS3ViewBuilder >> ruler: anObject [
 	ruler := anObject
+]
+
+{ #category : #private }
+HiRS3ViewBuilder >> signalChange [
+	changeBlockClosure value
+]
+
+{ #category : #'private - highlighting' }
+HiRS3ViewBuilder >> unhighlightAllIn: view [
+
+	view edges do: [:each | self basicUnhighlightElement: each ].
+	view elements do: [:each | self basicUnhighlightElement: each ].
+
 ]
