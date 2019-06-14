@@ -7,7 +7,6 @@ Class {
 	#instVars : [
 		'rowHeight',
 		'cellWidth',
-		'commitAvatarFactory',
 		'ruler',
 		'changeBlockClosure',
 		'actionGoToBlockClosure',
@@ -42,16 +41,6 @@ HiRS3ViewBuilder >> basicUnhighlightElement: aRSElement [
 { #category : #accessing }
 HiRS3ViewBuilder >> cellWidth: anObject [
 	cellWidth := anObject
-]
-
-{ #category : #accessing }
-HiRS3ViewBuilder >> commitAvatarFactory [
-	^ commitAvatarFactory
-]
-
-{ #category : #accessing }
-HiRS3ViewBuilder >> commitAvatarFactory: anObject [
-	commitAvatarFactory := anObject
 ]
 
 { #category : #'private - menu' }
