@@ -312,7 +312,7 @@ HiSimpleRenderer >> newForm [
 	"Answer a new form, rendered with the current ruler and rowInterval."
 	
 	| athensSurface |
-	athensSurface := AthensCairoSurface extent: self formWidth @ self formHeight.
+	athensSurface := AthensCairoSurface extent: self formExtent.
 	
 	athensSurface drawDuring: [ :athensCanvas |
 		athensCanvas pathTransform translateBy: self initialTranslationInAthensCanvas.

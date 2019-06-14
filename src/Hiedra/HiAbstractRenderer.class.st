@@ -18,6 +18,13 @@ HiAbstractRenderer >> cellWidth [
 ]
 
 { #category : #accessing }
+HiAbstractRenderer >> formExtent [
+	"Answer the pixel extent for the form to be rendered (as a Point)."
+
+	^ self formWidth @ self formHeight
+]
+
+{ #category : #accessing }
 HiAbstractRenderer >> formHeight [
 	"Answer the height in pixels for the form to be rendered."
 
