@@ -24,18 +24,22 @@ IceTipHiRS3AvatarsDataSource >> avatarSize [
 
 { #category : #private }
 IceTipHiRS3AvatarsDataSource >> freshAvatarsByEmail [
+	"Answer a Dictionary<String,Form> for the authors of all commits. It gets the avatars using internet, and answer an empty dictionary when HTTP connections weren't successful."
 
-	| firstRemote commitsByEmail commitsIdsToQuery credentials client |
-	elements ifEmpty: [ ^self ].
-	firstRemote := elements first repositoryModel entity remotes
-		ifEmpty: [ ^self ] ifNotEmpty: #first.
+	| githubRemote commitsByEmail commitsIdsToQuery credentials client |
+	elements ifEmpty: [ ^ Dictionary new ].
+	githubRemote := (elements first repositoryModel remotes
+		select: [ :each | each host = 'github.com' ])
+			ifEmpty: [ Dictionary new ]
+			ifNotEmpty: #anyOne.
 	
 	commitsByEmail := elements groupedBy: [ :each | each entity authorEmail ].
 	commitsIdsToQuery := commitsByEmail values collect: [:each | each last id ].
+	
 	credentials := IceGitHubAPI ensureCredentials; obtainCredentials.
 
 	client := HiGithubAvatarClient new
-		remote: firstRemote;
+		remote: githubRemote;
 		credentials: credentials;
 		avatarSize: self avatarSize;
 		commitsIds: commitsIdsToQuery;

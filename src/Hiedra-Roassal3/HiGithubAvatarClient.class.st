@@ -66,10 +66,10 @@ HiGithubAvatarClient >> get [
 
 	"Query Github"
 	
-([	response := IceGitHubAPI new
+	([	response := IceGitHubAPI new
 		credentials: self credentials;
 		graphql: self graphQL.
-] timeToRun asMilliSeconds asString, ' - to query github') logCr.
+	] timeToRun asMilliSeconds asString, ' - to query github') logCr.
 
 	"On sucess: Get avatar URLs"
 	avatarUrlByEmail := Dictionary new.
@@ -80,7 +80,7 @@ HiGithubAvatarClient >> get [
 				at: (each at: 'email')
 				put: (each at: 'avatarUrl') ].
 
-	self flag: #todo. "On fail"
+	self flag: #todo. "On fail!?"
 
 	"Get avatar images"
 	([self getAvatarsAsync] timeToRun asMilliSeconds asString, ' - to get ALL avatars') logCr.
