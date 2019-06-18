@@ -18,12 +18,17 @@ IceTipHiRS3DataSource class >> beCurrentDataSourceClass [
 
 { #category : #accessing }
 IceTipHiRS3DataSource class >> currentDataSourceClass [
-	^ CurrentDataSourceClass ifNil: [ IceTipDataSource ]
+	^ CurrentDataSourceClass ifNil: [ IceTipHiedraDataSource ]
 ]
 
 { #category : #accessing }
 IceTipHiRS3DataSource class >> currentDataSourceClass: aClass [
 	CurrentDataSourceClass := aClass
+]
+
+{ #category : #accessing }
+IceTipHiRS3DataSource class >> dataSourceClassOptions [
+	^ {IceTipHiedraDataSource}, IceTipHiRS3AvatarsDataSource subclasses
 ]
 
 { #category : #'instance creation' }
