@@ -13,8 +13,13 @@ IceTipHiRS3CommitInfoPresenter >> initializeCommitPanel [
 
 	notebookPanel
 		addPage: (roassal3Page := self newDiffPage 
-			title: 'Roassal3 diff from ancestor';
+			title: 'UML diff from ancestor';
 			presenterProvider: [ self roassal3DiffFromAncestor ];
+			yourself).
+	notebookPanel
+		addPage: (roassal3Page := self newDiffPage 
+			title: 'UML diff 2 from ancestor';
+			presenterProvider: [ self roassal3Diff2FromAncestor ];
 			yourself).
 
 	super initializeCommitPanel.
@@ -22,14 +27,24 @@ IceTipHiRS3CommitInfoPresenter >> initializeCommitPanel [
 ]
 
 { #category : #initialization }
-IceTipHiRS3CommitInfoPresenter >> roassal3DiffFromAncestor [
+IceTipHiRS3CommitInfoPresenter >> roassal3Diff2FromAncestor [
 
 	selectedModel ifNil: [ ^ self newEmpty ].
-	^ self roassal3ViewPresenterFor: (ancestorTabContainer diffFor: selectedModel)
+	
+	^ (self instantiate: RS3UMLWithCodePresenter)
+			diffPresenter: self diffFromAncestor;
+			diffModel: (ancestorTabContainer diffFor: selectedModel);
+			yourself
+
 ]
 
 { #category : #initialization }
-IceTipHiRS3CommitInfoPresenter >> roassal3ViewPresenterFor: diffModel [
+IceTipHiRS3CommitInfoPresenter >> roassal3DiffFromAncestor [
 
-	^ self newButton
+	selectedModel ifNil: [ ^ self newEmpty ].
+
+	^ (self instantiate: RS3UMLDiffPresenter)
+			diffModel: (ancestorTabContainer diffFor: selectedModel);
+			yourself
+
 ]
