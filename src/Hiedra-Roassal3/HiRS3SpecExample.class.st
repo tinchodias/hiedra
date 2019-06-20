@@ -62,23 +62,34 @@ HiRS3SpecExample >> commits: commits [
 
 { #category : #initialization }
 HiRS3SpecExample >> initializeWidgets [
-	
 	table := self instantiate: TablePresenter.
 
 	"Configure hiedra controller"
-	hiedraColumnController := HiRS3ColumnController new.	
-
-	"Adjust the ruler rendering settings with table's row height."
+	hiedraColumnController := HiRS3ColumnController new.
 	hiedraColumnController
-		rowHeight: FTTableMorph defaultRowHeight floor;
-		onChangeDo: [ table notifyPropertyChanged: #columns ].
+		rowHeight: FTTableMorph defaultRowHeight floor.
+
+	table announcer
+		when: WidgetBuilt
+		send: #onTableWidgetBuilt
+		to: self.
 
 	"Configure columns"
-	table columns:	{
-		ImageTableColumn evaluated: [ :item |
-			hiedraColumnController cellMorphAtValue: item ].
-		StringTableColumn evaluated: #comment.
-	}.
+	table
+		columns:
+			{(ImageTableColumn
+				evaluated: [ :item | hiedraColumnController cellMorphAtValue: item ]).
+			(StringTableColumn evaluated: #comment)}
+]
+
+{ #category : #initialization }
+HiRS3SpecExample >> onTableWidgetBuilt [
+	"Set up the Hiedra controller with the widget (assumes Morph)."
+
+	self flag: #todo.
+	hiedraColumnController
+		table: table adapter widget;
+		onChangeDo: [ table adapter widget ifNotNil: [ table adapter widget changed ] ]
 
 ]
 
