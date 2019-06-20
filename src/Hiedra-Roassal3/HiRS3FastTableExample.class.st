@@ -69,7 +69,9 @@ HiRS3FastTableExample >> elements: commits [
 	super elements: commits.
 
 	"Adjust the ruler rendering settings with table's row height."
+	self flag: #todo. "redundant! row height can be accessed through the table"
 	hiedraColumnController
+		table: self table;
 		rowHeight: self table rowHeight floor;
 		onChangeDo: [ self table changed ].
 
@@ -80,12 +82,10 @@ HiRS3FastTableExample >> elements: commits [
 			aCommit parentIds collect: [:id | 
 				commits detect: [:each | each id = id ] ] ]).
 
-	hiedraColumnController table: self table.
-
 	"Reset the visualization"
 	hiedraColumnController reset.
 
-	"Adjust the column width in the table"
+	"Now, we know the ruler width, so let's adjust the table's column width"
 	self table columns first width: hiedraColumnController rulerWidth.
 
 ]
