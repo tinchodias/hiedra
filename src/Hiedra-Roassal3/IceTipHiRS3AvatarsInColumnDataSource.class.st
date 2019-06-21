@@ -26,7 +26,9 @@ IceTipHiRS3AvatarsInColumnDataSource >> cellColumn: column row: rowIndex [
 	cell := super cellColumn: column row: rowIndex.
 	
 	column id = 'Author' ifTrue: [
-		cell addMorphFront: (self avatarFor: (self elementAt: rowIndex) id) asMorph
+		cell addMorphFront: ((self avatarFor: (self elementAt: rowIndex) id) asMorph
+			useRoundedCorners;
+			yourself)
 	].
 
 	
