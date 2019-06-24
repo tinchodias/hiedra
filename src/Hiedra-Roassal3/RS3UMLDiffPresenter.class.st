@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'diffPresenter',
 		'viewPresenter',
-		'iceDiffModel'
+		'iceDiffModel',
+		'packageColorScale'
 	],
 	#category : #'Hiedra-Roassal3-Examples-Iceberg'
 }
@@ -21,7 +22,9 @@ RS3UMLDiffPresenter class >> defaultSpec [
 { #category : #private }
 RS3UMLDiffPresenter >> addInteractions: view [
 	| elements connectedClasses singleClasses foo hierElements |
-	view addInteraction: RSControlsView.
+	view 
+		addInteraction: RSLightShapesView;
+		addInteraction: RSControlsView.
 	foo := RSTreeLayout new
 		edges: view edges.
 	elements := view elements.
@@ -47,20 +50,16 @@ RS3UMLDiffPresenter >> addInteractions: view [
 
 { #category : #private }
 RS3UMLDiffPresenter >> buildUMLDiffOn: view [
-	| classesByName metaclassesByName builder classes metaclasses |
-"	iceDiffModel tree isEmpty ifTrue: [ ^self ]."
-
+	| visitor builder classesByName metaclassesByName |
+	visitor := RS3NodesEntityCollector new.
+	iceDiffModel tree accept: visitor.
+	
 	classesByName := Dictionary new.
 	metaclassesByName := Dictionary new.
-
-	self flag: #fix. "This method doesn't iterate over the class if only a contained method changed!!!"
-	iceDiffModel tree allChildrenDo: [ :node |
-
-		node value definition isClassDefinition ifTrue: [ 
-			(node value definition isMeta
-				ifFalse: [ classesByName at: node key put: node ]
-				ifTrue: [ metaclassesByName at: (node key allButLast: ' class' size) asSymbol put: node ]) ]
-		].
+	visitor nodesWithClasses do: [ :node |
+		classesByName at: node key put: node ].
+	visitor nodesWithMetaclasses do: [ :node |
+		metaclassesByName at: (node key allButLast: ' class' size) put: node ].
 
 	builder := RSUMLClassBuilder new.
 	builder view: view.
@@ -80,13 +79,11 @@ RS3UMLDiffPresenter >> buildUMLDiffOn: view [
 	builder shape: (RSShapeBuilder composite 
 		interactionDo: [ :i | i draggable; popupText: #key ];
 		shapes: [ :m | builder createShapesFor: m ]).
+	builder renderer classBoxShape
+		color: [ :node | (self packageColorScale scale: node key) alpha: 0.3 ].
 	self setupRendererOn: builder.
 	
-	classes := classesByName values.
-"	metaclasses := metaclassesByName associations
-		reject: [:each | classesByName includesKey: each key ]
-		thenCollect: [:each | each value ]."
-	builder classes: classes", metaclasses".
+	builder classes:  classesByName values..
 	builder build.
 	self addInteractions: view.
 ]
@@ -126,6 +123,16 @@ RS3UMLDiffPresenter >> onMouseClickFor: anIceNode [
 ]
 
 { #category : #private }
+RS3UMLDiffPresenter >> packageColorScale [
+	^ packageColorScale
+]
+
+{ #category : #private }
+RS3UMLDiffPresenter >> packageColorScale: aScale [
+	packageColorScale := aScale
+]
+
+{ #category : #private }
 RS3UMLDiffPresenter >> setupRendererOn: builder [
 	| renderer |
 	renderer := builder renderer.
@@ -134,6 +141,9 @@ RS3UMLDiffPresenter >> setupRendererOn: builder [
 	renderer classBoxShape cornerRadius: 3.
 	renderer marker offset: 8.
 	renderer marker shape size: 16.
+	renderer classBoxShape
+		color: [ :node | (self packageColorScale scale: node parent key) alpha: 0.2 ].
+
 	self setupSystemThemeOn: builder.
 
 ]
@@ -145,7 +155,6 @@ RS3UMLDiffPresenter >> setupSystemThemeOn: b [
 	theme := Smalltalk ui theme.
 	b view color: theme backgroundColor.
 	b renderer defaultBorder color: theme textColor.
-	b renderer classBoxShape color: theme backgroundColor.
 	b renderer marker shape color: theme backgroundColor.
 
 ]

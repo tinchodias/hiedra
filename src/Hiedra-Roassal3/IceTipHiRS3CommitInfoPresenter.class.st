@@ -3,7 +3,8 @@ Class {
 	#superclass : #IceTipCommitInfoPresenter,
 	#instVars : [
 		'visualDiffToAncestorPage',
-		'visualDiffToHeadPage'
+		'visualDiffToHeadPage',
+		'packageColorScale'
 	],
 	#category : #'Hiedra-Roassal3-Examples-Iceberg'
 }
@@ -13,6 +14,8 @@ IceTipHiRS3CommitInfoPresenter >> initializeCommitPanel [
 	"This will be initialised in fact on the first refresh"
 
 	super initializeCommitPanel.
+
+	packageColorScale := TSScale category20.
 
 	notebookPanel
 		addPage: (visualDiffToHeadPage := self newDiffPage 
@@ -26,6 +29,26 @@ IceTipHiRS3CommitInfoPresenter >> initializeCommitPanel [
 			presenterProvider: [ self umlDiffFromAncestorPresenter ];
 			yourself).
 
+	notebookPanel
+		addPage: (visualDiffToAncestorPage := self newDiffPage 
+			title: 'Package diff to HEAD';
+			presenterProvider: [ self packageDiffFromHeadPresenter ];
+			yourself).
+
+
+]
+
+{ #category : #initialization }
+IceTipHiRS3CommitInfoPresenter >> packageDiffFromHeadPresenter [
+
+	selectedModel ifNil: [ ^ self newEmpty ].
+	
+	^ (self instantiate: RS3PackageDiffPresenter)
+			diffPresenter: self diffFromHead;
+			packageColorScale: packageColorScale;
+			iceDiffModel: (headTabContainer diffFor: selectedModel);
+			yourself
+
 ]
 
 { #category : #initialization }
@@ -35,6 +58,7 @@ IceTipHiRS3CommitInfoPresenter >> umlDiffFromAncestorPresenter [
 	
 	^ (self instantiate: RS3UMLDiffPresenter)
 			diffPresenter: self diffFromAncestor;
+			packageColorScale: packageColorScale;
 			iceDiffModel: (ancestorTabContainer diffFor: selectedModel);
 			yourself
 
@@ -47,6 +71,7 @@ IceTipHiRS3CommitInfoPresenter >> umlDiffFromHeadPresenter [
 	
 	^ (self instantiate: RS3UMLDiffPresenter)
 			diffPresenter: self diffFromHead;
+			packageColorScale: packageColorScale;
 			iceDiffModel: (headTabContainer diffFor: selectedModel);
 			yourself
 
