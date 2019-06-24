@@ -19,3 +19,13 @@ IceTipHistoryBrowser >> initializeWidgets [
 		
 	self refresh
 ]
+
+{ #category : #'*Hiedra-Roassal3' }
+IceTipHistoryBrowser class >> panelSpec [
+	<spec>
+	
+	^ SpecPanedLayout newHorizontal
+		add: #commitList;
+		add: #commitInfoTabs;
+		yourself
+]

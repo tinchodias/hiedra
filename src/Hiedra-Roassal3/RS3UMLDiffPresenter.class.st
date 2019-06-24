@@ -11,7 +11,7 @@ Class {
 
 { #category : #specs }
 RS3UMLDiffPresenter class >> defaultSpec [
-	^ SpecBoxLayout newHorizontal
+	^ SpecBoxLayout newVertical
 		add: #viewPresenter;
 		spacing: 5;
 		add: #diffPresenter;
@@ -19,19 +19,48 @@ RS3UMLDiffPresenter class >> defaultSpec [
 ]
 
 { #category : #private }
+RS3UMLDiffPresenter >> addInteractions: view [
+	| elements connectedClasses singleClasses foo hierElements |
+	view addInteraction: RSControlsView.
+	foo := RSTreeLayout new
+		edges: view edges.
+	elements := view elements.
+	connectedClasses := elements select: #hasEdges.
+	singleClasses := elements reject: #hasEdges.
+
+	elements := (foo rootNodesFor: connectedClasses) collect: [ :e | 
+		| group |
+		group :=  TSGroup new.
+		self fill: group with: e.
+		group ]. 
+	
+	hierElements := elements, singleClasses.
+
+	view when: TSExtentChangedEvent do: [ 
+		RSRectanglePackLayout new
+			gap: 0.5;
+			preferredAngle: view extent angle;
+			on: hierElements.
+		view zoomToFit; signalUpdate ].
+
+]
+
+{ #category : #private }
 RS3UMLDiffPresenter >> buildUMLDiffOn: view [
 	| classesByName metaclassesByName builder classes metaclasses |
-	iceDiffModel tree isEmpty ifTrue: [ ^self ].
+"	iceDiffModel tree isEmpty ifTrue: [ ^self ]."
 
 	classesByName := Dictionary new.
 	metaclassesByName := Dictionary new.
 
 	self flag: #fix. "This method doesn't iterate over the class if only a contained method changed!!!"
 	iceDiffModel tree allChildrenDo: [ :node |
+
 		node value definition isClassDefinition ifTrue: [ 
 			(node value definition isMeta
-				ifFalse: [ classesByName  at: node key put: node ]
-				ifTrue: [ metaclassesByName at: (node key allButLast: ' class' size) asSymbol put: node ]) ] ].
+				ifFalse: [ classesByName at: node key put: node ]
+				ifTrue: [ metaclassesByName at: (node key allButLast: ' class' size) asSymbol put: node ]) ]
+		].
 
 	builder := RSUMLClassBuilder new.
 	builder view: view.
@@ -42,7 +71,7 @@ RS3UMLDiffPresenter >> buildUMLDiffOn: view [
 		methods: [ :node |
 			| metaclassMethods |
 			metaclassMethods := metaclassesByName at: node key ifPresent: [:found | found children ] ifAbsent: [ #() ].
-			node children, metaclassMethods ];
+			metaclassMethods, node children ];
 		superclass: [ :node | 
 			| superclassName |
 			superclassName := node value definition asMCDefinition superclassName.
@@ -54,19 +83,25 @@ RS3UMLDiffPresenter >> buildUMLDiffOn: view [
 	self setupRendererOn: builder.
 	
 	classes := classesByName values.
-	metaclasses := metaclassesByName associations
+"	metaclasses := metaclassesByName associations
 		reject: [:each | classesByName includesKey: each key ]
-		thenCollect: [:each | each value ].
-	builder classes: classes, metaclasses.
+		thenCollect: [:each | each value ]."
+	builder classes: classes", metaclasses".
 	builder build.
-
-	view addInteraction: RSControlsView
+	self addInteractions: view.
 ]
 
 { #category : #accessing }
 RS3UMLDiffPresenter >> diffPresenter: aPresenter [
 	diffPresenter := aPresenter
 
+]
+
+{ #category : #private }
+RS3UMLDiffPresenter >> fill: group with: e [
+	group add: e.
+	e outgoingEdges do: [ :ed | 
+		self fill: group with: ed to ].
 ]
 
 { #category : #accessing }

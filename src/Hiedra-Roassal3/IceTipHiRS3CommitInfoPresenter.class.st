@@ -2,7 +2,8 @@ Class {
 	#name : #IceTipHiRS3CommitInfoPresenter,
 	#superclass : #IceTipCommitInfoPresenter,
 	#instVars : [
-		'roassal3Page'
+		'visualDiffToAncestorPage',
+		'visualDiffToHeadPage'
 	],
 	#category : #'Hiedra-Roassal3-Examples-Iceberg'
 }
@@ -11,13 +12,19 @@ Class {
 IceTipHiRS3CommitInfoPresenter >> initializeCommitPanel [
 	"This will be initialised in fact on the first refresh"
 
+	super initializeCommitPanel.
+
 	notebookPanel
-		addPage: (roassal3Page := self newDiffPage 
-			title: 'UMLdiff from ancestor';
-			presenterProvider: [ self umlDiffFromAncestorPresenter ];
+		addPage: (visualDiffToHeadPage := self newDiffPage 
+			title: 'Visual diff to HEAD';
+			presenterProvider: [ self umlDiffFromHeadPresenter ];
 			yourself).
 
-	super initializeCommitPanel.
+	notebookPanel
+		addPage: (visualDiffToAncestorPage := self newDiffPage 
+			title: 'Visual diff to ancestor';
+			presenterProvider: [ self umlDiffFromAncestorPresenter ];
+			yourself).
 
 ]
 
@@ -29,6 +36,18 @@ IceTipHiRS3CommitInfoPresenter >> umlDiffFromAncestorPresenter [
 	^ (self instantiate: RS3UMLDiffPresenter)
 			diffPresenter: self diffFromAncestor;
 			iceDiffModel: (ancestorTabContainer diffFor: selectedModel);
+			yourself
+
+]
+
+{ #category : #initialization }
+IceTipHiRS3CommitInfoPresenter >> umlDiffFromHeadPresenter [
+
+	selectedModel ifNil: [ ^ self newEmpty ].
+	
+	^ (self instantiate: RS3UMLDiffPresenter)
+			diffPresenter: self diffFromHead;
+			iceDiffModel: (headTabContainer diffFor: selectedModel);
 			yourself
 
 ]
