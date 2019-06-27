@@ -124,7 +124,7 @@ RS3UMLDiffPresenter >> onMouseClickFor: anIceNode [
 
 { #category : #private }
 RS3UMLDiffPresenter >> packageColorScale [
-	^ packageColorScale
+	^ packageColorScale ifNil: [ packageColorScale := TSScale category10 ]
 ]
 
 { #category : #private }
@@ -184,8 +184,8 @@ RS3UMLDiffPresenter >> shapeForNodeEmulatingCondensedFont: isCondensed bold: isB
 			font: e font
 			maxSize: 200 ];
 		onModel;
-		if: [:node | node value definition isMethodDefinition and: [
-				node value definition classIsMeta ] ] actions: [:s | s underline ].
+		if: [:node | node value definition isMethodDefinition and: [ node value definition classIsMeta ] ]
+		then: [:s | s underline ].
 		
 	isBold ifTrue: [ labelShape bold ].
 
