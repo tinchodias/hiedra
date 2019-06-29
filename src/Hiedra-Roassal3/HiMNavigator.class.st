@@ -30,6 +30,7 @@ HiMNavigator >> addEdgesFor: elements [
 		color: (Color blue alpha: 0.2);
 		yourself.
 
+	"Dependencies"
 	edges := OrderedCollection new.
 	elements do: [ :targetElement |
 		| sourceNodes |
@@ -41,19 +42,29 @@ HiMNavigator >> addEdgesFor: elements [
 				edges add: (edgeBuilder edgeFrom: incomingElementOrNil to: targetElement).
 		] ] ].
 
+
+	"Parent"
+	edgeBuilder color: (Color red alpha: 0.2).
+	elements do: [ :each |
+		each model parent ifNotNil: [:parent |
+			edges add: (edgeBuilder edgeFrom: each to: (view elementFromModel: parent)) ]].
+
 	layout addEdges: edges.
 
 ]
 
 { #category : #adding }
-HiMNavigator >> addElementsFor: nodes [
+HiMNavigator >> addElementsFor: nodesMaybeAlreadyPresent [
 
-	| elements |
+	| elements nodes |
+	self flag: #todo. "Suboptimal!"
+	nodes := nodesMaybeAlreadyPresent reject: [ :each | (view elementFromModel: each) notNil ].
+	
 	elements := RSShapeBuilder box
 		allowRepeatCommands;
 		interactionDo: [ :i | i draggable; popupText: #object"; addInteraction: highlightable "];
 		color: [ :each | self colorFor: each ];
-		size: 10;
+		size: [ :each | (10 * (each children size + 1)) sqrt ];
 		onElement;
 		when: TSMouseDragging do: [ :each | [:evt | 
 			layout fix: each at: evt position - (each extent / 2) ]];
@@ -63,8 +74,8 @@ HiMNavigator >> addElementsFor: nodes [
 			each model children
 				ifEmpty: [ self inform: 'No children' ]
 				ifNotEmpty: [:children |
-					self inform: ('Adding {1} children' format: { children size }).
-					each remove.
+					self inform: ('{1} children' format: { children size }).
+					"each remove."
 					self addElementsFor: each model children ]
 			] ];
 		elementsOn:nodes.
@@ -95,7 +106,8 @@ HiMNavigator >> initialize [
 		nodes: view elements;
 		edges: view edges;
 		start: view elements;
-		charge: -50;
+		gravity: 0.05;
+		friction: 0.5;
 		enclosingForce: 0.1;
 		enclosingThreshold: 20;
 		yourself.
