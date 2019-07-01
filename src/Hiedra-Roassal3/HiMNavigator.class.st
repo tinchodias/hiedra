@@ -10,16 +10,6 @@ Class {
 	#category : #'Hiedra-Roassal3-Examples-MultigranularNavigator'
 }
 
-{ #category : #'as yet unclassified' }
-HiMNavigator class >> example200 [
-	^ self new addModels: 200; openViewScaled: 1.
-]
-
-{ #category : #'as yet unclassified' }
-HiMNavigator class >> example5 [
-	^ self new addModels: 5; openViewScaled: 5.
-]
-
 { #category : #visualization }
 HiMNavigator >> addEdgesFor: elements [
 
