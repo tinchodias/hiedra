@@ -119,9 +119,11 @@ HiMPackageDependenciesExample >> visitDAMessageSendDependency: aDAMessageSendDep
 	from := self ensureAddNodeForPackage: aDAMessageSendDependency source.
 	to := self ensureAddNodeForPackage: aDAMessageSendDependency target.
 	
+	from addOutgoingLinkTo: to.
+	
 	self flag: #todo. "Not true!"
-	from withAllChildrenDo: [:node |
-		node addOutgoingLinkTo: to ].
+	"from withAllChildrenDo: [:node |
+		node addOutgoingLinkTo: to ]."
 ]
 
 { #category : #visiting }

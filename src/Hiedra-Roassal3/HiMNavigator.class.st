@@ -22,6 +22,23 @@ HiMNavigator class >> example5 [
 ]
 
 { #category : #adding }
+HiMNavigator >> addChildrenElementsFor: aRSElement [
+
+	| elements |
+	elements := RSShapeBuilder composite
+		allowRepeatCommands;
+		interactionDo: [ :i | i popupText: #object ];
+		color: [ :each | Color red ];
+		size: [ :each | (5 * (each children size + 1)) sqrt ];
+		elementsOn: aRSElement model children.
+
+	RSRectanglePackLayout on: elements. 
+
+	aRSElement addAll: elements.
+
+]
+
+{ #category : #adding }
 HiMNavigator >> addEdgesFor: elements [
 
 	| edgeBuilder edges |
@@ -42,46 +59,31 @@ HiMNavigator >> addEdgesFor: elements [
 				edges add: (edgeBuilder edgeFrom: incomingElementOrNil to: targetElement).
 		] ] ].
 
-	"Parent"
-	edgeBuilder color: (Color red alpha: 0.2).
-	elements do: [ :each |
-		each model parent ifNotNil: [:parent |
-			edges add: (edgeBuilder edgeFrom: each to: (view elementFromModel: parent)) ]].
-
 	layout addEdges: edges.
 	edges do: #pushBack.
 
 ]
 
 { #category : #adding }
-HiMNavigator >> addElementsFor: nodesMaybeAlreadyPresent [
+HiMNavigator >> addElementsFor: nodes [
 
-	| elements nodes labelInteraction |
-	self flag: #todo. "Suboptimal!"
-	nodes := nodesMaybeAlreadyPresent reject: [ :each | (view elementFromModel: each) notNil ].
-	
+	| elements labelInteraction |
 	labelInteraction := RSLabeled new.
 	labelInteraction shape text: [:each | each model object ]; fontSize: 3.
 	
-	elements := RSShapeBuilder box
+	elements := RSShapeBuilder composite
 		allowRepeatCommands;
-		interactionDo: [ :i | i draggable; popupText: #object; addInteraction: labelInteraction "; addInteraction: highlightable "];
+		interactionDo: [ :i | i draggable; popupText: #object"; addInteraction: labelInteraction; addInteraction: highlightable" ];
 		color: [ :each | self colorFor: each ];
-		size: [ :each | (10 * (each children size + 1)) sqrt ];
+		size: [ :each | self collapsedSizeFor: each ];
 		onElement;
 		when: TSMouseDragging do: [ :each | [:evt | 
 			layout fix: each at: evt position - (each extent / 2) ]];
 		when: TSMouseDragEnd do: [:each | [:evt |
 			layout removeFix: each ]];
-		when: TSMouseDoubleClick do: [ :each | [:evt |
-			each model children
-				ifEmpty: [ self inform: 'No children' ]
-				ifNotEmpty: [:children |
-					self inform: ('{1} children' format: { children size }).
-					"each remove."
-					self addElementsFor: each model children ]
-			] ];
-		elementsOn:nodes.
+		when: TSMouseDoubleClick do: [ :each | [:evt | self toggleNode: each ] ];
+		elementsOn: nodes.
+
 	view addAll: elements.
 	layout addNodes: elements.
 	
@@ -91,9 +93,81 @@ HiMNavigator >> addElementsFor: nodesMaybeAlreadyPresent [
 	
 ]
 
+{ #category : #animations }
+HiMNavigator >> collapse: aRSElement [ 
+	| size |
+	size := (self collapsedSizeFor: aRSElement model).
+	aRSElement animation
+		duration: self expandDuration;
+		from: 1@1;
+		to: size/aRSElement extent;
+		onStepDo: [ :t | | position |
+			position := aRSElement position.
+			aRSElement matrix
+				loadIdentity;
+				translation: position;
+				scaleBy: t.
+			aRSElement resetBBox.
+			aRSElement connectedEdges do: [ :anEdge |
+				| newLength |
+				newLength := (anEdge from width max: anEdge from height) + (anEdge to width max: anEdge to height)+5.
+				layout set: anEdge length: newLength ].
+			];
+		when: TSAnimationEndEvent do: [ | position |
+			aRSElement shapes copy do: #remove.
+			position := aRSElement position.
+			aRSElement matrix
+				loadIdentity;
+				translation: position.
+			aRSElement size: size.
+			 ].
+
+	aRSElement connectedEdges do: [ :anEdge |
+		layout removeLengthAt: anEdge ].
+]
+
+{ #category : #adding }
+HiMNavigator >> collapsedSizeFor: aModel [
+
+	^ (5 * (aModel children size + 1)) sqrt
+]
+
 { #category : #adding }
 HiMNavigator >> colorFor: aNode [
 	^ colors scale: aNode topParent
+]
+
+{ #category : #animations }
+HiMNavigator >> expand: aRSElement [
+	| initialPosition |
+	initialPosition := aRSElement position.
+	self addChildrenElementsFor: aRSElement.
+	aRSElement adjustToChildren.
+	aRSElement translateTo: initialPosition.
+	aRSElement padding: 1.
+	aRSElement animation
+		duration: self expandDuration;
+		from: (self collapsedSizeFor: aRSElement model)/ aRSElement extent ;
+		to: 1@1;
+		onStepDo: [ :t | | position |
+			position := aRSElement position.
+			aRSElement matrix
+				loadIdentity;
+				translation: position;
+				scaleBy: t.
+			aRSElement resetBBox.
+			aRSElement connectedEdges do: [ :anEdge |
+				| newLength |
+				newLength := (anEdge from width max: anEdge from height) + (anEdge to width max: anEdge to height)+5.
+				layout set: anEdge length: newLength ].
+			].
+
+	
+]
+
+{ #category : #animations }
+HiMNavigator >> expandDuration [
+	^ 500 milliSeconds
 ]
 
 { #category : #initialization }
@@ -109,8 +183,7 @@ HiMNavigator >> initialize [
 		nodes: view elements;
 		edges: view edges;
 		start: view elements;
-"		gravity: 0.05;"
-		friction: 0.5;
+		friction: 0.3;
 		enclosingForce: 0.1;
 		enclosingThreshold: 20;
 		yourself.
@@ -132,4 +205,16 @@ HiMNavigator >> openViewScaled: aFloat [
 
 	view camera scale: aFloat.
 	view open.
+]
+
+{ #category : #adding }
+HiMNavigator >> toggleNode: aRSElement [
+	| isExpanded |
+	isExpanded := aRSElement
+		attributeAt: #expanded
+		ifAbsentPut: [ false ].
+	isExpanded
+		ifTrue: [ self collapse: aRSElement ]
+		ifFalse: [ self expand: aRSElement ].
+	aRSElement attributeAt: #expanded put: isExpanded not
 ]
