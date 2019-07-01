@@ -5,7 +5,6 @@ Class {
 		'colors',
 		'layout',
 		'view',
-		'random',
 		'highlightable'
 	],
 	#category : #'Hiedra-Roassal3-Examples-MultigranularNavigator'
@@ -21,30 +20,16 @@ HiMNavigator class >> example5 [
 	^ self new addModels: 5; openViewScaled: 5.
 ]
 
-{ #category : #adding }
-HiMNavigator >> addChildrenElementsFor: aRSElement [
-
-	| elements |
-	elements := RSShapeBuilder composite
-		allowRepeatCommands;
-		interactionDo: [ :i | i popupText: #object ];
-		color: [ :each | Color black ];
-		size: [ :each | self collapsedSizeFor: each ];
-		elementsOn: aRSElement model children.
-
-	RSRectanglePackLayout on: elements. 
-
-	aRSElement addAll: elements.
-
-]
-
-{ #category : #adding }
+{ #category : #visualization }
 HiMNavigator >> addEdgesFor: elements [
 
 	| edgeBuilder edges |
 	edgeBuilder := RSEdgeBuilder line
 		view: view;
-		color: (Color blue alpha: 0.2);
+		color: (self currentTheme caretColor alpha: 0.25);
+		interactionDo: [ :i |
+			i 	popupText: [:model | model key model object asString, '->', model value model object asString ];
+				addInteraction: highlightable ];
 		onElement;
 		when: TSMouseDoubleClick do: [ :each | [:evt | self toggleEdge: each ] ];
 		yourself.
@@ -66,25 +51,28 @@ HiMNavigator >> addEdgesFor: elements [
 
 ]
 
-{ #category : #adding }
-HiMNavigator >> addElementsFor: nodes [
+{ #category : #visualization }
+HiMNavigator >> addElementsFor: models [
 
 	| elements labelInteraction |
 	labelInteraction := RSLabeled new.
-	labelInteraction shape text: [:each | each model object ]; fontSize: 3.
+	labelInteraction shape
+		text: [:each | each model object ];
+		fontSize: 2;
+		color: (self currentTheme textColor alpha: 0.5).
 	
 	elements := RSShapeBuilder composite
 		allowRepeatCommands;
-		interactionDo: [ :i | i draggable; popupText: #object"; addInteraction: labelInteraction; addInteraction: highlightable" ];
+		interactionDo: [ :i | i draggable; popupText: #object; addInteraction: labelInteraction; addInteraction: highlightable ];
 		color: [ :each | self colorFor: each ];
-		size: [ :each | self collapsedSizeFor: each ];
+		size: [ :each | self sizeFor: each ];
 		onElement;
 		when: TSMouseDragging do: [ :each | [:evt | 
 			layout fix: each at: evt position - (each extent / 2) ]];
 		when: TSMouseDragEnd do: [:each | [:evt |
 			layout removeFix: each ]];
 		when: TSMouseDoubleClick do: [ :each | [:evt | self toggleNode: each ] ];
-		elementsOn: nodes.
+		elementsOn: models.
 
 	view addAll: elements.
 	layout addNodes: elements.
@@ -95,13 +83,30 @@ HiMNavigator >> addElementsFor: nodes [
 	
 ]
 
+{ #category : #visualization }
+HiMNavigator >> addNestedElementsFor: aRSElement [
+
+	| elements |
+	elements := RSShapeBuilder composite
+		allowRepeatCommands;
+		interactionDo: [ :i | i popupText: #object ];
+		color: [ :each | Color black ];
+		size: [ :each | self sizeFor: each ];
+		elementsOn: aRSElement model children.
+
+	RSRectanglePackLayout on: elements. 
+
+	aRSElement addAll: elements.
+
+]
+
 { #category : #'expanding-collapsing' }
 HiMNavigator >> collapse: aRSElement [ 
 	| endSize |
 	"May be already collapsed"
 	(self isMarkedAsExpanded: aRSElement) ifFalse: [ ^self ].
 
-	endSize := self collapsedSizeFor: aRSElement model.
+	endSize := self sizeFor: aRSElement model.
 	aRSElement animation
 		duration: self expandDuration;
 		from: 1@1;
@@ -121,14 +126,14 @@ HiMNavigator >> collapse: aRSElement [
 	self mark: aRSElement asExpanded: false.
 ]
 
-{ #category : #adding }
-HiMNavigator >> collapsedSizeFor: aModel [
-	^ (8 * (aModel children size + 1)) sqrt
+{ #category : #visualization }
+HiMNavigator >> colorFor: aModel [
+	^ colors scale: aModel topParent
 ]
 
-{ #category : #adding }
-HiMNavigator >> colorFor: aNode [
-	^ colors scale: aNode topParent
+{ #category : #accessing }
+HiMNavigator >> currentTheme [
+	^ Smalltalk ui theme
 ]
 
 { #category : #'expanding-collapsing' }
@@ -138,13 +143,13 @@ HiMNavigator >> expand: aRSElement [
 	(self isMarkedAsExpanded: aRSElement) ifTrue: [ ^self ].
 	
 	initialPosition := aRSElement position.
-	self addChildrenElementsFor: aRSElement.
+	self addNestedElementsFor: aRSElement.
 	aRSElement adjustToChildren.
 	aRSElement translateTo: initialPosition.
 	aRSElement padding: 1.
 	aRSElement animation
 		duration: self expandDuration;
-		from: (self collapsedSizeFor: aRSElement model) / aRSElement extent;
+		from: (self sizeFor: aRSElement model) / aRSElement extent;
 		to: 1@1;
 		onStepDo: [ :t | self expand: aRSElement step: t ].
 
@@ -176,9 +181,9 @@ HiMNavigator >> expandDuration [
 HiMNavigator >> initialize [
 	super initialize.
 	
-	random := Random seed: 123.
 	colors := TSScale category20.
 	view := RSView new.
+	view color: self currentTheme backgroundColor.
 	highlightable := RSHighlightable new.
 
 	layout := RSRectangleForceLayout new
@@ -217,6 +222,11 @@ HiMNavigator >> openViewScaled: aFloat [
 
 	view camera scale: aFloat.
 	view open.
+]
+
+{ #category : #visualization }
+HiMNavigator >> sizeFor: aModel [
+	^ (8 * (aModel children size + 1)) sqrt
 ]
 
 { #category : #'expanding-collapsing' }
