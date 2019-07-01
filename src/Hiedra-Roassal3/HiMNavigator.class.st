@@ -42,7 +42,6 @@ HiMNavigator >> addEdgesFor: elements [
 				edges add: (edgeBuilder edgeFrom: incomingElementOrNil to: targetElement).
 		] ] ].
 
-
 	"Parent"
 	edgeBuilder color: (Color red alpha: 0.2).
 	elements do: [ :each |
@@ -50,19 +49,23 @@ HiMNavigator >> addEdgesFor: elements [
 			edges add: (edgeBuilder edgeFrom: each to: (view elementFromModel: parent)) ]].
 
 	layout addEdges: edges.
+	edges do: #pushBack.
 
 ]
 
 { #category : #adding }
 HiMNavigator >> addElementsFor: nodesMaybeAlreadyPresent [
 
-	| elements nodes |
+	| elements nodes labelInteraction |
 	self flag: #todo. "Suboptimal!"
 	nodes := nodesMaybeAlreadyPresent reject: [ :each | (view elementFromModel: each) notNil ].
 	
+	labelInteraction := RSLabeled new.
+	labelInteraction shape text: [:each | each model object ]; fontSize: 3.
+	
 	elements := RSShapeBuilder box
 		allowRepeatCommands;
-		interactionDo: [ :i | i draggable; popupText: #object"; addInteraction: highlightable "];
+		interactionDo: [ :i | i draggable; popupText: #object; addInteraction: labelInteraction "; addInteraction: highlightable "];
 		color: [ :each | self colorFor: each ];
 		size: [ :each | (10 * (each children size + 1)) sqrt ];
 		onElement;
@@ -79,13 +82,13 @@ HiMNavigator >> addElementsFor: nodesMaybeAlreadyPresent [
 					self addElementsFor: each model children ]
 			] ];
 		elementsOn:nodes.
-	
 	view addAll: elements.
-
 	layout addNodes: elements.
 	
 	self addEdgesFor: elements.
+	
 
+	
 ]
 
 { #category : #adding }
@@ -106,7 +109,7 @@ HiMNavigator >> initialize [
 		nodes: view elements;
 		edges: view edges;
 		start: view elements;
-		gravity: 0.05;
+"		gravity: 0.05;"
 		friction: 0.5;
 		enclosingForce: 0.1;
 		enclosingThreshold: 20;
