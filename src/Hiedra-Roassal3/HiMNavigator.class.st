@@ -28,8 +28,8 @@ HiMNavigator >> addChildrenElementsFor: aRSElement [
 	elements := RSShapeBuilder composite
 		allowRepeatCommands;
 		interactionDo: [ :i | i popupText: #object ];
-		color: [ :each | Color red ];
-		size: [ :each | (5 * (each children size + 1)) sqrt ];
+		color: [ :each | Color black ];
+		size: [ :each | self collapsedSizeFor: each ];
 		elementsOn: aRSElement model children.
 
 	RSRectanglePackLayout on: elements. 
@@ -45,6 +45,8 @@ HiMNavigator >> addEdgesFor: elements [
 	edgeBuilder := RSEdgeBuilder line
 		view: view;
 		color: (Color blue alpha: 0.2);
+		onElement;
+		when: TSMouseDoubleClick do: [ :each | [:evt | self toggleEdge: each ] ];
 		yourself.
 
 	"Dependencies"
@@ -93,43 +95,35 @@ HiMNavigator >> addElementsFor: nodes [
 	
 ]
 
-{ #category : #animations }
+{ #category : #'expanding-collapsing' }
 HiMNavigator >> collapse: aRSElement [ 
-	| size |
-	size := (self collapsedSizeFor: aRSElement model).
+	| endSize |
+	"May be already collapsed"
+	(self isMarkedAsExpanded: aRSElement) ifFalse: [ ^self ].
+
+	endSize := self collapsedSizeFor: aRSElement model.
 	aRSElement animation
 		duration: self expandDuration;
 		from: 1@1;
-		to: size/aRSElement extent;
-		onStepDo: [ :t | | position |
-			position := aRSElement position.
-			aRSElement matrix
-				loadIdentity;
-				translation: position;
-				scaleBy: t.
-			aRSElement resetBBox.
-			aRSElement connectedEdges do: [ :anEdge |
-				| newLength |
-				newLength := (anEdge from width max: anEdge from height) + (anEdge to width max: anEdge to height)+5.
-				layout set: anEdge length: newLength ].
-			];
+		to: endSize/aRSElement extent;
+		onStepDo: [ :t | self expand: aRSElement step: t ];
 		when: TSAnimationEndEvent do: [ | position |
 			aRSElement shapes copy do: #remove.
 			position := aRSElement position.
 			aRSElement matrix
 				loadIdentity;
 				translation: position.
-			aRSElement size: size.
-			 ].
+			aRSElement size: endSize.
+			
+		aRSElement connectedEdges do: [ :anEdge |
+			layout removeLengthAt: anEdge ] ].
 
-	aRSElement connectedEdges do: [ :anEdge |
-		layout removeLengthAt: anEdge ].
+	self mark: aRSElement asExpanded: false.
 ]
 
 { #category : #adding }
 HiMNavigator >> collapsedSizeFor: aModel [
-
-	^ (5 * (aModel children size + 1)) sqrt
+	^ (8 * (aModel children size + 1)) sqrt
 ]
 
 { #category : #adding }
@@ -137,9 +131,12 @@ HiMNavigator >> colorFor: aNode [
 	^ colors scale: aNode topParent
 ]
 
-{ #category : #animations }
+{ #category : #'expanding-collapsing' }
 HiMNavigator >> expand: aRSElement [
 	| initialPosition |
+	"May be already expanded"
+	(self isMarkedAsExpanded: aRSElement) ifTrue: [ ^self ].
+	
 	initialPosition := aRSElement position.
 	self addChildrenElementsFor: aRSElement.
 	aRSElement adjustToChildren.
@@ -147,27 +144,32 @@ HiMNavigator >> expand: aRSElement [
 	aRSElement padding: 1.
 	aRSElement animation
 		duration: self expandDuration;
-		from: (self collapsedSizeFor: aRSElement model)/ aRSElement extent ;
+		from: (self collapsedSizeFor: aRSElement model) / aRSElement extent;
 		to: 1@1;
-		onStepDo: [ :t | | position |
-			position := aRSElement position.
-			aRSElement matrix
-				loadIdentity;
-				translation: position;
-				scaleBy: t.
-			aRSElement resetBBox.
-			aRSElement connectedEdges do: [ :anEdge |
-				| newLength |
-				newLength := (anEdge from width max: anEdge from height) + (anEdge to width max: anEdge to height)+5.
-				layout set: anEdge length: newLength ].
-			].
+		onStepDo: [ :t | self expand: aRSElement step: t ].
 
-	
+	self mark: aRSElement asExpanded: true.
 ]
 
-{ #category : #animations }
+{ #category : #'expanding-collapsing' }
+HiMNavigator >> expand: aRSElement step: t [
+	
+	| position |
+	position := aRSElement position.
+	aRSElement matrix
+		loadIdentity;
+		translation: position;
+		scaleBy: t.
+	aRSElement resetBBox.
+	aRSElement connectedEdges do: [ :anEdge |
+		| newLength |
+		newLength := (anEdge from width max: anEdge from height) + (anEdge to width max: anEdge to height).
+		layout set: anEdge length: newLength ]
+]
+
+{ #category : #'expanding-collapsing' }
 HiMNavigator >> expandDuration [
-	^ 500 milliSeconds
+	^ 150 milliSeconds
 ]
 
 { #category : #initialization }
@@ -175,7 +177,7 @@ HiMNavigator >> initialize [
 	super initialize.
 	
 	random := Random seed: 123.
-	colors := TSScale category10.
+	colors := TSScale category20.
 	view := RSView new.
 	highlightable := RSHighlightable new.
 
@@ -183,7 +185,7 @@ HiMNavigator >> initialize [
 		nodes: view elements;
 		edges: view edges;
 		start: view elements;
-		friction: 0.3;
+		friction: 0.25;
 		enclosingForce: 0.1;
 		enclosingThreshold: 20;
 		yourself.
@@ -200,6 +202,16 @@ HiMNavigator >> initialize [
 	].
 ]
 
+{ #category : #'expanding-collapsing' }
+HiMNavigator >> isMarkedAsExpanded: aRSElement [
+	^ aRSElement attributeAt: #expanded ifAbsentPut: [ false ]
+]
+
+{ #category : #'expanding-collapsing' }
+HiMNavigator >> mark: aRSElement asExpanded: aBoolean [
+	^ aRSElement attributeAt: #expanded put: aBoolean
+]
+
 { #category : #opening }
 HiMNavigator >> openViewScaled: aFloat [
 
@@ -207,14 +219,26 @@ HiMNavigator >> openViewScaled: aFloat [
 	view open.
 ]
 
-{ #category : #adding }
+{ #category : #'expanding-collapsing' }
+HiMNavigator >> toggleEdge: aRSEdge [
+	| isFromExpanded isToExpanded |
+	isFromExpanded := self isMarkedAsExpanded: aRSEdge from.
+	isToExpanded := self isMarkedAsExpanded: aRSEdge to.
+	
+	isFromExpanded & isToExpanded
+		ifTrue: [
+			self
+				collapse: aRSEdge from;
+				collapse: aRSEdge to ]
+		ifFalse: [ 
+			self
+				expand: aRSEdge from;
+				expand: aRSEdge to ]
+]
+
+{ #category : #'expanding-collapsing' }
 HiMNavigator >> toggleNode: aRSElement [
-	| isExpanded |
-	isExpanded := aRSElement
-		attributeAt: #expanded
-		ifAbsentPut: [ false ].
-	isExpanded
+	(self isMarkedAsExpanded: aRSElement)
 		ifTrue: [ self collapse: aRSElement ]
-		ifFalse: [ self expand: aRSElement ].
-	aRSElement attributeAt: #expanded put: isExpanded not
+		ifFalse: [ self expand: aRSElement ]
 ]
