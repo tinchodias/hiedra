@@ -44,16 +44,11 @@ HiMNavigator >> addEdgesFor: elements [
 { #category : #visualization }
 HiMNavigator >> addElementsFor: models [
 
-	| elements labelInteraction |
-	labelInteraction := RSLabeled new.
-	labelInteraction shape
-		text: [:each | each model object ];
-		fontSize: 2;
-		color: (self currentTheme textColor alpha: 0.5).
+	| elements |
 	
 	elements := RSShapeBuilder composite
 		allowRepeatCommands;
-		interactionDo: [ :i | i draggable; popupText: #object; addInteraction: labelInteraction; addInteraction: highlightable ];
+		interactionDo: [ :i | i draggable; popupText: #object; addInteraction: highlightable ];
 		color: [ :each | self colorFor: each ];
 		size: [ :each | self sizeFor: each ];
 		onElement;
@@ -69,6 +64,35 @@ HiMNavigator >> addElementsFor: models [
 	
 	self addEdgesFor: elements.
 	
+	self addLabelElementsFor: elements.
+]
+
+{ #category : #visualization }
+HiMNavigator >> addLabelElementsFor: elements [
+
+	| labelShapeBuilder invisibleEdgeBuilder |
+	labelShapeBuilder := RSShapeBuilder label
+		text: [:each | each model object ];
+		fontSize: 2;
+		color: (self currentTheme textColor alpha: 0.75);
+		yourself.
+
+	invisibleEdgeBuilder := RSSingleEdgeBuilder line
+		width: 0.3;
+		color: (Color white alpha: 0.1);
+		dashArray: #(0.5);
+		yourself.
+	 
+	elements do: [ :each |
+		| label edge |
+		label := labelShapeBuilder elementOn: each.
+		edge := invisibleEdgeBuilder from: each; to: label; edge.
+		view add: label; add: edge.
+		layout
+			addNodes: { label };
+			addEdge: edge;
+			set: edge length: 5.
+		 ]
 
 	
 ]
@@ -177,9 +201,9 @@ HiMNavigator >> initialize [
 	highlightable := RSHighlightable new.
 
 	layout := RSRectangleForceLayout new
-		nodes: view elements;
+"		nodes: view elements;
 		edges: view edges;
-		start: view elements;
+"		start: #();
 		friction: 0.25;
 		enclosingForce: 0.1;
 		enclosingThreshold: 20;
