@@ -11,6 +11,26 @@ Class {
 	#category : #'Hiedra-Roassal3-Examples-MultigranularNavigator'
 }
 
+{ #category : #examples }
+HiMNavigator class >> example1 [ 
+
+	| nodes navigator view |
+	TSLine delta: 1.	"Note: global effect!"
+
+	nodes := HiMPackageDependenciesExample new
+		packageNames: {'Hiedra'. 'Hiedra-Tests'. 'Hiedra-Roassal3'. 'Random-Core'. 'Athens-Cairo'};
+		build;
+		initialNodes.
+
+	navigator := HiMNavigator new
+		addElementsFor: nodes;
+		yourself.
+
+	view := navigator view.
+	view camera scale: 6.
+	view open.
+]
+
 { #category : #visualization }
 HiMNavigator >> addEdgesFor: elements [
 
