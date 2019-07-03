@@ -5,7 +5,7 @@ Class {
 }
 
 { #category : #private }
-RS3PackageDiffPresenter >> buildUMLDiffOn: view [
+RS3PackageDiffPresenter >> buildDiffOn: view [
 
 	| visitor elements theme border uml compositeShape classNameShape classShape |
 	visitor := RS3NodesEntityCollector new.

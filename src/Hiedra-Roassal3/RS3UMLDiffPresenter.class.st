@@ -1,23 +1,8 @@
 Class {
 	#name : #RS3UMLDiffPresenter,
-	#superclass : #ComposablePresenter,
-	#instVars : [
-		'diffPresenter',
-		'viewPresenter',
-		'iceDiffModel',
-		'packageColorScale'
-	],
+	#superclass : #RS3DiffPresenter,
 	#category : #'Hiedra-Roassal3-Examples-Iceberg'
 }
-
-{ #category : #specs }
-RS3UMLDiffPresenter class >> defaultSpec [
-	^ SpecBoxLayout newVertical
-		add: #viewPresenter;
-		spacing: 5;
-		add: #diffPresenter;
-		yourself
-]
 
 { #category : #private }
 RS3UMLDiffPresenter >> addInteractions: view [
@@ -49,69 +34,10 @@ RS3UMLDiffPresenter >> addInteractions: view [
 ]
 
 { #category : #private }
-RS3UMLDiffPresenter >> buildUMLDiffOn: view [
-	| visitor builder classesByName metaclassesByName |
-	visitor := RS3NodesEntityCollector new.
-	iceDiffModel tree accept: visitor.
-	
-	classesByName := Dictionary new.
-	metaclassesByName := Dictionary new.
-	visitor nodesWithClasses do: [ :node |
-		classesByName at: node key put: node ].
-	visitor nodesWithMetaclasses do: [ :node |
-		metaclassesByName at: (node key allButLast: ' class' size) put: node ].
-
-	builder := RSUMLClassBuilder new.
-	builder view: view.
-
-	builder classDescriptor
-		classname: [ :node | node key asString ];
-		instVars: [ :node | #() ];
-		methods: [ :node |
-			| metaclassMethods |
-			metaclassMethods := metaclassesByName at: node key ifPresent: [:found | found children ] ifAbsent: [ #() ].
-			metaclassMethods, node children ];
-		superclass: [ :node | 
-			| superclassName |
-			superclassName := node value definition asMCDefinition superclassName.
-			classesByName at: superclassName ifAbsent: [ nil ] ];
-		methodSelector: [ :met | met key asString ].
-	builder shape: (RSShapeBuilder composite 
-		interactionDo: [ :i | i draggable; popupText: #key ];
-		shapes: [ :m | builder createShapesFor: m ]).
-	builder renderer classBoxShape
-		color: [ :node | (self packageColorScale scale: node key) alpha: 0.3 ].
-	self setupRendererOn: builder.
-	
-	builder classes:  classesByName values..
-	builder build.
-	self addInteractions: view.
-]
-
-{ #category : #accessing }
-RS3UMLDiffPresenter >> diffPresenter: aPresenter [
-	diffPresenter := aPresenter
-
-]
-
-{ #category : #private }
 RS3UMLDiffPresenter >> fill: group with: e [
 	group add: e.
 	e outgoingEdges do: [ :ed | 
 		self fill: group with: ed to ].
-]
-
-{ #category : #accessing }
-RS3UMLDiffPresenter >> iceDiffModel: anIceDiffModel [
-
-	iceDiffModel := anIceDiffModel.
-	viewPresenter refresh.
-]
-
-{ #category : #initialization }
-RS3UMLDiffPresenter >> initializeWidgets [
-	viewPresenter := self instantiate: RoassalPresenter.
-	viewPresenter script: [ :view | self buildUMLDiffOn: view ].
 ]
 
 { #category : #private }
@@ -120,16 +46,6 @@ RS3UMLDiffPresenter >> onMouseClickFor: anIceNode [
 	fastTable := diffPresenter changeList widget.
 	index := fastTable dataSource indexOfElement: anIceNode.
 	fastTable selectIndex: index
-]
-
-{ #category : #private }
-RS3UMLDiffPresenter >> packageColorScale [
-	^ packageColorScale ifNil: [ packageColorScale := TSScale category10 ]
-]
-
-{ #category : #private }
-RS3UMLDiffPresenter >> packageColorScale: aScale [
-	packageColorScale := aScale
 ]
 
 { #category : #private }

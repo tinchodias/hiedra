@@ -56,7 +56,7 @@ IceTipHiRS3CommitInfoPresenter >> umlDiffFromAncestorPresenter [
 
 	selectedModel ifNil: [ ^ self newEmpty ].
 	
-	^ (self instantiate: RS3UMLDiffPresenter)
+	^ (self instantiate: RS3ClassDiffPresenter)
 			diffPresenter: self diffFromAncestor;
 			packageColorScale: packageColorScale;
 			iceDiffModel: (ancestorTabContainer diffFor: selectedModel);
@@ -69,7 +69,7 @@ IceTipHiRS3CommitInfoPresenter >> umlDiffFromHeadPresenter [
 
 	selectedModel ifNil: [ ^ self newEmpty ].
 	
-	^ (self instantiate: RS3UMLDiffPresenter)
+	^ (self instantiate: RS3ClassDiffPresenter)
 			diffPresenter: self diffFromHead;
 			packageColorScale: packageColorScale;
 			iceDiffModel: (headTabContainer diffFor: selectedModel);
