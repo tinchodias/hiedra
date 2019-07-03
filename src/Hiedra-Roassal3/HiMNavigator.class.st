@@ -5,7 +5,8 @@ Class {
 		'colors',
 		'layout',
 		'view',
-		'highlightable'
+		'highlightable',
+		'commandHistory'
 	],
 	#category : #'Hiedra-Roassal3-Examples-MultigranularNavigator'
 }
@@ -32,9 +33,10 @@ HiMNavigator >> addEdgesFor: elements [
 		sourceNodes do: [ :incomingModel |
 			| incomingElementOrNil |
 			incomingElementOrNil := view elementFromModel: incomingModel.
-			incomingElementOrNil ifNotNil: [ 
-				edges add: (edgeBuilder edgeFrom: incomingElementOrNil to: targetElement).
-		] ] ].
+			incomingElementOrNil ifNotNil: [
+				(incomingElementOrNil isDirectlyConnectedTo:	 targetElement) ifFalse: [
+					edges add: (edgeBuilder edgeFrom: incomingElementOrNil to: targetElement).
+		] ] ] ].
 
 	layout addEdges: edges.
 	edges do: #pushBack.
@@ -78,9 +80,9 @@ HiMNavigator >> addLabelElementsFor: elements [
 		yourself.
 
 	invisibleEdgeBuilder := RSSingleEdgeBuilder line
-		width: 0.3;
-		color: (Color white alpha: 0.1);
-		dashArray: #(0.5);
+		width: 0.25;
+		color: (self currentTheme textColor alpha: 0.25);
+		dashArray: #(0.25);
 		yourself.
 	 
 	elements do: [ :each |
@@ -91,7 +93,8 @@ HiMNavigator >> addLabelElementsFor: elements [
 		layout
 			addNodes: { label };
 			addEdge: edge;
-			set: edge length: 5.
+			set: edge length: 5;
+			set: edge strength: 3.
 		 ]
 
 	
@@ -117,9 +120,6 @@ HiMNavigator >> addNestedElementsFor: aRSElement [
 { #category : #'expanding-collapsing' }
 HiMNavigator >> collapse: aRSElement [ 
 	| endSize |
-	"May be already collapsed"
-	(self isMarkedAsExpanded: aRSElement) ifFalse: [ ^self ].
-
 	endSize := self sizeFor: aRSElement model.
 	aRSElement animation
 		duration: self expandDuration;
@@ -150,12 +150,43 @@ HiMNavigator >> currentTheme [
 	^ Smalltalk ui theme
 ]
 
+{ #category : #commands }
+HiMNavigator >> executeAndRegisterCollapseIfPossible: aRSElement [
+	| aCommand |
+	(self isMarkedAsExpanded: aRSElement) ifFalse: [ ^self ].
+
+	aCommand := HiMCollapse new
+		navigator: self;
+		node: aRSElement;
+		yourself.
+	commandHistory executeAndRegister: aCommand.
+]
+
+{ #category : #commands }
+HiMNavigator >> executeAndRegisterExpandIfPossible: aRSElement [
+	| aCommand |
+	(self isMarkedAsExpanded: aRSElement) ifTrue: [ ^self ].
+
+	aCommand := HiMExpand new
+		navigator: self;
+		node: aRSElement;
+		yourself.
+	commandHistory executeAndRegister: aCommand.
+]
+
+{ #category : #commands }
+HiMNavigator >> executeRedoIfPossible [
+	commandHistory canRedo ifTrue: [ commandHistory redo ]
+]
+
+{ #category : #commands }
+HiMNavigator >> executeUndoIfPossible [
+	commandHistory canUndo ifTrue: [ commandHistory undo ]
+]
+
 { #category : #'expanding-collapsing' }
 HiMNavigator >> expand: aRSElement [
 	| initialPosition |
-	"May be already expanded"
-	(self isMarkedAsExpanded: aRSElement) ifTrue: [ ^self ].
-	
 	initialPosition := aRSElement position.
 	self addNestedElementsFor: aRSElement.
 	aRSElement adjustToChildren.
@@ -195,30 +226,32 @@ HiMNavigator >> expandDuration [
 HiMNavigator >> initialize [
 	super initialize.
 	
+	commandHistory := HiMCommandHistory new.
+	
 	colors := TSScale category20.
 	view := RSView new.
 	view color: self currentTheme backgroundColor.
 	highlightable := RSHighlightable new.
-
 	layout := RSRectangleForceLayout new
-"		nodes: view elements;
-		edges: view edges;
-"		start: #();
+		start: #();
 		friction: 0.25;
+"		charge: -20;
+		strength: 0.3;
+		gravity: 0.05;"
 		enclosingForce: 0.1;
 		enclosingThreshold: 20;
 		yourself.
-
 	view animation repeat onStepDo: [ :t | layout step ].
-	
+
 	"Apply forces from the window borders to the elements."
-	view when: TSExtentChangedEvent do: [ :evt |
-		| camera origin corner |
-		camera := view canvas camera.
-		origin := camera fromPixelToSpace: 0@0.
-		corner := camera fromPixelToSpace: view canvas extent.
-		layout enclosingRectangle: (origin corner: corner).
-	].
+	view
+		when: TSExtentChangedEvent
+		do: [ :evt | 
+			| camera origin corner |
+			camera := view canvas camera.
+			origin := camera fromPixelToSpace: 0 @ 0.
+			corner := camera fromPixelToSpace: view canvas extent.
+			layout enclosingRectangle: (origin corner: corner) ]
 ]
 
 { #category : #'expanding-collapsing' }
@@ -252,17 +285,17 @@ HiMNavigator >> toggleEdge: aRSEdge [
 	isFromExpanded & isToExpanded
 		ifTrue: [
 			self
-				collapse: aRSEdge from;
-				collapse: aRSEdge to ]
+				executeAndRegisterCollapseIfPossible: aRSEdge from;
+				executeAndRegisterCollapseIfPossible: aRSEdge to ]
 		ifFalse: [ 
 			self
-				expand: aRSEdge from;
-				expand: aRSEdge to ]
+				executeAndRegisterExpandIfPossible: aRSEdge from;
+				executeAndRegisterExpandIfPossible: aRSEdge to ]
 ]
 
 { #category : #'expanding-collapsing' }
 HiMNavigator >> toggleNode: aRSElement [
 	(self isMarkedAsExpanded: aRSElement)
-		ifTrue: [ self collapse: aRSElement ]
-		ifFalse: [ self expand: aRSElement ]
+		ifTrue: [ self executeAndRegisterCollapseIfPossible: aRSElement ]
+		ifFalse: [ self executeAndRegisterExpandIfPossible: aRSElement ]
 ]
