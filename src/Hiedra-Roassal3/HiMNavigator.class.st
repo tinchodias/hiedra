@@ -93,7 +93,7 @@ HiMNavigator >> addLabelElementsFor: elements [
 		layout
 			addNodes: { label };
 			addEdge: edge;
-			set: edge length: 5;
+			set: edge length: 1;
 			set: edge strength: 3.
 		 ]
 
@@ -251,7 +251,11 @@ HiMNavigator >> initialize [
 			camera := view canvas camera.
 			origin := camera fromPixelToSpace: 0 @ 0.
 			corner := camera fromPixelToSpace: view canvas extent.
-			layout enclosingRectangle: (origin corner: corner) ]
+			layout enclosingRectangle: (origin corner: corner) ].
+	
+	view
+		when: TSKeyDown
+		do: [ :evt | self processKeyDown: evt ]
 ]
 
 { #category : #'expanding-collapsing' }
@@ -264,11 +268,15 @@ HiMNavigator >> mark: aRSElement asExpanded: aBoolean [
 	^ aRSElement attributeAt: #expanded put: aBoolean
 ]
 
-{ #category : #opening }
-HiMNavigator >> openViewScaled: aFloat [
+{ #category : #commands }
+HiMNavigator >> processKeyDown: evt [
 
-	view camera scale: aFloat.
-	view open.
+	($z meta matchesCompletely: evt keyCombination) ifTrue: [ 
+		^ self executeUndoIfPossible ].
+
+	($z shift meta matchesCompletely: evt keyCombination) ifTrue: [ 
+		^ self executeRedoIfPossible ].
+
 ]
 
 { #category : #visualization }
@@ -298,4 +306,9 @@ HiMNavigator >> toggleNode: aRSElement [
 	(self isMarkedAsExpanded: aRSElement)
 		ifTrue: [ self executeAndRegisterCollapseIfPossible: aRSElement ]
 		ifFalse: [ self executeAndRegisterExpandIfPossible: aRSElement ]
+]
+
+{ #category : #accessing }
+HiMNavigator >> view [
+	^ view
 ]
