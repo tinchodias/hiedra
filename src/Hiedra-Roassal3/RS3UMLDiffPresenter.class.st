@@ -40,11 +40,6 @@ RS3UMLDiffPresenter >> fill: group with: e [
 		self fill: group with: ed to ].
 ]
 
-{ #category : #accessing }
-RS3UMLDiffPresenter >> maxLabelSize [
-	^ 200
-]
-
 { #category : #private }
 RS3UMLDiffPresenter >> onMouseClickFor: anIceNode [
 	| fastTable index |
@@ -57,8 +52,14 @@ RS3UMLDiffPresenter >> onMouseClickFor: anIceNode [
 RS3UMLDiffPresenter >> setupRendererOn: builder [
 	| renderer |
 	renderer := builder renderer.
-	renderer methodShape: self shapeForMethod.
-	renderer classNameShape: self shapeForClassOrTrait.
+	renderer methodShape:
+		(HiMUMLDiffUtils new shapeForMethod
+			when: TSMouseClick do: [ :anIceNode | [ self onMouseClickFor: anIceNode ] ];
+			yourself).
+	renderer classNameShape:
+		(HiMUMLDiffUtils new shapeForClassOrTrait
+			when: TSMouseClick do: [ :anIceNode | [ self onMouseClickFor: anIceNode ] ];
+			yourself).
 	renderer classBoxShape cornerRadius: 3.
 	renderer marker offset: 8.
 	renderer marker shape size: 16.
@@ -78,53 +79,4 @@ RS3UMLDiffPresenter >> setupSystemThemeOn: b [
 	b renderer defaultBorder color: theme textColor.
 	b renderer marker shape color: theme backgroundColor.
 
-]
-
-{ #category : #private }
-RS3UMLDiffPresenter >> shapeForClassOrTrait [
-
-	^ self shapeForNodeEmulatingCondensedFont: false bold: true
-]
-
-{ #category : #private }
-RS3UMLDiffPresenter >> shapeForMethod [
-
-	^ self shapeForNodeEmulatingCondensedFont: true bold: false
-]
-
-{ #category : #private }
-RS3UMLDiffPresenter >> shapeForNodeEmulatingCondensedFont: isCondensed bold: isBold [
-
-	| iconShape labelShape composite widthScale |
-	widthScale := isCondensed ifTrue: [ 0.8 ] ifFalse: [ 1 ].
-	iconShape := RSShapeBuilder bitmap form: #icon.
-	labelShape := RSShapeBuilder label
-		color: Smalltalk ui theme textColor;
-		onElement; 
-		text: [ :e | HiTextWidthKeeper
-			stringFor: e model key
-			font: e font
-			maxSize: self maxLabelSize * (1/widthScale) ];
-		onModel;
-		if: [:node | node value definition isMethodDefinition and: [ node value definition classIsMeta ] ]
-		then: [:s | s underline ].
-		
-	isBold ifTrue: [ labelShape bold ].
-
-	composite:=  RSShapeBuilder composite 
-		shapes: [:node | 
-			| g icon text |
-			g := TSGroup new.
-			icon := iconShape elementOn: node value.
-			text := labelShape elementOn: node.
-			text scaleBy: widthScale@1.
-			g add: icon; add: text.
-			RSHorizontalLineLayout new alignCenter; gapSize: 2; on: g.
-			g ];
-		interactionDo: [:i | i popupText: [ :node | node key ] ];
-		"addInteraction: (RSPopup text: [ :node | node value ] )"
-		when: TSMouseClick do: [ :anIceNode | [ self onMouseClickFor: anIceNode ] ];
-		yourself.
-
-	^ composite
 ]

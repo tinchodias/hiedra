@@ -41,6 +41,19 @@ IceTipHiRS3CommitInfoPresenter >> initializeCommitPanel [
 			presenterProvider: [ self multigranularDiffFromHeadPresenter ];
 			yourself).
 
+	notebookPanel
+		addPage: (self newDiffPage 
+			title: 'Multigranular diff to HEAD';
+			presenterProvider: [ self multigranularDiffFromHeadPresenter2 ];
+			yourself).
+
+]
+
+{ #category : #initialization }
+IceTipHiRS3CommitInfoPresenter >> labelShapeBuilder [
+	^ HiMUMLDiffUtils new shapeForClassOrTrait
+		scaleBy: 0.2;
+		yourself
 ]
 
 { #category : #initialization }
@@ -49,6 +62,21 @@ IceTipHiRS3CommitInfoPresenter >> multigranularDiffFromHeadPresenter [
 	selectedModel ifNil: [ ^ self newEmpty ].
 	
 	^ (self instantiate: RS3MultigranularDiffPresenter)
+			labelStrategy: (HiMFloatingLabelStrategy new shapeBuilder: self labelShapeBuilder; yourself);
+			diffPresenter: self diffFromHead;
+			packageColorScale: packageColorScale;
+			iceDiffModel: (headTabContainer diffFor: selectedModel);
+			yourself
+
+]
+
+{ #category : #initialization }
+IceTipHiRS3CommitInfoPresenter >> multigranularDiffFromHeadPresenter2 [
+
+	selectedModel ifNil: [ ^ self newEmpty ].
+	
+	^ (self instantiate: RS3MultigranularDiffPresenter)
+			labelStrategy: (HiMTopLabelStrategy new shapeBuilder: self labelShapeBuilder; yourself);
 			diffPresenter: self diffFromHead;
 			packageColorScale: packageColorScale;
 			iceDiffModel: (headTabContainer diffFor: selectedModel);

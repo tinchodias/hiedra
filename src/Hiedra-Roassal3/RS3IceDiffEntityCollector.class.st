@@ -1,5 +1,5 @@
 Class {
-	#name : #RS3NodesEntityCollector,
+	#name : #RS3IceDiffEntityCollector,
 	#superclass : #IceTreeVisitor,
 	#instVars : [
 		'nodesWithClasses',
@@ -13,7 +13,7 @@ Class {
 }
 
 { #category : #initialization }
-RS3NodesEntityCollector >> initialize [
+RS3IceDiffEntityCollector >> initialize [
 	super initialize.
 	
 	nodesWithPackages := OrderedCollection new.
@@ -25,37 +25,37 @@ RS3NodesEntityCollector >> initialize [
 ]
 
 { #category : #accessing }
-RS3NodesEntityCollector >> nodesWithClassExtensions [
+RS3IceDiffEntityCollector >> nodesWithClassExtensions [
 	^ nodesWithClassExtensions
 ]
 
 { #category : #accessing }
-RS3NodesEntityCollector >> nodesWithClasses [
+RS3IceDiffEntityCollector >> nodesWithClasses [
 	^ nodesWithClasses
 ]
 
 { #category : #accessing }
-RS3NodesEntityCollector >> nodesWithMetaclasses [
+RS3IceDiffEntityCollector >> nodesWithMetaclasses [
 	^ nodesWithMetaclasses
 ]
 
 { #category : #accessing }
-RS3NodesEntityCollector >> nodesWithMethods [
+RS3IceDiffEntityCollector >> nodesWithMethods [
 	^ nodesWithMethods
 ]
 
 { #category : #accessing }
-RS3NodesEntityCollector >> nodesWithPackages [
+RS3IceDiffEntityCollector >> nodesWithPackages [
 	^ nodesWithPackages
 ]
 
 { #category : #visiting }
-RS3NodesEntityCollector >> visitAddition: anIceAddition [ 
+RS3IceDiffEntityCollector >> visitAddition: anIceAddition [ 
 	self visitRemoval: anIceAddition
 ]
 
 { #category : #visiting }
-RS3NodesEntityCollector >> visitClassDefinition: anIceClassDefinition [ 
+RS3IceDiffEntityCollector >> visitClassDefinition: anIceClassDefinition [ 
 	anIceClassDefinition isMeta
 		ifFalse: [ nodesWithClasses add: currentNode ]
 		ifTrue: [ nodesWithMetaclasses add: currentNode ].
@@ -64,62 +64,62 @@ RS3NodesEntityCollector >> visitClassDefinition: anIceClassDefinition [
 ]
 
 { #category : #visiting }
-RS3NodesEntityCollector >> visitDirectoryDefinition: anIceDirectoryDefinition [ 
+RS3IceDiffEntityCollector >> visitDirectoryDefinition: anIceDirectoryDefinition [ 
 	
 	self visitChildrenOf: currentNode
 ]
 
 { #category : #visiting }
-RS3NodesEntityCollector >> visitExtensionDefinition: anIceExtensionDefinition [ 
+RS3IceDiffEntityCollector >> visitExtensionDefinition: anIceExtensionDefinition [ 
 	nodesWithClassExtensions add: currentNode.
 	self visitChildrenOf: currentNode.
 
 ]
 
 { #category : #visiting }
-RS3NodesEntityCollector >> visitFileNode: anIceFileDefinition [ 
+RS3IceDiffEntityCollector >> visitFileNode: anIceFileDefinition [ 
 	nodesWithFiles add: currentNode.
 	self visitChildrenOf: currentNode.
 
 ]
 
 { #category : #visiting }
-RS3NodesEntityCollector >> visitMethodNode: anIceMethodDefinition [ 
+RS3IceDiffEntityCollector >> visitMethodNode: anIceMethodDefinition [ 
 	nodesWithMethods add: currentNode.
 	self visitChildrenOf: currentNode.
 	
 ]
 
 { #category : #visiting }
-RS3NodesEntityCollector >> visitModification: anIceModification [ 
+RS3IceDiffEntityCollector >> visitModification: anIceModification [ 
 	
 	^ anIceModification leftDefinition accept: self
 ]
 
 { #category : #visiting }
-RS3NodesEntityCollector >> visitNoModification: anIceNoModification [ 
+RS3IceDiffEntityCollector >> visitNoModification: anIceNoModification [ 
 
 	anIceNoModification definition accept: self
 ]
 
 { #category : #visiting }
-RS3NodesEntityCollector >> visitPackage: anIcePackageDefinition [ 
+RS3IceDiffEntityCollector >> visitPackage: anIcePackageDefinition [ 
 	nodesWithPackages add: currentNode.
 	self visitChildrenOf: currentNode.
 ]
 
 { #category : #visiting }
-RS3NodesEntityCollector >> visitRemoval: anIceRemoval [ 
+RS3IceDiffEntityCollector >> visitRemoval: anIceRemoval [ 
 	anIceRemoval definition accept: self
 ]
 
 { #category : #visiting }
-RS3NodesEntityCollector >> visitRootDefinition: anIceRootDefinition [ 
+RS3IceDiffEntityCollector >> visitRootDefinition: anIceRootDefinition [ 
 	
 	self visitChildrenOf: currentNode
 ]
 
 { #category : #visiting }
-RS3NodesEntityCollector >> visitTraitDefinition: anIceTraitDefinition [ 
+RS3IceDiffEntityCollector >> visitTraitDefinition: anIceTraitDefinition [ 
 	self visitClassDefinition: anIceTraitDefinition
 ]

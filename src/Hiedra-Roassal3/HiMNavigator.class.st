@@ -6,29 +6,22 @@ Class {
 		'layout',
 		'view',
 		'highlightable',
-		'commandHistory'
+		'commandHistory',
+		'labelStrategy'
 	],
 	#category : #'Hiedra-Roassal3-Examples-MultigranularNavigator'
 }
 
 { #category : #examples }
-HiMNavigator class >> example1 [ 
+HiMNavigator class >> exampleFloatingLabels [
 
-	| nodes navigator view |
-	TSLine delta: 1.	"Note: global effect!"
+	^ self openExampleWith: self new
+]
 
-	nodes := HiMPackageDependenciesExample new
-		packageNames: {'Hiedra'. 'Hiedra-Tests'. 'Hiedra-Roassal3'. 'Random-Core'. 'Athens-Cairo'};
-		build;
-		initialNodes.
+{ #category : #examples }
+HiMNavigator class >> exampleTopLabels [
 
-	navigator := HiMNavigator new
-		addElementsFor: nodes;
-		yourself.
-
-	view := navigator view.
-	view camera scale: 6.
-	view open.
+	^ self openExampleWith: (self new labelStrategy: HiMTopLabelStrategy new; yourself)
 ]
 
 { #category : #examples }
@@ -41,6 +34,25 @@ HiMNavigator class >> newOn: aRSView [
 	^ self basicNew
 		initializeOn: aRSView;
 		yourself
+]
+
+{ #category : #examples }
+HiMNavigator class >> openExampleWith: aHiMNavigator [
+
+	| nodes view |
+	TSLine delta: 1.	"Note: global effect!"
+
+	nodes := HiMPackageDependenciesExample new
+		packageNames: {'Hiedra'. 'Hiedra-Tests'. 'Hiedra-Roassal3'. 'Random-Core'". 'Athens-Cairo'. 'Growl'. 'Iceberg'"};
+		build;
+		initialNodes.
+
+	aHiMNavigator addElementsFor: nodes.
+
+	view := aHiMNavigator view.
+	view camera scale: 6.
+	view open.
+
 ]
 
 { #category : #visualization }
@@ -78,11 +90,13 @@ HiMNavigator >> addEdgesFor: elements [
 { #category : #visualization }
 HiMNavigator >> addElementsFor: models [
 
-	| elements |
-	
-	elements := RSShapeBuilder composite
-		allowRepeatCommands;
-		interactionDo: [ :i | i draggable; popupText: #object; addInteraction: highlightable ];
+	| shapeBuilder elements |
+	shapeBuilder := RSShapeBuilder composite
+		interactionDo: [ :interactionBuilder | 
+			interactionBuilder 
+				draggable; 
+				popupText: #object; 
+				addInteraction: highlightable ];
 		color: [ :each | self colorFor: each ];
 		size: [ :each | self sizeFor: each ];
 		onElement;
@@ -91,45 +105,18 @@ HiMNavigator >> addElementsFor: models [
 		when: TSMouseDragEnd do: [:each | [:evt |
 			layout removeFix: each ]];
 		when: TSMouseDoubleClick do: [ :each | [:evt | self toggleNode: each ] ];
-		elementsOn: models.
+		yourself.
+		
+	labelStrategy applyBeforeCreatingElementsWith: shapeBuilder.
+	
+	elements := shapeBuilder elementsOn: models.
 
 	view addAll: elements.
 	layout addNodes: elements.
 	
 	self addEdgesFor: elements.
 	
-	self addLabelElementsFor: elements.
-]
-
-{ #category : #visualization }
-HiMNavigator >> addLabelElementsFor: elements [
-
-	| labelShapeBuilder invisibleEdgeBuilder |
-	labelShapeBuilder := RSShapeBuilder label
-		text: [:each | each model object ];
-		fontSize: 2;
-		color: (self currentTheme textColor alpha: 0.75);
-		yourself.
-
-	invisibleEdgeBuilder := RSSingleEdgeBuilder line
-		width: 0.25;
-		color: (self currentTheme textColor alpha: 0.25);
-		dashArray: #(0.25);
-		yourself.
-	 
-	elements do: [ :each |
-		| label edge |
-		label := labelShapeBuilder elementOn: each.
-		edge := invisibleEdgeBuilder from: each; to: label; edge.
-		view add: label; add: edge.
-		layout
-			addNodes: { label };
-			addEdge: edge;
-			set: edge length: 1;
-			set: edge strength: 3.
-		 ]
-
-	
+	labelStrategy applyAfterAddingElements: elements.
 ]
 
 { #category : #visualization }
@@ -137,7 +124,6 @@ HiMNavigator >> addNestedElementsFor: aRSElement [
 
 	| elements |
 	elements := RSShapeBuilder composite
-		allowRepeatCommands;
 		interactionDo: [ :i | i popupText: #object ];
 		color: [ :each | Color black ];
 		size: [ :each | self sizeFor: each ];
@@ -259,6 +245,8 @@ HiMNavigator >> initializeOn: aRSView [
 	self initialize.
 	
 	commandHistory := HiMCommandHistory new.
+	self labelStrategy: HiMFloatingLabelStrategy new.
+
 	
 	colors := TSScale category20.
 	view := aRSView.
@@ -287,12 +275,30 @@ HiMNavigator >> initializeOn: aRSView [
 	
 	view
 		when: TSKeyDown
-		do: [ :evt | self processKeyDown: evt ]
+		do: [ :evt | self processKeyDown: evt ].
+		
+	view addInteraction: RSMonitorView.
 ]
 
 { #category : #'expanding-collapsing' }
 HiMNavigator >> isMarkedAsExpanded: aRSElement [
 	^ aRSElement attributeAt: #expanded ifAbsentPut: [ false ]
+]
+
+{ #category : #accessing }
+HiMNavigator >> labelStrategy [
+	^ labelStrategy
+]
+
+{ #category : #accessing }
+HiMNavigator >> labelStrategy: aHiMLabelStrategy [
+	labelStrategy := aHiMLabelStrategy.
+	aHiMLabelStrategy navigator: self.
+]
+
+{ #category : #accessing }
+HiMNavigator >> layout [
+	^ layout
 ]
 
 { #category : #'expanding-collapsing' }

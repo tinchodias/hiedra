@@ -7,7 +7,7 @@ Class {
 { #category : #private }
 RS3ClassDiffPresenter >> buildDiffOn: view [
 	| visitor builder classesByName metaclassesByName |
-	visitor := RS3NodesEntityCollector new.
+	visitor := RS3IceDiffEntityCollector new.
 	iceDiffModel tree accept: visitor.
 	
 	classesByName := Dictionary new.

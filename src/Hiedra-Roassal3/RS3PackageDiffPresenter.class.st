@@ -8,7 +8,7 @@ Class {
 RS3PackageDiffPresenter >> buildDiffOn: view [
 
 	| visitor elements theme border uml compositeShape classNameShape classShape |
-	visitor := RS3NodesEntityCollector new.
+	visitor := RS3IceDiffEntityCollector new.
 	iceDiffModel tree accept: visitor.
 
 	theme := Smalltalk ui theme.
@@ -16,7 +16,7 @@ RS3PackageDiffPresenter >> buildDiffOn: view [
 	border := TSBorder new color: theme textColor; yourself.
 	
 	uml := RSUMLClassBuilder new.
-	classNameShape := self shapeForClassOrTrait.
+	classNameShape := HiMUMLDiffUtils new shapeForClassOrTrait.
 	classShape := RSShapeBuilder composite shapes: [ :node | 
 		| name box |
 		name := classNameShape elementOn: node.
