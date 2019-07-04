@@ -31,6 +31,18 @@ HiMNavigator class >> example1 [
 	view open.
 ]
 
+{ #category : #examples }
+HiMNavigator class >> new [
+	^ self newOn: RSView new
+]
+
+{ #category : #examples }
+HiMNavigator class >> newOn: aRSView [
+	^ self basicNew
+		initializeOn: aRSView;
+		yourself
+]
+
 { #category : #visualization }
 HiMNavigator >> addEdgesFor: elements [
 
@@ -243,13 +255,13 @@ HiMNavigator >> expandDuration [
 ]
 
 { #category : #initialization }
-HiMNavigator >> initialize [
-	super initialize.
+HiMNavigator >> initializeOn: aRSView [
+	self initialize.
 	
 	commandHistory := HiMCommandHistory new.
 	
 	colors := TSScale category20.
-	view := RSView new.
+	view := aRSView.
 	view color: self currentTheme backgroundColor.
 	highlightable := RSHighlightable new.
 	layout := RSRectangleForceLayout new

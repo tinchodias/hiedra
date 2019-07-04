@@ -18,23 +18,41 @@ IceTipHiRS3CommitInfoPresenter >> initializeCommitPanel [
 	packageColorScale := TSScale category20.
 
 	notebookPanel
-		addPage: (visualDiffToHeadPage := self newDiffPage 
+		addPage: (self newDiffPage 
 			title: 'Visual diff to HEAD';
 			presenterProvider: [ self umlDiffFromHeadPresenter ];
 			yourself).
 
 	notebookPanel
-		addPage: (visualDiffToAncestorPage := self newDiffPage 
+		addPage: (self newDiffPage 
 			title: 'Visual diff to ancestor';
 			presenterProvider: [ self umlDiffFromAncestorPresenter ];
 			yourself).
 
 	notebookPanel
-		addPage: (visualDiffToAncestorPage := self newDiffPage 
+		addPage: (self newDiffPage 
 			title: 'Package diff to HEAD';
 			presenterProvider: [ self packageDiffFromHeadPresenter ];
 			yourself).
 
+	notebookPanel
+		addPage: (self newDiffPage 
+			title: 'Multigranular diff to HEAD';
+			presenterProvider: [ self multigranularDiffFromHeadPresenter ];
+			yourself).
+
+]
+
+{ #category : #initialization }
+IceTipHiRS3CommitInfoPresenter >> multigranularDiffFromHeadPresenter [
+
+	selectedModel ifNil: [ ^ self newEmpty ].
+	
+	^ (self instantiate: RS3MultigranularDiffPresenter)
+			diffPresenter: self diffFromHead;
+			packageColorScale: packageColorScale;
+			iceDiffModel: (headTabContainer diffFor: selectedModel);
+			yourself
 
 ]
 
