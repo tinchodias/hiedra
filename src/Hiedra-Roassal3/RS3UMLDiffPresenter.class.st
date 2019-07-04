@@ -40,6 +40,11 @@ RS3UMLDiffPresenter >> fill: group with: e [
 		self fill: group with: ed to ].
 ]
 
+{ #category : #accessing }
+RS3UMLDiffPresenter >> maxLabelSize [
+	^ 200
+]
+
 { #category : #private }
 RS3UMLDiffPresenter >> onMouseClickFor: anIceNode [
 	| fastTable index |
@@ -90,7 +95,8 @@ RS3UMLDiffPresenter >> shapeForMethod [
 { #category : #private }
 RS3UMLDiffPresenter >> shapeForNodeEmulatingCondensedFont: isCondensed bold: isBold [
 
-	| iconShape labelShape composite  |
+	| iconShape labelShape composite widthScale |
+	widthScale := isCondensed ifTrue: [ 0.8 ] ifFalse: [ 1 ].
 	iconShape := RSShapeBuilder bitmap form: #icon.
 	labelShape := RSShapeBuilder label
 		color: Smalltalk ui theme textColor;
@@ -98,7 +104,7 @@ RS3UMLDiffPresenter >> shapeForNodeEmulatingCondensedFont: isCondensed bold: isB
 		text: [ :e | HiTextWidthKeeper
 			stringFor: e model key
 			font: e font
-			maxSize: 200 ];
+			maxSize: self maxLabelSize * (1/widthScale) ];
 		onModel;
 		if: [:node | node value definition isMethodDefinition and: [ node value definition classIsMeta ] ]
 		then: [:s | s underline ].
@@ -111,9 +117,7 @@ RS3UMLDiffPresenter >> shapeForNodeEmulatingCondensedFont: isCondensed bold: isB
 			g := TSGroup new.
 			icon := iconShape elementOn: node value.
 			text := labelShape elementOn: node.
-
-			isCondensed ifTrue: [ text scaleBy: (0.8@1) ].
-
+			text scaleBy: widthScale@1.
 			g add: icon; add: text.
 			RSHorizontalLineLayout new alignCenter; gapSize: 2; on: g.
 			g ];
