@@ -20,8 +20,11 @@ HiGithubAvatarClient >> avatarByEmail [
 { #category : #private }
 HiGithubAvatarClient >> avatarFor: urlString [
 
-	^ ZnEasy getImage: urlString, '&s=', self avatarSize asString
-
+	| form |
+	form := ZnEasy getImage: urlString, '&s=', self avatarSize asString.
+	
+	"We found some cases where responded image doesn't have the requested size."
+	^ form scaledToSize: self avatarSize asPoint.
 ]
 
 { #category : #'accessing - request' }
