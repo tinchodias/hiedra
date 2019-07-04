@@ -19,32 +19,26 @@ IceTipHiRS3CommitInfoPresenter >> initializeCommitPanel [
 
 	notebookPanel
 		addPage: (self newDiffPage 
-			title: 'Visual diff to HEAD';
+			title: 'Classes';
 			presenterProvider: [ self umlDiffFromHeadPresenter ];
 			yourself).
 
 	notebookPanel
 		addPage: (self newDiffPage 
-			title: 'Visual diff to ancestor';
-			presenterProvider: [ self umlDiffFromAncestorPresenter ];
-			yourself).
-
-	notebookPanel
-		addPage: (self newDiffPage 
-			title: 'Package diff to HEAD';
+			title: 'Packages';
 			presenterProvider: [ self packageDiffFromHeadPresenter ];
 			yourself).
 
 	notebookPanel
 		addPage: (self newDiffPage 
-			title: 'Multigranular diff to HEAD';
-			presenterProvider: [ self multigranularDiffFromHeadPresenter ];
+			title: 'Multi (Floating)';
+			presenterProvider: [ self multigranularFloatingLabelsDiffFromHeadPresenter ];
 			yourself).
 
 	notebookPanel
 		addPage: (self newDiffPage 
-			title: 'Multigranular diff to HEAD';
-			presenterProvider: [ self multigranularDiffFromHeadPresenter2 ];
+			title: 'Multi (Top)';
+			presenterProvider: [ self multigranularTopLabelDiffFromHeadPresenter ];
 			yourself).
 
 ]
@@ -57,7 +51,7 @@ IceTipHiRS3CommitInfoPresenter >> labelShapeBuilder [
 ]
 
 { #category : #initialization }
-IceTipHiRS3CommitInfoPresenter >> multigranularDiffFromHeadPresenter [
+IceTipHiRS3CommitInfoPresenter >> multigranularFloatingLabelsDiffFromHeadPresenter [
 
 	selectedModel ifNil: [ ^ self newEmpty ].
 	
@@ -71,7 +65,7 @@ IceTipHiRS3CommitInfoPresenter >> multigranularDiffFromHeadPresenter [
 ]
 
 { #category : #initialization }
-IceTipHiRS3CommitInfoPresenter >> multigranularDiffFromHeadPresenter2 [
+IceTipHiRS3CommitInfoPresenter >> multigranularTopLabelDiffFromHeadPresenter [
 
 	selectedModel ifNil: [ ^ self newEmpty ].
 	
