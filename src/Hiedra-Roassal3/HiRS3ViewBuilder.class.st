@@ -11,7 +11,8 @@ Class {
 		'changeBlockClosure',
 		'actionGoToBlockClosure',
 		'linkShapeBuilder',
-		'nodeShapeBuilder'
+		'nodeShapeBuilder',
+		'branchMapping'
 	],
 	#category : #'Hiedra-Roassal3-UI'
 }
@@ -108,12 +109,11 @@ HiRS3ViewBuilder >> edgeMenuInteraction [
 { #category : #'private - highlighting' }
 HiRS3ViewBuilder >> highlightBranchAtLink: aRSEdge in: view [
 
-	| branch linksToHighlight aColor |
-	branch := ruler branchAtLink: aRSEdge model.
-	linksToHighlight := Array streamContents: [:stream |
-		ruler branchByLink keysAndValuesDo: [:key :value | 
-		value = branch ifTrue: [ stream nextPut: key ] ] ].
-	aColor := (aRSEdge attributes at: #originalColor) mixed: 0.4 with: UITheme current textColor.
+	| linksToHighlight aColor |
+	linksToHighlight := branchMapping allLinksWithSameBranchAs: aRSEdge model.
+	aColor := (aRSEdge attributes at: #originalColor)
+		mixed: 0.4
+		with: Smalltalk ui theme textColor.
 
 	view edges
 		select: [:edge | linksToHighlight includes: edge model ]
@@ -165,6 +165,7 @@ HiRS3ViewBuilder >> linkShapeBuilder: anObject [
 HiRS3ViewBuilder >> newView [
 	| view rulerPointExtent branchScale rectangle |
 	view := RSView new.
+	branchMapping := HiBranchMapping builtFor: ruler.
 
 	rulerPointExtent := cellWidth @ rowHeight.
 	branchScale := TSScale google20.
@@ -173,13 +174,12 @@ HiRS3ViewBuilder >> newView [
 		position: [ :node | node rulerPoint * rulerPointExtent ];
 		border: [ :node |
 			TSBorder new
-				color: 
-					(branchScale scale: (ruler branchAtNode: node ifAbsent: [ node hash ]));
+				color: (branchScale scale: (branchMapping branchAtNode: node));
 				yourself ].
 	view addAll: (nodeShapeBuilder elementsOn: ruler nodes).
 	
 	linkShapeBuilder
-		color: [ :link | branchScale scale: (ruler branchAtLink: link) ];
+		color: [ :link | branchScale scale: (branchMapping branchAtLink: link) ];
 		controlPoints: [ :link |
 			OrderedCollection new
 				add: (view elementFromModel: link origin);
