@@ -163,23 +163,24 @@ HiRS3ViewBuilder >> linkShapeBuilder: anObject [
 
 { #category : #API }
 HiRS3ViewBuilder >> newView [
-	| view rulerPointExtent branchScale rectangle |
+	| view rulerPointExtent rectangle colorStrategy |
 	view := RSView new.
-	branchMapping := HiBranchMapping builtFor: ruler.
 
 	rulerPointExtent := cellWidth @ rowHeight.
-	branchScale := TSScale google20.
+	colorStrategy := HiWheelColorStrategy new.
+	colorStrategy ruler: ruler.
+	branchMapping := colorStrategy branchMapping. "Still hacky"
 
 	nodeShapeBuilder
 		position: [ :node | node rulerPoint * rulerPointExtent ];
 		border: [ :node |
 			TSBorder new
-				color: (branchScale scale: (branchMapping branchAtNode: node));
+				color: (colorStrategy colorForNode: node);
 				yourself ].
 	view addAll: (nodeShapeBuilder elementsOn: ruler nodes).
 	
 	linkShapeBuilder
-		color: [ :link | branchScale scale: (branchMapping branchAtLink: link) ];
+		color: [ :link | colorStrategy colorForLink: link ];
 		controlPoints: [ :link |
 			OrderedCollection new
 				add: (view elementFromModel: link origin);
@@ -277,8 +278,8 @@ HiRS3ViewBuilder >> ruler [
 ]
 
 { #category : #accessing }
-HiRS3ViewBuilder >> ruler: anObject [
-	ruler := anObject
+HiRS3ViewBuilder >> ruler: aHiRuler [
+	ruler := aHiRuler
 ]
 
 { #category : #accessing }

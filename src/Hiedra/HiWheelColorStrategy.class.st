@@ -12,6 +12,11 @@ Class {
 	#category : #'Hiedra-UI'
 }
 
+{ #category : #private }
+HiWheelColorStrategy >> branchMapping [
+	^ branchMapping
+]
+
 { #category : #accessing }
 HiWheelColorStrategy >> colorForLink: aHiLink [
 	^ colorByBranch at: (branchMapping branchAtLink: aHiLink)
