@@ -20,18 +20,19 @@ HiColorWheelRenderer >> colorForNode: aHiNode [
 
 { #category : #rendering }
 HiColorWheelRenderer >> newColorGenerator [
-	| anArrayOfColors numberOfColors |
-	numberOfColors := 10.
-	anArrayOfColors := Color
-		wheel: numberOfColors
-		saturation: 1
-		brightness: 0.85.
-
 	^ Generator on: [ :generator |
-		| nextIndex |
+		| nextIndex colorWheel |
+		colorWheel := (Color
+			wheel: 7
+			saturation: 1
+			brightness: 1) collect: [:c | 
+				| referenceColor |
+				referenceColor := Smalltalk ui theme textColor.
+				c mixed: 0.85 with: referenceColor].
+		
 		nextIndex := 1.
-		[ generator yield: (anArrayOfColors at: nextIndex).
-		nextIndex := (nextIndex + 1) \\ anArrayOfColors size + 1 ] repeat ]
+		[ generator yield: (colorWheel at: nextIndex).
+		nextIndex := (nextIndex + 1) \\ colorWheel size + 1 ] repeat ]
 ]
 
 { #category : #rendering }

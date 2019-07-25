@@ -74,6 +74,7 @@ HiSpecExample >> initializeWidgets [
 	hiedraColumnController renderer
 		nodeRadius: 1.5;
 		nodeBorderWidth: 3.0;
+		linkWidth: 2.0;
 		arrowSize: 0;
 		nodeConnectionOffset: 3;
 		cellWidth: 8;
