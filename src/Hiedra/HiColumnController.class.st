@@ -72,7 +72,7 @@ HiColumnController >> formAtPage: pageIndex [
 HiColumnController >> initialize [
 
 	super initialize.
-	renderer := HiColorWheelRenderer new.
+	renderer := HiSimpleRenderer new.
 	pageSize := 30.
 	self reset.
 ]

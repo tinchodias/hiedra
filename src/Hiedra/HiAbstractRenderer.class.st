@@ -67,6 +67,7 @@ HiAbstractRenderer >> ruler [
 ]
 
 { #category : #accessing }
-HiAbstractRenderer >> ruler: anObject [
-	ruler := anObject
+HiAbstractRenderer >> ruler: aHiRuler [
+	ruler := aHiRuler
+
 ]

@@ -78,7 +78,7 @@ HiSpecExample >> initializeWidgets [
 		arrowSize: 0;
 		nodeConnectionOffset: 3;
 		cellWidth: 8;
-		nodeColor: Smalltalk ui theme textColor.
+		useUniformColorStrategy.
 	
 	"Adjust the ruler rendering settings with table's row height."
 	hiedraColumnController renderer rowHeight: FTTableMorph defaultRowHeight floor.

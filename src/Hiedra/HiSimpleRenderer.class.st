@@ -12,17 +12,16 @@ Class {
 	#name : #HiSimpleRenderer,
 	#superclass : #HiAbstractRenderer,
 	#instVars : [
-		'nodeColor',
 		'linkDashes',
 		'linkWidth',
 		'nodeBorderWidth',
 		'rowHeight',
-		'linkColor',
 		'linkCurveAngle',
 		'arrowSize',
 		'cellWidth',
 		'nodeConnectionOffset',
-		'nodeRadio'
+		'nodeRadio',
+		'colorStrategy'
 	],
 	#category : #'Hiedra-UI'
 }
@@ -234,6 +233,16 @@ HiSimpleRenderer >> cellWidth: aNumber [
 	cellWidth := aNumber
 ]
 
+{ #category : #accessing }
+HiSimpleRenderer >> colorStrategy [
+	^ colorStrategy
+]
+
+{ #category : #accessing }
+HiSimpleRenderer >> colorStrategy: anObject [
+	colorStrategy := anObject
+]
+
 { #category : #rendering }
 HiSimpleRenderer >> initialTranslationInAthensCanvas [
 	"Apply left margin + rowsInterval offset."
@@ -245,15 +254,16 @@ HiSimpleRenderer >> initialTranslationInAthensCanvas [
 HiSimpleRenderer >> initialize [
 	super initialize.
 
+	self useWheelColorStrategy.
+
 	nodeRadio := 2.2.
 	nodeBorderWidth := 1.75.
 	nodeConnectionOffset := 0.
-	nodeColor := Smalltalk ui theme caretColor.
 
 	linkWidth := nodeBorderWidth.
 	linkDashes := #().
 	linkCurveAngle := 45 degreesToRadians.
-	linkColor := nodeColor.
+
 	arrowSize := linkWidth * 0.75.
 
 	"Important: the user must set the height of rows (integers worked better than a floats)"
@@ -263,13 +273,9 @@ HiSimpleRenderer >> initialize [
 ]
 
 { #category : #accessing }
-HiSimpleRenderer >> linkColor [
-	^ linkColor
-]
-
-{ #category : #accessing }
 HiSimpleRenderer >> linkColor: aColor [
-	linkColor := aColor
+	self useUniformColorStrategy.
+	colorStrategy linkColor: aColor.
 ]
 
 { #category : #rendering }
@@ -339,13 +345,9 @@ HiSimpleRenderer >> nodeBottomRelativeConnectionPoint [
 ]
 
 { #category : #accessing }
-HiSimpleRenderer >> nodeColor [
-	^ nodeColor
-]
-
-{ #category : #accessing }
 HiSimpleRenderer >> nodeColor: anObject [
-	nodeColor := anObject
+	self useUniformColorStrategy.
+	colorStrategy nodeColor: anObject
 ]
 
 { #category : #accessing }
@@ -373,12 +375,14 @@ HiSimpleRenderer >> nodeRadius: aNumber [
 { #category : #rendering }
 HiSimpleRenderer >> renderLinks: links on: athensCanvas [
 
-	"Set the paint that is common to all the links."
-	(athensCanvas setStrokePaint: linkColor) width: linkWidth.
-	athensCanvas paint joinMiter.
-	
 	"Draw each link on the canvas."
 	links do: [ :each | 
+
+		"Set the paint for this link."
+		(athensCanvas setStrokePaint: (colorStrategy colorForLink: each)) width: linkWidth.
+		athensCanvas paint joinMiter.
+	
+		"Draw it"
 		athensCanvas drawShape: (self athensPathForLink: each on: athensCanvas) ]
 
 ]
@@ -387,14 +391,17 @@ HiSimpleRenderer >> renderLinks: links on: athensCanvas [
 HiSimpleRenderer >> renderNodes: nodes on: athensCanvas [
 
 	| nodeAthensPath |
+
 	"Create the Athens path that is common to all nodes."
 	nodeAthensPath := self athensPathForNodeOn: athensCanvas.
 
 	athensCanvas paintMode restoreAfter: [
-		"Set the stroke for all the nodes."
-		(athensCanvas setStrokePaint: nodeColor) width: nodeBorderWidth.
-
 		nodes do: [ :each |
+		
+			"Set the stroke for this node."
+			(athensCanvas setStrokePaint: (colorStrategy colorForNode: each)) width: nodeBorderWidth.
+
+			"Draw it"
 			athensCanvas pathTransform restoreAfter: [
 				athensCanvas pathTransform
 					translateBy: (self cellCenterFor: each rulerPoint).
@@ -422,4 +429,22 @@ HiSimpleRenderer >> rowHeight [
 { #category : #accessing }
 HiSimpleRenderer >> rowHeight: aNumber [
 	rowHeight := aNumber
+]
+
+{ #category : #accessing }
+HiSimpleRenderer >> ruler: aHiRuler [
+	super ruler: aHiRuler.
+	colorStrategy ruler: ruler.
+]
+
+{ #category : #accessing }
+HiSimpleRenderer >> useUniformColorStrategy [
+	colorStrategy := HiUniformColorStrategy new.
+	colorStrategy ruler: ruler.
+]
+
+{ #category : #accessing }
+HiSimpleRenderer >> useWheelColorStrategy [
+	colorStrategy := HiWheelColorStrategy new.
+	colorStrategy ruler: ruler.
 ]

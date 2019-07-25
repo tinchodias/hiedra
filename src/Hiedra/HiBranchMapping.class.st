@@ -1,5 +1,6 @@
 "
 I know how to map each link and node of a Hiedra ruler to a branch number. This is useful to colorize a ruler.
+Note that my mapping is arbitrary, and other mappings are possible.
 "
 Class {
 	#name : #HiBranchMapping,
