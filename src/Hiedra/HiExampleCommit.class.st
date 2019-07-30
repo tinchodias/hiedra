@@ -24131,18 +24131,6 @@ HiExampleCommit class >> randomlyGenerated [
 		]
 ]
 
-{ #category : #'as yet unclassified' }
-HiExampleCommit class >> twoCommits [
-
-	^ (1 to: 2) collect: [ :value | 
-		self new
-			id: value;
-			comment: 'Value ', value asString;
-			parentIds: #();
-			yourself
-		]
-]
-
 { #category : #accessing }
 HiExampleCommit >> comment [
 	^ comment
