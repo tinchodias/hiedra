@@ -8,7 +8,7 @@ Class {
 		'hiedraColumnController',
 		'table'
 	],
-	#category : #'Hiedra-UI-Examples'
+	#category : #'Hiedra-Examples'
 }
 
 { #category : #specs }
