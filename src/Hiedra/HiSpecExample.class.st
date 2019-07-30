@@ -3,7 +3,7 @@ I am an example of use of Hiedra in the Spec library (with Morph as backend).
 "
 Class {
 	#name : #HiSpecExample,
-	#superclass : #ComposablePresenter,
+	#superclass : #SpPresenter,
 	#instVars : [
 		'hiedraColumnController',
 		'table'
@@ -13,7 +13,7 @@ Class {
 
 { #category : #specs }
 HiSpecExample class >> defaultSpec [
-	^ SpecBoxLayout newVertical
+	^ SpBoxLayout newVertical
 		add: #table;
 		yourself
 ]
@@ -65,34 +65,24 @@ HiSpecExample >> commits: commits [
 
 { #category : #initialization }
 HiSpecExample >> initializeWidgets [
-	
-	table := self instantiate: TablePresenter.
+	table := self newTable.
 
 	"Configure hiedra controller"
-	hiedraColumnController := HiColumnController new.	
+	hiedraColumnController := HiColumnController new.
 
 	hiedraColumnController renderer
 		nodeRadius: 1.5;
 		nodeBorderWidth: 3.0;
-		linkWidth: 2.0;
 		arrowSize: 0;
 		nodeConnectionOffset: 3;
 		cellWidth: 8;
 		useUniformColorStrategy.
-	
+
 	"Adjust the ruler rendering settings with table's row height."
 	hiedraColumnController renderer rowHeight: FTTableMorph defaultRowHeight floor.
 
 	"Configure columns"
-	table columns:	{
-		ImageTableColumn evaluated: [ :item |
-			hiedraColumnController cellMorphAtValue: item ].
-		StringTableColumn evaluated: #comment.
-	}.
-
-]
-
-{ #category : #accessing }
-HiSpecExample >> table [
-	^ table
+	table
+		addColumn: (SpImageTableColumn evaluated: [ :item | hiedraColumnController cellMorphAtValue: item ]);
+		addColumn: (SpStringTableColumn evaluated: #comment)
 ]
