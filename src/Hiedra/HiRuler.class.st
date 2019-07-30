@@ -41,8 +41,7 @@ Class {
 		'nodeByRow',
 		'valueByRow',
 		'rowByValue',
-		'linksByRow',
-		'branchByLink'
+		'linksByRow'
 	],
 	#category : #'Hiedra-Model'
 }
