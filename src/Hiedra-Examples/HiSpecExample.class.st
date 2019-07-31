@@ -41,9 +41,12 @@ HiSpecExample class >> openExample: selector [
 
 	self new
 		commits: commits;
-		title: ('Hiedra in Spec - {1} - {2} elements' format: {selector. commits size});
-		extent: 500 @ 700;
-		openWithSpec
+		openWithSpec;
+		withWindowDo: [ :window |
+			window
+				extent: 600 @ 800;
+				title: ('Hiedra in Spec2 with Roassal3 - {1} - {2} elements' format: {selector. commits size}) ].
+
 ]
 
 { #category : #accessing }
