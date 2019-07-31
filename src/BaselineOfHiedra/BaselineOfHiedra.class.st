@@ -14,11 +14,10 @@ BaselineOfHiedra >> baseline: spec [
 				spec repository: 'github://ObjectProfile/Roassal3/src' ].
 			spec
 				package: 'Hiedra';
-				package: 'Hiedra-Roassal3' with: [ spec requires: #(Hiedra Roassal3) ];
-				package: 'Hiedra-Tests' with: [ spec requires: #(Hiedra) ].
+				package: 'Hiedra-Examples' with: [ spec requires: #('Hiedra') ];
+				package: 'Hiedra-Tests' with: [ spec requires: #('Hiedra-Examples') ].
 			spec
 				group: 'core' with: #(Hiedra);
-				group: 'core+tests' with: #('Hiedra-Tests');
-				group: 'all' with: #('Hiedra-Roassal3' 'Hiedra-Tests');
-				group: 'default' with: #(all) ]
+				group: 'core+examples+tests' with: #('Hiedra-Tests');
+				group: 'default' with: #('core+examples+tests') ]
 ]
