@@ -1,6 +1,6 @@
 Class {
 	#name : #HiRS3SpecExample,
-	#superclass : #ComposablePresenter,
+	#superclass : #SpPresenter,
 	#instVars : [
 		'hiedraColumnController',
 		'table'
@@ -10,7 +10,7 @@ Class {
 
 { #category : #specs }
 HiRS3SpecExample class >> defaultSpec [
-	^ SpecBoxLayout newVertical
+	^ SpBoxLayout newVertical
 		add: #table;
 		yourself
 ]
@@ -38,9 +38,12 @@ HiRS3SpecExample class >> openExample: selector [
 
 	self new
 		commits: commits;
-		extent: 500 @ 700;
 		openWithSpec;
-		withWindowDo: [ :window | window title: ('Hiedra in Spec - {1} - {2} elements' format: {selector. commits size}) ]
+		withWindowDo: [ :window |
+			window
+				extent: 600 @ 800;
+				title: ('Hiedra in Spec2 with Roassal3 - {1} - {2} elements' format: {selector. commits size}) ].
+
 ]
 
 { #category : #accessing }
@@ -62,7 +65,7 @@ HiRS3SpecExample >> commits: commits [
 
 { #category : #initialization }
 HiRS3SpecExample >> initializeWidgets [
-	table := self instantiate: TablePresenter.
+	table := self newTable.
 
 	"Configure hiedra controller"
 	hiedraColumnController := HiRS3ColumnController new.
@@ -70,16 +73,14 @@ HiRS3SpecExample >> initializeWidgets [
 		rowHeight: FTTableMorph defaultRowHeight floor.
 
 	table announcer
-		when: WidgetBuilt
+		when: SpWidgetBuilt
 		send: #onTableWidgetBuilt
 		to: self.
 
 	"Configure columns"
 	table
-		columns:
-			{(ImageTableColumn
-				evaluated: [ :item | hiedraColumnController cellMorphAtValue: item ]).
-			(StringTableColumn evaluated: #comment)}
+		addColumn: (SpImageTableColumn evaluated: [ :item | hiedraColumnController cellMorphAtValue: item ]);
+		addColumn: (SpStringTableColumn evaluated: #comment)
 ]
 
 { #category : #initialization }
@@ -93,7 +94,14 @@ HiRS3SpecExample >> onTableWidgetBuilt [
 
 ]
 
-{ #category : #accessing }
-HiRS3SpecExample >> table [
-	^ table
+{ #category : #initialization }
+HiRS3SpecExample >> onTableWidgetBuilt: announcement [
+	"Set up the Hiedra controller with the table widget."
+
+	| tableWidget |
+	tableWidget := announcement widget.
+	hiedraColumnController
+		table: tableWidget;
+		onChangeDo: [ tableWidget ifNotNil: [ tableWidget changed ] ]
+
 ]
