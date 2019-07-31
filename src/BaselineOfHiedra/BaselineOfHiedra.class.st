@@ -10,8 +10,6 @@ BaselineOfHiedra >> baseline: spec [
 	spec
 		for: #pharo
 		do: [
-			spec baseline: 'Roassal3' with: [
-				spec repository: 'github://ObjectProfile/Roassal3/src' ].
 			spec
 				package: 'Hiedra';
 				package: 'Hiedra-Examples' with: [ spec requires: #('Hiedra') ];
