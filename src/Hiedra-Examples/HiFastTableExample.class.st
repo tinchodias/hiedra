@@ -93,5 +93,4 @@ HiFastTableExample >> initialize [
 		arrowSize: 2;
 		nodeConnectionOffset: 2;
 		cellWidth: 7.
-
 ]

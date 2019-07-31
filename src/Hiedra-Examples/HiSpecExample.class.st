@@ -46,7 +46,6 @@ HiSpecExample class >> openExample: selector [
 			window
 				extent: 600 @ 800;
 				title: ('Hiedra in Spec2 with Roassal3 - {1} - {2} elements' format: {selector. commits size}) ].
-
 ]
 
 { #category : #accessing }
