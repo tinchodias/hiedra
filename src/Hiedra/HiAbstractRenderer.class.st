@@ -40,10 +40,17 @@ HiAbstractRenderer >> formWidth [
 ]
 
 { #category : #API }
+HiAbstractRenderer >> newAthensSurface [
+	"Answer a new Athens surface, rendered with the current ruler and rowInterval."
+
+	self subclassResponsibility
+]
+
+{ #category : #API }
 HiAbstractRenderer >> newForm [
 	"Answer a new form, rendered with the current ruler and rowInterval."
-	
-	self subclassResponsibility
+
+	^ self newAthensSurface asForm
 ]
 
 { #category : #accessing }
