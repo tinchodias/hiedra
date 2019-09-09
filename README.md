@@ -9,8 +9,35 @@ It is a small Pharo project to visually connect items in a history-like graph. I
 Note this project is already part of Pharo 6, 7 and 8. But if you need to install it, the script is:
 
 ```Smalltalk
-		Metacello new 
+		Metacello new
 			repository: 'github://tinchodias/hiedra/src';
+			baseline: 'Hiedra';
+			load.
+```
+
+## GTK prototype
+
+Get pharo from Terminal:
+
+```
+curl get.pharo.org/64/80+vmHeadlessLatest | bash
+```
+
+Evaluate:
+
+```Smalltalk
+
+		{
+			{ 'Mars'. 'github://pharo-spec/mars-gtk' }.
+		}
+		do: [ :each |
+			Metacello new
+				baseline: each first;
+				repository: each second;
+				load ].
+
+		Metacello new
+			repository: 'github://tinchodias/hiedra:gtk/src';
 			baseline: 'Hiedra';
 			load.
 ```
