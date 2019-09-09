@@ -5,25 +5,33 @@ Class {
 }
 
 { #category : #private }
+HiGtkColumnController >> formAtPage: pageIndex [
+
+	^ formByPageIndex
+		at: pageIndex
+		ifAbsentPut: [
+			renderer
+				rowsInterval: (self rowIntervalAtPage: pageIndex);
+				newAthensSurface ]
+]
+
+{ #category : #private }
 HiGtkColumnController >> newCellMorphForRow: rowIndex [
 	"Answer a Morph that corresponds to aValue in the rendered ruler."
 
-	| pageIndex aForm cellBoundsInPage rectangleToCut anAthensSurface |
+	| pageIndex cellBoundsInPage rectangleToCut pageAthensSurface |
 	pageIndex := self pageIndexAtRow: rowIndex.
 	cellBoundsInPage := self
 		cellBoundsForRow: rowIndex
 		inPage: pageIndex.
 
-	anAthensSurface := self formAtPage: pageIndex.
+	pageAthensSurface := self formAtPage: pageIndex.
 	rectangleToCut := cellBoundsInPage truncated.
 
-		
-	aForm := Form
-		extent: cellBoundsInPage extent
-		depth: 32.
-	aForm getCanvas
-		translucentImage: anAthensSurface
-		at: 0 @ 0
-		sourceRect: rectangleToCut.
-	^ aForm
+	^ GdkPixbuf
+		newFromSurface: pageAthensSurface
+		x: rectangleToCut left
+		y: rectangleToCut top
+		width: rectangleToCut width
+		height: rectangleToCut height
 ]

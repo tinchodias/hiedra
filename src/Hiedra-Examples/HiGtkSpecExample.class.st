@@ -27,6 +27,9 @@ HiGtkSpecExample >> initializeHiedra [
 
 	hiedraColumnController := HiGtkColumnController new.
 
+	"GTK table isn't lazy so it's better to reduce pagination."
+	hiedraColumnController pageSize: 1500.
+
 	hiedraColumnController renderer
 		nodeRadius: 1.5;
 		nodeBorderWidth: 3.0;
