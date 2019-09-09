@@ -1,29 +1,15 @@
-# Hiedra
+# Hiedra in GTK - prototype
 
-It is a small Pharo project to visually connect items in a history-like graph. It uses Athens, and provides support for Morphic, FastTable and Spec.
-
-![screenshot](screenshot.png)
 
 ## Install it
 
-Note this project is already part of Pharo 6, 7 and 8. But if you need to install it, the script is:
-
-```Smalltalk
-		Metacello new
-			repository: 'github://tinchodias/hiedra/src';
-			baseline: 'Hiedra';
-			load.
-```
-
-## GTK prototype
-
-Get pharo from Terminal:
+1. Get pharo 8 headless from Terminal:
 
 ```
 curl get.pharo.org/64/80+vmHeadlessLatest | bash
 ```
 
-Evaluate:
+2. Evaluate:
 
 ```Smalltalk
 
@@ -42,11 +28,17 @@ Evaluate:
 			load.
 ```
 
-:warning:
-The [Pharo repository](https://github.com/pharo-project/pharo) might have a more recent version of this project, as the code is embedded (it's not maintained as an external project as Iceberg).
-:warning:
 
+## Try it
 
-## Use it
+### Example 1 (2870 commits):
 
-You can find the classes named `HiFastTableExample` and `HiSpecExample` with executable examples (class-side).
+```Smalltalk
+HiGtkSpecExample example2870IcebergCommits.
+```
+
+### Example 2 (493 commits): 
+
+```Smalltalk
+HiGtkSpecExample example493PharoCommits.
+```
