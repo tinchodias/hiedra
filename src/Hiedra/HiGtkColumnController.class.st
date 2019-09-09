@@ -6,6 +6,7 @@ Class {
 
 { #category : #private }
 HiGtkColumnController >> formAtPage: pageIndex [
+	"For GTK, answer the AthensSurface that represents a page with many table cells (see #pageSize)."
 
 	^ formByPageIndex
 		at: pageIndex
@@ -17,7 +18,7 @@ HiGtkColumnController >> formAtPage: pageIndex [
 
 { #category : #private }
 HiGtkColumnController >> newCellMorphForRow: rowIndex [
-	"Answer a Morph that corresponds to aValue in the rendered ruler."
+	"For GTK, answer the GdkPixbuf directly that represents one table cell."
 
 	| pageIndex cellBoundsInPage rectangleToCut pageAthensSurface |
 	pageIndex := self pageIndexAtRow: rowIndex.
