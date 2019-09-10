@@ -66,25 +66,40 @@ HiSpecExample >> commits: commits [
 ]
 
 { #category : #initialization }
-HiSpecExample >> initializeWidgets [
-	table := self newTable.
+HiSpecExample >> initializeHiedra [
+	"Configure the Hiedra controller, which adapts the visualization to the table column cells."
 
-	"Configure hiedra controller"
-	hiedraColumnController := HiColumnController new.
+	hiedraColumnController := self newHiedraColummnController.
+
+	"Spec table isn't lazy so it's better to reduce pagination."
+	hiedraColumnController pageSize: 1500.
 
 	hiedraColumnController renderer
-		nodeRadius: 1.5;
+		nodeRadius: 1;
+		linkWidth: 1;
 		nodeBorderWidth: 3.0;
 		arrowSize: 0;
 		nodeConnectionOffset: 3;
 		cellWidth: 8;
-		useUniformColorStrategy.
+		rowHeight: 20.
+]
 
-	"Adjust the ruler rendering settings with table's row height."
-	hiedraColumnController renderer rowHeight: FTTableMorph defaultRowHeight floor.
+{ #category : #initialization }
+HiSpecExample >> initializeTable [
+	table := self newTable
+		hideColumnHeaders;
+		addColumn: (SpImageTableColumn evaluated: [ :each | hiedraColumnController cellMorphAtValue: each ]);
+		addColumn: (SpStringTableColumn evaluated: [ :each | each comment lines ifNotEmpty: #first ]);
+		yourself.
+]
 
-	"Configure columns"
-	table
-		addColumn: (SpImageTableColumn evaluated: [ :item | hiedraColumnController cellMorphAtValue: item ]);
-		addColumn: (SpStringTableColumn evaluated: #comment)
+{ #category : #initialization }
+HiSpecExample >> initializeWidgets [
+	self initializeHiedra.
+	self initializeTable.
+]
+
+{ #category : #initialization }
+HiSpecExample >> newHiedraColummnController [
+	^ HiColumnController new
 ]
