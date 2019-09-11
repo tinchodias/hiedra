@@ -9,7 +9,9 @@
 curl get.pharo.org/64/80+vmHeadlessLatest | bash
 ```
 
-2. Evaluate:
+2. Open image with `./pharo-ui Pharo.image`.
+
+3. Evaluate:
 
 ```Smalltalk
 	{
@@ -22,6 +24,10 @@ curl get.pharo.org/64/80+vmHeadlessLatest | bash
 			repository: each second;
 			load ].
 ```
+
+4. Save and quit. Reason: I understood from Esteban that reopening the image after installing mars is a good trick to avoid some problems.
+
+5. Re open image.
 
 
 ## Try it
