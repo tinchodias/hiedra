@@ -12,20 +12,15 @@ curl get.pharo.org/64/80+vmHeadlessLatest | bash
 2. Evaluate:
 
 ```Smalltalk
-
-		{
-			{ 'Mars'. 'github://pharo-spec/mars-gtk' }.
-		}
-		do: [ :each |
-			Metacello new
-				baseline: each first;
-				repository: each second;
-				load ].
-
+	{
+		{ 'Mars'. 'github://pharo-spec/mars-gtk' }.
+		{ 'Hiedra'. 'github://tinchodias/hiedra:gtk/src' }
+	}
+	do: [ :each |
 		Metacello new
-			repository: 'github://tinchodias/hiedra:gtk/src';
-			baseline: 'Hiedra';
-			load.
+			baseline: each first;
+			repository: each second;
+			load ].
 ```
 
 
