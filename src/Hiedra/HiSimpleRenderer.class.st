@@ -1,11 +1,15 @@
 "
-I render a Hiedra visualization (HiRuler) in a Form using Athens. The nodes and links of the ruler will occupy the cells of a grid in the Athens canvas. 
+I render a Hiedra visualization (HiRuler) in a Form using Athens. The nodes and links of the ruler will occupy the cells of an imaginary grid in the Athens canvas. 
 
 Decisions to render the ruler:
 
 * All nodes have the same appearance (radius, color, etc.).
 * All links have the same appearance (width, color, etc.).
 * All cells have same dimensions (width and height).
+
+The #accessing methods provide a way to customize the renderization.
+
+IMPORTANT: The #rowHeight is only rendering parameter that HAS NO DEFAULT VALUE and the user must set it with the pixel height of rows (an integer number).
 
 "
 Class {
@@ -266,10 +270,7 @@ HiSimpleRenderer >> initialize [
 
 	arrowSize := linkWidth * 0.75.
 
-	"Important: the user must set the height of rows (integers worked better than a floats)"
-	rowHeight := nil.
-	cellWidth := linkWidth * 3.
-
+	cellWidth := linkWidth * 3
 ]
 
 { #category : #accessing }
@@ -427,8 +428,11 @@ HiSimpleRenderer >> rowHeight [
 ]
 
 { #category : #accessing }
-HiSimpleRenderer >> rowHeight: aNumber [
-	rowHeight := aNumber
+HiSimpleRenderer >> rowHeight: anInteger [
+	"Set the pixel height for rows (an integer number).
+	Note this assumes there is a unique height for all rows."
+
+	rowHeight := anInteger
 ]
 
 { #category : #accessing }
