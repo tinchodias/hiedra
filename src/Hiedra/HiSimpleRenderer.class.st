@@ -243,8 +243,8 @@ HiSimpleRenderer >> colorStrategy [
 ]
 
 { #category : #accessing }
-HiSimpleRenderer >> colorStrategy: anObject [
-	colorStrategy := anObject
+HiSimpleRenderer >> colorStrategy: aHiColorStrategy [
+	colorStrategy := aHiColorStrategy
 ]
 
 { #category : #rendering }
@@ -346,9 +346,9 @@ HiSimpleRenderer >> nodeBottomRelativeConnectionPoint [
 ]
 
 { #category : #accessing }
-HiSimpleRenderer >> nodeColor: anObject [
+HiSimpleRenderer >> nodeColor: aColor [
 	self useUniformColorStrategy.
-	colorStrategy nodeColor: anObject
+	colorStrategy nodeColor: aColor
 ]
 
 { #category : #accessing }
