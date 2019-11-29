@@ -51,6 +51,11 @@ HiWheelColorStrategy >> defaultColorWheelSize [
 	^ 10
 ]
 
+{ #category : #testing }
+HiWheelColorStrategy >> isReady [
+	^ colorWheel isNotNil
+]
+
 { #category : #private }
 HiWheelColorStrategy >> newColorGenerator [
 	^ Generator

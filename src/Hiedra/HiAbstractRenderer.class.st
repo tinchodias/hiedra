@@ -39,6 +39,11 @@ HiAbstractRenderer >> formWidth [
 	^ (ruler numberOfColumns + 2) * self cellWidth
 ]
 
+{ #category : #testing }
+HiAbstractRenderer >> isReady [
+	^ self subclassResponsibility
+]
+
 { #category : #API }
 HiAbstractRenderer >> newForm [
 	"Answer a new form, rendered with the current ruler and rowInterval."

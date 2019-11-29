@@ -273,6 +273,12 @@ HiSimpleRenderer >> initialize [
 	cellWidth := linkWidth * 3
 ]
 
+{ #category : #testing }
+HiSimpleRenderer >> isReady [
+	^ ruler isNotNil and: [ colorStrategy isReady ]
+		
+]
+
 { #category : #accessing }
 HiSimpleRenderer >> linkColor: aColor [
 	self useUniformColorStrategy.

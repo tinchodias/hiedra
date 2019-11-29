@@ -77,6 +77,11 @@ HiColumnController >> initialize [
 	self reset.
 ]
 
+{ #category : #testing }
+HiColumnController >> isReady [
+	^ renderer isReady
+]
+
 { #category : #private }
 HiColumnController >> newCellMorphForRow: rowIndex [
 	"Answer a Morph that corresponds to aValue in the rendered ruler."
