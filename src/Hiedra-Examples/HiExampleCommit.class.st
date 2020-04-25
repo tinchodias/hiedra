@@ -24121,7 +24121,7 @@ HiExampleCommit class >> randomlyGenerated [
 
 	| values random |
 	values := 60 to: 1 by: -1.
-	random := Random new.
+	random := Random seed: 1.
 	^ values collect: [ :value | 
 		self new
 			id: value;
