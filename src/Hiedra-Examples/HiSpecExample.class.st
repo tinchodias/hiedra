@@ -61,7 +61,7 @@ HiSpecExample >> commits: commits [
 
 	hiedraColumnController reset.
 	
-	"After #reset, we can know the width of the column."
+	"After #reset, we know the desired width for the column."
 	table columns first width: hiedraColumnController rulerWidth.
 ]
 
@@ -85,6 +85,7 @@ HiSpecExample >> initializeWidgets [
 
 	"Configure columns"
 	table
-		addColumn: (SpImageTableColumn evaluated: [ :item | hiedraColumnController cellMorphAtValue: item ]);
+		addColumn: (SpImageTableColumn evaluated: [ :item |
+			hiedraColumnController cellMorphAtValue: item ]);
 		addColumn: (SpStringTableColumn evaluated: #comment)
 ]
