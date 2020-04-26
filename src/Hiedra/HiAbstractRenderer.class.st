@@ -55,13 +55,8 @@ HiAbstractRenderer >> rowHeight [
 HiAbstractRenderer >> rowWidthAt: rowIndex [
 	"Answer the width in pixels required by a row to be rendered."
 
-	| columns indent |
-	indent := 3.
-	columns := ruler numberOfColumnsAt: rowIndex.
-	columns := columns + (indent - (columns \\ indent)).
-
-	"Note: The reason of numberOfColumns + 2 is the left and right margin."
-	^ columns + 2 * self cellWidth
+	"The +2 represents the left and right margin."
+	^ ((ruler numberOfColumnsAt: rowIndex) + 2) * self cellWidth
 ]
 
 { #category : #accessing }
