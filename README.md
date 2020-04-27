@@ -2,11 +2,17 @@
 
 It is a small Pharo project to visually connect items in a history-like graph. It uses Athens, and provides support for Morphic, FastTable and Spec.
 
+White theme and single column (the text sticks to the hiedra on each row):
+
+![screenshotB](screenshotB.png)
+
+Dark theme and two columns:
+
 ![screenshot](screenshot.png)
 
 ## Install it
 
-Note this project is already part of Pharo 6, 7 and 8. But if you need to install it, the script is:
+Note this project is already part of Pharo 6, 7, 8 and 9-dev. But if you need to install it, the script is:
 
 ```Smalltalk
 		Metacello new 
@@ -16,7 +22,7 @@ Note this project is already part of Pharo 6, 7 and 8. But if you need to instal
 ```
 
 :warning:
-The [Pharo repository](https://github.com/pharo-project/pharo) might have a more recent version of this project, as the code is embedded (it's not maintained as an external project as Iceberg).
+The [Pharo repository](https://github.com/pharo-project/pharo) might have a more recent version of this project, as the code is embedded (it's not maintained as an external project).
 :warning:
 
 

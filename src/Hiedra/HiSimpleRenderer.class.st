@@ -133,7 +133,7 @@ HiSimpleRenderer >> athensPathForAscendingLink: aHiLink on: athensCanvas [
 			self
 				addLinkFragmentFrom: fragmentStart
 				to: fragmentEnd
-				intermediateY: (self cellOriginFor: rulerPoint) y
+				intermediateY: (self cellOriginFor: rulerPoint) y - linkWidth
 				into: athensPathBuilder.
 			fragmentStart := fragmentEnd
 			].
@@ -142,7 +142,7 @@ HiSimpleRenderer >> athensPathForAscendingLink: aHiLink on: athensCanvas [
 		self
 			addLinkFragmentFrom: fragmentStart
 			to: (self cellCenterFor: aHiLink origin rulerPoint) - nodeConnectionYOffset
-			intermediateY: (self cellOriginFor: aHiLink origin rulerPoint) y
+			intermediateY: (self cellOriginFor: aHiLink origin rulerPoint) y - linkWidth
 			into: athensPathBuilder.
 		]
 ]
@@ -166,7 +166,7 @@ HiSimpleRenderer >> athensPathForDescendingLink: aHiLink on: athensCanvas [
 			self
 				addLinkFragmentFrom: fragmentStart
 				to: fragmentEnd
-				intermediateY: (self cellOriginFor: rulerPoint) y
+				intermediateY: (self cellOriginFor: rulerPoint) y - linkWidth
 				into: athensPathBuilder.
 			fragmentStart := fragmentEnd
 			].
@@ -175,7 +175,7 @@ HiSimpleRenderer >> athensPathForDescendingLink: aHiLink on: athensCanvas [
 		self
 			addLinkFragmentFrom: fragmentStart
 			to: (self cellCenterFor: aHiLink target rulerPoint) - nodeConnectionYOffset
-			intermediateY: (self cellOriginFor: aHiLink target rulerPoint) y
+			intermediateY: (self cellOriginFor: aHiLink target rulerPoint) y - linkWidth
 			into: athensPathBuilder.
 
 		self addArrowInto: athensPathBuilder descending: true.
@@ -243,8 +243,8 @@ HiSimpleRenderer >> colorStrategy [
 ]
 
 { #category : #accessing }
-HiSimpleRenderer >> colorStrategy: anObject [
-	colorStrategy := anObject
+HiSimpleRenderer >> colorStrategy: aHiColorStrategy [
+	colorStrategy := aHiColorStrategy
 ]
 
 { #category : #rendering }
@@ -346,9 +346,9 @@ HiSimpleRenderer >> nodeBottomRelativeConnectionPoint [
 ]
 
 { #category : #accessing }
-HiSimpleRenderer >> nodeColor: anObject [
+HiSimpleRenderer >> nodeColor: aColor [
 	self useUniformColorStrategy.
-	colorStrategy nodeColor: anObject
+	colorStrategy nodeColor: aColor
 ]
 
 { #category : #accessing }
