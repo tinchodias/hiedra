@@ -1,4 +1,4 @@
-# Hiedra
+# Hiedra [![Build Status](https://travis-ci.org/tinchodias/hiedra.png)](http://travis-ci.org/tinchodias/hiedra)
 
 It is a small Pharo project to visually connect items in a history-like graph. It uses Athens, and provides support for Morphic, FastTable and Spec.
 
