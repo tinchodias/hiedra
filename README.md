@@ -1,15 +1,15 @@
 # Hiedra [![Build Status](https://travis-ci.org/tinchodias/hiedra.png)](http://travis-ci.org/tinchodias/hiedra)
 
-It is a small Pharo project to visually connect items in a history-like graph. It uses Athens, and provides support for Morphic, FastTable and Spec.
+Render a column that visually connects a list of items in a format that's commonly used for VCS commits. Implemented in Pharo, it uses Athens, and provides support for Morphic, FastTable, Spec and Spec2.
 
 
 ## Screenshots
 
-White theme and single column (the text sticks to the hiedra on each row):
+Text and hiedra in the same column (the text sticks to the hiedra on each row):
 
 ![screenshotB](screenshotB.png)
 
-Dark theme and two columns:
+Multiple columns, dark theme:
 
 ![screenshot](screenshot.png)
 
