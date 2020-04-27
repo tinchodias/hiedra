@@ -2,11 +2,13 @@
 
 It is a small Pharo project to visually connect items in a history-like graph. It uses Athens, and provides support for Morphic, FastTable and Spec.
 
+White theme and single column (the text sticks to the hiedra on each row):
+
 ![screenshotB](screenshotB.png)
-White theme and single column (text stick to the hiedra).
+
+Dark theme and two columns:
 
 ![screenshot](screenshot.png)
-Dark theme and two columns.
 
 ## Install it
 
