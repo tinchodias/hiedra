@@ -32,3 +32,7 @@ The [Pharo repository](https://github.com/pharo-project/pharo) might have a more
 ## Use it
 
 You can find the classes named `HiFastTableExample` and `HiSpecExample` with executable examples (class-side).
+
+## What's *hiedra*?
+
+It's the name in Spanish of [this plant](https://en.wikipedia.org/wiki/Hedera).
