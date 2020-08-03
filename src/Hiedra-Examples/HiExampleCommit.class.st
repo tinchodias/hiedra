@@ -31,7 +31,7 @@ Class {
 		'comment',
 		'parentIds'
 	],
-	#category : #'Hiedra-Examples'
+	#category : #'Hiedra-Examples-Model'
 }
 
 { #category : #examples }
