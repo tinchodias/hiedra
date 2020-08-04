@@ -4,21 +4,28 @@ Class {
 	#category : #'Hiedra-Tests-Model'
 }
 
+{ #category : #testing }
+HiExamplesTest class >> isAbstract [
+	^ self = HiExamplesTest
+]
+
 { #category : #tests }
-HiExamplesTest >> exampleMethods [ 
-	^ (((RPackage organizer packages
-		select: [ :each | each name beginsWith: 'Hiedra' ])
-		flatCollect: #classes)
-		flatCollect: [ :each | each classSide methods ])
-		select: [ :each | 
-			(each selector beginsWith: 'example') and: [ each numArgs = 0 ] ]
+HiExamplesTest >> exampleClassToTest [
+	^ self subclassResponsibility
+]
+
+{ #category : #tests }
+HiExamplesTest >> exampleMethods [
+
+	^ self exampleClassToTest classSide methods select: [ :each | 
+		  (each selector beginsWith: 'example') and: [ each numArgs = 0 ] ]
 ]
 
 { #category : #tests }
 HiExamplesTest >> testAllExamples [
 	| exampleMethods |
 	
-	self timeLimit: 30 seconds.
+	self timeLimit: 1 minute.
 	
 	exampleMethods := self exampleMethods.
 	self deny: exampleMethods isEmpty.
