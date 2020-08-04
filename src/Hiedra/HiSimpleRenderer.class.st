@@ -124,16 +124,19 @@ HiSimpleRenderer >> athensPathForAscendingLink: aHiLink on: athensCanvas [
 		fragmentStart := (self cellCenterFor: aHiLink target rulerPoint) + nodeConnectionYOffset.
 		athensPathBuilder absolute; moveTo: fragmentStart.
 
+		"The arrow (if enabled) is connected to target node"
 		self addArrowInto: athensPathBuilder descending: false.
 
 		"Add all fragments except last (in reversed order)"
 		aHiLink intermediatePoints reverseDo: [ :rulerPoint | 
-			| fragmentEnd |
+			| fragmentEnd offset |
 			fragmentEnd := self cellCenterFor: rulerPoint.
+			offset := fragmentStart x > fragmentEnd x
+				ifTrue: [ linkWidth negated ] ifFalse: [ linkWidth ].
 			self
 				addLinkFragmentFrom: fragmentStart
 				to: fragmentEnd
-				intermediateY: (self cellOriginFor: rulerPoint) y - linkWidth
+				intermediateY: (self cellOriginFor: rulerPoint) y + offset
 				into: athensPathBuilder.
 			fragmentStart := fragmentEnd
 			].
@@ -142,7 +145,7 @@ HiSimpleRenderer >> athensPathForAscendingLink: aHiLink on: athensCanvas [
 		self
 			addLinkFragmentFrom: fragmentStart
 			to: (self cellCenterFor: aHiLink origin rulerPoint) - nodeConnectionYOffset
-			intermediateY: (self cellOriginFor: aHiLink origin rulerPoint) y - linkWidth
+			intermediateY: (self cellOriginFor: aHiLink origin rulerPoint) y
 			into: athensPathBuilder.
 		]
 ]
@@ -155,29 +158,32 @@ HiSimpleRenderer >> athensPathForDescendingLink: aHiLink on: athensCanvas [
 		| nodeConnectionYOffset fragmentStart |
 		nodeConnectionYOffset := self nodeBottomRelativeConnectionPoint.
 
-		"Start of first fragment (that connects BELOW of the origin node)"
+		"Start of first fragment (that connects at BOTTOM of the origin node)"
 		fragmentStart := (self cellCenterFor: aHiLink origin rulerPoint) + nodeConnectionYOffset.
 		athensPathBuilder absolute; moveTo: fragmentStart.
 
 		"Add all fragments except last"
 		aHiLink intermediatePoints do: [ :rulerPoint |
-			| fragmentEnd |
+			| fragmentEnd offset |
 			fragmentEnd := self cellCenterFor: rulerPoint.
+			offset := fragmentStart x > fragmentEnd x
+				ifTrue: [ linkWidth negated ] ifFalse: [ linkWidth ].
 			self
 				addLinkFragmentFrom: fragmentStart
 				to: fragmentEnd
-				intermediateY: (self cellOriginFor: rulerPoint) y - linkWidth
+				intermediateY: (self cellOriginFor: rulerPoint) y + offset
 				into: athensPathBuilder.
 			fragmentStart := fragmentEnd
 			].
 
-		"Add last fragment (that connects ABOVE of the target node)"
+		"Add last fragment (that connects at TOP of the target node)"
 		self
 			addLinkFragmentFrom: fragmentStart
 			to: (self cellCenterFor: aHiLink target rulerPoint) - nodeConnectionYOffset
-			intermediateY: (self cellOriginFor: aHiLink target rulerPoint) y - linkWidth
+			intermediateY: (self cellOriginFor: aHiLink target rulerPoint) y
 			into: athensPathBuilder.
 
+		"The arrow (if enabled) is connected to target node"
 		self addArrowInto: athensPathBuilder descending: true.
 		]
 ]
