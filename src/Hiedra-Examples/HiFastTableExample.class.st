@@ -35,6 +35,7 @@ HiFastTableExample class >> openExample: selector [
 	table := FTTableMorph new
 		extent: 500 @ 700;
 		addColumn: (FTColumn id: #'Comment');
+		hideColumnHeaders;
 		dataSource: dataSource;
 		beResizable;
 		yourself.
