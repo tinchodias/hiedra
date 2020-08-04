@@ -266,11 +266,11 @@ HiSimpleRenderer >> initialize [
 
 	self useWheelColorStrategy.
 
-	nodeRadio := 2.2.
-	nodeBorderWidth := 1.75.
+	nodeRadio := 3.0.
+	nodeBorderWidth := 1.1.
 	nodeConnectionOffset := 0.
 
-	linkWidth := nodeBorderWidth.
+	linkWidth := 1.3.
 	linkDashes := #().
 	linkCurveAngle := 45 degreesToRadians.
 
