@@ -12,30 +12,12 @@ Class {
 	#category : #'Hiedra-Examples-Spec2'
 }
 
-{ #category : #specs }
-HiSpecExample class >> defaultSpec [
-	^ SpBoxLayout newVertical
-		add: #table;
-		add: #actionBar withConstraints: [ :constraints | constraints height: self toolbarHeight ];
-		yourself
-]
-
-{ #category : #specs }
-HiSpecExample class >> example2870IcebergCommits [
-	^ self openExample: #iceberg_v1_5_6
-]
-
-{ #category : #specs }
-HiSpecExample class >> example493PharoCommits [
-	^ self openExample: #pharo_v60507
-]
-
-{ #category : #specs }
+{ #category : #examples }
 HiSpecExample class >> example60RandomCommits [
 	^ self openExample: #randomlyGenerated
 ]
 
-{ #category : #specs }
+{ #category : #examples }
 HiSpecExample class >> openExample: selector [
 
 	| commits |
@@ -43,13 +25,12 @@ HiSpecExample class >> openExample: selector [
 
 	^ self new
 		commits: commits;
-		openWithSpec;
+		open;
 		withWindowDo: [ :window |
 			window
 				extent: 600 @ 800;
 				title: ('Hiedra in Spec2 with Roassal3 - {1} - {2} elements' format: {selector. commits size}) ];
 		yourself.
-
 ]
 
 { #category : #windows }
@@ -73,6 +54,14 @@ HiSpecExample >> commits: commits [
 	
 	"After #reset, we know the desired width for the column."
 	table columns first width: hiedraColumnController rulerWidth.
+]
+
+{ #category : #layout }
+HiSpecExample >> defaultLayout [
+	^ SpBoxLayout newTopToBottom
+		add: #table;
+		add: #actionBar expand: false;
+		yourself
 ]
 
 { #category : #initialization }
@@ -100,7 +89,6 @@ HiSpecExample >> initializeActionBar [
 		add: inspectButton;
 		add: refreshButton;
 		yourself.
-
 ]
 
 { #category : #initialization }

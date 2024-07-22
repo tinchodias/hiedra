@@ -11,16 +11,6 @@ Class {
 }
 
 { #category : #examples }
-HiFastTableExample class >> example2870IcebergCommits [
-	^ self openExample: #iceberg_v1_5_6
-]
-
-{ #category : #examples }
-HiFastTableExample class >> example493PharoCommits [
-	^ self openExample: #pharo_v60507
-]
-
-{ #category : #examples }
 HiFastTableExample class >> example60RandomCommits [
 	^ self openExample: #randomlyGenerated
 ]
@@ -43,7 +33,6 @@ HiFastTableExample class >> openExample: selector [
 	dataSource elements: commits.
 	
 	^ table openInWindowLabeled: ('Hiedra in FastTable - {1} - {2} elements' format: {selector. commits size}).
-
 ]
 
 { #category : #accessing }
@@ -79,7 +68,6 @@ HiFastTableExample >> elements: commits [
 
 	"Reset the visualization"
 	hiedraColumnController reset.
-
 ]
 
 { #category : #initialization }
@@ -90,5 +78,4 @@ HiFastTableExample >> initialize [
 		arrowSize: 1;
 		nodeConnectionOffset: 2;
 		cellWidth: 7.
-
 ]
