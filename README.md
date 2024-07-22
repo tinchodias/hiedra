@@ -17,21 +17,34 @@ Multiple columns, dark theme:
 
 Note this project is already part of Pharo 6, 7, 8 and 9-dev. But if you need to install it, the script is:
 
+```
+curl get.pharo.org/64/80+vmHeadlessLatest | bash
+```
+
+2. Open image with `./pharo-ui Pharo.image`.
+
+3. Evaluate:
+
 ```Smalltalk
-		Metacello new 
-			repository: 'github://tinchodias/hiedra/src';
-			baseline: 'Hiedra';
-			load.
+	{
+		{ 'Mars'. 'github://pharo-spec/mars-gtk' }.
+		{ 'Hiedra'. 'github://tinchodias/hiedra:gtk/src' }
+	}
+	do: [ :each |
+		Metacello new
+			baseline: each first;
+			repository: each second;
+			load ].
 ```
 
 :warning:
 The [Pharo repository](https://github.com/pharo-project/pharo) might have a more recent version of this project, as the code is embedded (it's not maintained as an external project).
 :warning:
 
+5. Re open image.
 
-## Use it
 
-You can find the classes named `HiFastTableExample` and `HiSpecExample` with executable examples (class-side).
+## Try it
 
 ## License
 

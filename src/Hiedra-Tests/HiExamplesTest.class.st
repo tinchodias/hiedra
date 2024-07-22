@@ -7,6 +7,12 @@ Class {
 	#category : #'Hiedra-Tests-Model'
 }
 
+{ #category : #accessing }
+HiExamplesTest class >> defaultTimeLimit [ 
+
+	^ 30 seconds
+]
+
 { #category : #tests }
 HiExamplesTest class >> classWithExamplesToTest [
 	^ self

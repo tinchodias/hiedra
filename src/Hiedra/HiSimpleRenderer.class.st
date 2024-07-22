@@ -275,6 +275,7 @@ HiSimpleRenderer >> initialize [
 
 	arrowSize := linkWidth * 0.75.
 
+	"Important: the user must set the height of rows (integers worked better than a floats)"
 	cellWidth := linkWidth * 3
 ]
 
@@ -320,9 +321,9 @@ HiSimpleRenderer >> linkWidth: aNumber [
 ]
 
 { #category : #API }
-HiSimpleRenderer >> newForm [
-	"Answer a new form, rendered with the current ruler and rowInterval."
-
+HiSimpleRenderer >> newAthensSurface [
+	"Answer a new Athens surface, rendered with the current ruler and rowInterval."
+	
 	| athensSurface |
 	athensSurface := AthensCairoSurface extent: self formExtent.
 
@@ -331,7 +332,7 @@ HiSimpleRenderer >> newForm [
 
 		self renderOn: athensCanvas ].
 
-	^ athensSurface asForm
+	^ athensSurface
 ]
 
 { #category : #accessing }
